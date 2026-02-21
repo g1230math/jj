@@ -87,8 +87,8 @@ export function Courses() {
             </section>
 
             {/* Feature cards */}
-            <Section className="bg-white !pt-4 !pb-16">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 -mt-16 relative z-10">
+            <Section className="bg-white">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
                     {[
                         { icon: Users, title: '소수정예', desc: '반당 6~12명', color: 'from-blue-500 to-blue-600' },
                         { icon: BookOpen, title: '체계적 교재', desc: '학년별 전문 교재', color: 'from-emerald-500 to-emerald-600' },
