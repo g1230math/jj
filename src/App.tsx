@@ -13,6 +13,7 @@ import { About } from './pages/About';
 import { Courses } from './pages/Courses';
 import { ParentService } from './pages/ParentService';
 import { Shuttle } from './pages/Shuttle';
+import { SuccessStories } from './pages/SuccessStories';
 import { PageSkeleton } from './components/Skeleton';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="contact" element={<Contact />} />
         <Route path="calendar" element={<Calendar />} />
         <Route path="shuttle" element={<Shuttle />} />
+        <Route path="success" element={<SuccessStories />} />
 
         {/* Protected Routes */}
         <Route path="dashboard" element={

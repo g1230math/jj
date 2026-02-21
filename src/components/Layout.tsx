@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle } from 'lucide-react';
+import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -36,6 +36,7 @@ export function Layout() {
     { name: '학사일정', path: '/calendar', icon: Calendar },
     { name: '차량운행', path: '/shuttle', icon: Bus },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
+    { name: '대입성공스토리', path: '/success', icon: Trophy },
     { name: '학부모서비스', path: '/parent-service', icon: Users, requiresAuth: true },
     { name: '오시는길', path: '/contact', icon: MapPin },
   ];
