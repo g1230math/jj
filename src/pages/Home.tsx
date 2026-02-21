@@ -194,25 +194,27 @@ export function Home() {
 
         {/* Tab buttons */}
         <ScrollReveal className="flex justify-center mb-10">
-          <div className="inline-flex bg-slate-100 rounded-2xl p-1.5 gap-1">
-            {programs.map((p, i) => (
-              <button
-                key={p.id}
-                onClick={() => setActiveProgram(i)}
-                className={cn(
-                  "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all",
-                  activeProgram === i
-                    ? "bg-white text-slate-900 shadow-md"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <p.icon className="w-4 h-4" />
-                {p.label}
-                <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full", activeProgram === i ? cn(p.lightBg, p.lightText) : "bg-slate-200 text-slate-500")}>
-                  {p.grades}
-                </span>
-              </button>
-            ))}
+          <div className="w-full overflow-x-auto flex justify-center">
+            <div className="inline-flex bg-slate-100 rounded-2xl p-1.5 gap-1">
+              {programs.map((p, i) => (
+                <button
+                  key={p.id}
+                  onClick={() => setActiveProgram(i)}
+                  className={cn(
+                    "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap",
+                    activeProgram === i
+                      ? "bg-white text-slate-900 shadow-md"
+                      : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <p.icon className="w-4 h-4" />
+                  {p.label}
+                  <span className={cn("hidden sm:inline text-xs font-medium px-2 py-0.5 rounded-full", activeProgram === i ? cn(p.lightBg, p.lightText) : "bg-slate-200 text-slate-500")}>
+                    {p.grades}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </ScrollReveal>
 
