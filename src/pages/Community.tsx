@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { notices } from '../data/mockData';
-import { Image as ImageIcon, FileText, MessageCircle, Info, Download, ChevronDown, ChevronUp, Eye, Calendar, Tag } from 'lucide-react';
+import { Image as ImageIcon, FileText, MessageCircle, Info, Download, ChevronDown, ChevronUp, Eye, Calendar, Tag, BookOpen, Clock, User } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
 
@@ -111,12 +111,50 @@ const faqs = [
 export function Community() {
   const [activeTab, setActiveTab] = useState('notice');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [openBlog, setOpenBlog] = useState<number | null>(null);
 
   const tabs = [
     { id: 'notice', name: '공지사항', icon: Info },
+    { id: 'blog', name: '블로그', icon: BookOpen },
     { id: 'gallery', name: '학원 갤러리', icon: ImageIcon },
     { id: 'resources', name: '자료실', icon: FileText },
     { id: 'faq', name: 'FAQ', icon: MessageCircle },
+  ];
+
+  const blogPosts = [
+    {
+      id: 1,
+      title: '수학 성적을 올리는 5가지 학습 습관',
+      excerpt: '수학 성적 향상을 원한다면 단순히 문제를 많이 푸는 것만으로는 부족합니다. 효과적인 학습 습관을 먼저 다져야 합니다.',
+      content: `## 1. 오답노트를 활용하세요\n\n틀린 문제를 그냥 넘기지 말고, 반드시 오답노트에 정리하세요. 왜 틀렸는지, 어떤 개념이 부족했는지를 기록하면 같은 실수를 반복하지 않게 됩니다.\n\n## 2. 개념 이해를 우선으로\n\n공식을 외우기 전에 ‘왜 이 공식이 나오는지’를 이해하세요. 개념을 이해하면 응용 문제에서도 유연하게 대응할 수 있습니다.\n\n## 3. 매일 조금씩 꾸준히\n\n주말에 몰아서 하는 것보다 매일 30분~1시간씩 꾸준히 하는 것이 훨씬 효과적입니다. 수학은 누적 학습이 핵심입니다.\n\n## 4. 시간을 정해서 풀기\n\n시험에서는 시간 관리가 중요합니다. 평소에도 타이머를 맞춰놓고 문제를 푸는 연습을 하세요.\n\n## 5. 질문을 두려워하지 마세요\n\n모르는 것이 당연합니다. 수업 중 이해가 안 되는 부분은 바로 질문하세요. 담당 선생님이 친절하게 설명해 드립니다.`,
+      author: '김원장',
+      date: '2025.02.20',
+      readTime: '5분',
+      tags: ['학습법', '수학공부', '성적향상'],
+      image: 'https://picsum.photos/seed/blog1/800/400',
+    },
+    {
+      id: 2,
+      title: '학부모가 알아야 할 중학 수학 → 고등 수학 연계 학습 전략',
+      excerpt: '중학교에서 고등학교로 올라가면 수학 난이도가 확 높아집니다. 미리 준비하지 않으면 성적 하락을 경험할 수 있습니다.',
+      content: `## 중학 수학과 고등 수학의 차이\n\n중학 수학은 개념 이해와 기본 연산이 중심이지만, 고등 수학은 추상적 사고와 논리적 추론이 핵심입니다.\n\n## 중3 겨울방학 활용법\n\n- **인수분해** 완벽 마스터: 고등 수학의 기초\n- **함수 개념** 깊이 이해: 일차함수 → 이차함수 → 여러 가지 함수\n- **방정식** 심화 학습: 복잡한 방정식 풀이 능력 키우기\n\n## 고등 1학년 첫 시험 대비\n\n고등학교 첫 중간고사는 중학교와 난이도 차이가 큭니다. 여유를 가지고 선행학습을 해두면 자신감을 얻을 수 있습니다.\n\n## 부모님의 역할\n\n자녀에게 “공부해라”고 다그치기보다는, 학습 환경을 만들어 주세요. 규칙적인 시간, 적절한 휴식, 그리고 격려가 중요합니다.`,
+      author: '박미적',
+      date: '2025.02.15',
+      readTime: '7분',
+      tags: ['중고연계', '학부모', '선행학습'],
+      image: 'https://picsum.photos/seed/blog2/800/400',
+    },
+    {
+      id: 3,
+      title: '수학 자신감을 키우는 방법: 수포자에서 수학 우등생으로',
+      excerpt: '"나는 수학을 못해"라고 생각하는 학생들이 많습니다. 하지만 올바른 방법으로 접근하면 누구나 수학을 잘할 수 있습니다.',
+      content: `## 수포자가 되는 이유\n\n대부분의 수포자는 특정 단원에서 개념이 끊기면서 시작됩니다. 초등학교 분수, 중학교 방정식, 고등학교 함수 등 핵심 단계를 놓치면 그 다음 내용을 이해할 수 없게 됩니다.\n\n## 해결 방법\n\n### 1단계: 끊어진 고리 찾기\n정확히 어떤 단원에서 모르게 됐는지 진단합니다. 우리 학원에서는 입학 시 진단테스트를 통해 정확한 취약점을 파악합니다.\n\n### 2단계: 기초부터 탄탄히\n한 학년 뒤로 돌아가더라도 기초를 다지는 것이 줄요합니다. 단기적으로는 느리지만 장기적으로 큰 효과를 얻습니다.\n\n### 3단계: 성장 경험\n작은 성공을 쌓아가면 자신감이 생깁니다. 쉬운 문제부터 완벽히 맞히고, 점점 난이도를 높여가면 “나도 할 수 있다”는 느낌을 받게 됩니다.\n\n## 실제 사례\n\n진접 G1230에서 수학 30점대였던 학생이 6개월 만에 80점대로 성적이 올랐습니다. 기초 진단 → 취약 단원 보강 → 현행 수업 병행의 3단계 프로그램으로 달성한 결과입니다.`,
+      author: '이함수',
+      date: '2025.02.10',
+      readTime: '6분',
+      tags: ['수포자', '자신감', '성적향상', '사례'],
+      image: 'https://picsum.photos/seed/blog3/800/400',
+    },
   ];
 
   const galleryImages = [
@@ -287,6 +325,90 @@ export function Community() {
               ))}
             </div>
           )}
+
+          {activeTab === 'blog' && (
+            <div className="space-y-8">
+              {blogPosts.map((post) => (
+                <article key={post.id} className="group rounded-2xl border border-slate-100 overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all">
+                  <div className="aspect-[21/9] overflow-hidden">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <User className="w-3.5 h-3.5" />
+                        {post.author}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {post.date}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        {post.readTime} 읽기
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-700 transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.tags.map(tag => (
+                          <span key={tag} className="px-2.5 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-full">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setOpenBlog(openBlog === post.id ? null : post.id)}
+                        className="flex items-center gap-1 text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors"
+                      >
+                        {openBlog === post.id ? '접기' : '자세히 보기'}
+                        {openBlog === post.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {openBlog === post.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-6 pt-6 border-t border-slate-100"
+                      >
+                        <div className="prose prose-sm prose-slate max-w-none">
+                          {post.content.split('\n\n').map((paragraph, i) => {
+                            if (paragraph.startsWith('## ')) {
+                              return <h3 key={i} className="text-lg font-bold text-slate-900 mt-6 mb-3">{paragraph.replace('## ', '')}</h3>;
+                            }
+                            if (paragraph.startsWith('### ')) {
+                              return <h4 key={i} className="text-base font-semibold text-slate-800 mt-4 mb-2">{paragraph.replace('### ', '')}</h4>;
+                            }
+                            if (paragraph.startsWith('- ')) {
+                              return (
+                                <ul key={i} className="list-disc list-inside space-y-1 text-sm text-slate-600 my-2">
+                                  {paragraph.split('\n').map((line, j) => (
+                                    <li key={j}>{line.replace('- ', '')}</li>
+                                  ))}
+                                </ul>
+                              );
+                            }
+                            return <p key={i} className="text-sm text-slate-600 leading-relaxed mb-3">{paragraph}</p>;
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
     </div>
