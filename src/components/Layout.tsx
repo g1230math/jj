@@ -10,6 +10,7 @@ export function Layout() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
 
   // Scroll-aware header
   useEffect(() => {
@@ -319,12 +320,144 @@ export function Layout() {
           <div className="mt-10 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
             <p className="font-display">&copy; 2025 진접 G1230 수학전문학원. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="hover:text-white transition-colors">이용약관</a>
-              <a href="#" className="hover:text-white transition-colors">개인정보처리방침</a>
+              <button onClick={() => setLegalModal('terms')} className="hover:text-white transition-colors">이용약관</button>
+              <button onClick={() => setLegalModal('privacy')} className="hover:text-white transition-colors">개인정보처리방침</button>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Legal Modal */}
+      <AnimatePresence>
+        {legalModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setLegalModal(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-slate-200">
+                <h2 className="text-lg font-bold text-slate-900">
+                  {legalModal === 'terms' ? '이용약관' : '개인정보처리방침'}
+                </h2>
+                <button onClick={() => setLegalModal(null)} className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+              <div className="p-5 overflow-y-auto text-sm text-slate-600 leading-relaxed space-y-4">
+                {legalModal === 'terms' ? (
+                  <>
+                    <p className="text-xs text-slate-400">시행일: 2025년 1월 1일</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제1조 (목적)</h3>
+                    <p>이 약관은 진접 G1230 수학전문학원(이하 "학원")이 제공하는 교육 서비스 및 웹사이트(이하 "서비스")의 이용 조건 및 절차, 학원과 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제2조 (용어의 정의)</h3>
+                    <p>① "회원"이란 학원에 개인정보를 제공하여 회원 등록을 한 학생 및 학부모를 말합니다.<br />② "서비스"란 학원이 제공하는 오프라인 수업, 온라인 강의실, 학습 자료 다운로드, 출결 확인, 성적 관리 등 일체의 교육 관련 서비스를 의미합니다.<br />③ "콘텐츠"란 학원이 제작·제공하는 강의 영상, 학습 자료, 시험 문제 등을 의미합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제3조 (약관의 효력과 변경)</h3>
+                    <p>① 이 약관은 서비스를 이용하고자 하는 모든 이용자에게 적용됩니다.<br />② 학원은 필요한 경우 관련 법령에 위배되지 않는 범위에서 이 약관을 변경할 수 있으며, 변경 시 7일 전 공지합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제4조 (회원가입 및 서비스 이용)</h3>
+                    <p>① 회원가입은 학부모 또는 법정대리인의 동의 하에 이루어집니다.<br />② 회원은 가입 시 정확한 정보를 제공해야 하며, 허위 정보 제공 시 서비스 이용이 제한될 수 있습니다.<br />③ 만 14세 미만 아동의 경우 법정대리인의 동의를 받아 가입합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제5조 (서비스의 제공 및 변경)</h3>
+                    <p>① 학원은 다음과 같은 서비스를 제공합니다: 수학 교과 수업(초·중·고), 온라인 강의실, 학습 자료 제공, 출결 관리, 성적표 조회, 학부모 상담 서비스.<br />② 학원은 운영상 필요한 경우 서비스의 내용을 변경할 수 있으며, 변경 시 사전에 공지합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제6조 (수강료 및 환불)</h3>
+                    <p>① 수강료는 학원 원무실에서 안내하며, 카드결제·계좌이체·자동이체로 납부 가능합니다.<br />② 환불은 학원의 설립·운영 및 과외교습에 관한 법률에 따라 처리합니다.<br />③ 수강 시작 전 전액 환불, 수강 후에는 경과일수에 따라 일할 계산하여 환불합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제7조 (지식재산권)</h3>
+                    <p>① 학원이 제공하는 모든 콘텐츠(강의 영상, 학습 자료, 시험 문제 등)의 저작권은 학원에 있습니다.<br />② 회원은 학원의 사전 동의 없이 콘텐츠를 복제, 배포, 방송, 전시할 수 없습니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제8조 (회원의 의무)</h3>
+                    <p>① 회원은 학원의 수업 규칙과 안전 수칙을 준수해야 합니다.<br />② 타인의 개인정보를 도용하거나 학원 시설을 고의로 훼손하는 행위를 금지합니다.<br />③ 온라인 서비스 이용 시 타인의 학습을 방해하는 행위를 금지합니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제9조 (면책조항)</h3>
+                    <p>① 학원은 천재지변, 전쟁, 감염병 등 불가항력 사유로 서비스를 제공할 수 없는 경우 책임이 면제됩니다.<br />② 회원의 귀책사유로 인한 서비스 이용 장애에 대해 학원은 책임지지 않습니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제10조 (분쟁 해결)</h3>
+                    <p>이 약관과 관련된 분쟁은 대한민국 법률에 따르며, 관할법원은 학원 소재지를 관할하는 법원으로 합니다.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-slate-400">시행일: 2025년 1월 1일</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제1조 (개인정보의 수집 및 이용 목적)</h3>
+                    <p>진접 G1230 수학전문학원(이하 "학원")은 다음 목적을 위해 개인정보를 수집·이용합니다.</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>회원 가입, 본인 확인, 서비스 제공</li>
+                      <li>수업 배정, 출결 관리, 성적 관리 및 학부모 알림</li>
+                      <li>수강료 결제 및 환불 처리</li>
+                      <li>셔틀버스 운행 및 안전 관리</li>
+                      <li>상담 신청 및 문의 응대</li>
+                      <li>교육 서비스 개선 및 통계 분석</li>
+                    </ul>
+
+                    <h3 className="text-base font-bold text-slate-900">제2조 (수집하는 개인정보 항목)</h3>
+                    <p><strong>필수항목:</strong> 학생 이름, 학년, 학교, 학부모 이름, 연락처(휴대전화), 주소<br /><strong>선택항목:</strong> 이메일, 이전 학원 수강 이력, 학습 수준 진단 결과<br /><strong>자동수집:</strong> 서비스 이용 기록, 접속 로그, IP 주소, 브라우저 정보</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제3조 (개인정보의 보유 및 이용 기간)</h3>
+                    <p>① 회원 탈퇴 시 즉시 파기합니다. 단, 관련 법령에 따라 보존이 필요한 경우 해당 기간 동안 보관합니다.<br />② 수강료 결제 기록: 5년 (전자상거래법)<br />③ 출결 및 성적 기록: 수강 종료 후 1년<br />④ 상담 기록: 상담 종료 후 1년</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제4조 (개인정보의 제3자 제공)</h3>
+                    <p>학원은 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우 예외로 합니다.</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>법령에 의거하여 수사 목적으로 관계기관의 요청이 있는 경우</li>
+                      <li>이용자가 사전에 동의한 경우</li>
+                    </ul>
+
+                    <h3 className="text-base font-bold text-slate-900">제5조 (개인정보의 처리 위탁)</h3>
+                    <p>학원은 원활한 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁할 수 있습니다.</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>결제 처리: PG사 (수강료 결제 처리)</li>
+                      <li>문자 발송: SMS 발송 대행업체 (출결 알림, 공지 전달)</li>
+                    </ul>
+
+                    <h3 className="text-base font-bold text-slate-900">제6조 (개인정보의 파기 절차 및 방법)</h3>
+                    <p>① 전자적 파일: 복구 불가능한 방법으로 영구 삭제<br />② 종이 문서: 분쇄기로 파쇄 또는 소각</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제7조 (이용자의 권리)</h3>
+                    <p>① 이용자는 언제든지 자신의 개인정보를 조회, 수정, 삭제할 수 있습니다.<br />② 만 14세 미만 아동의 법정대리인은 아동의 개인정보에 대한 열람, 수정, 삭제를 요청할 수 있습니다.<br />③ 개인정보 수집·이용 동의를 철회할 수 있으며, 이 경우 서비스 이용이 제한될 수 있습니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제8조 (개인정보의 안전성 확보 조치)</h3>
+                    <p>학원은 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>개인정보 접근 권한 제한 및 관리</li>
+                      <li>개인정보의 암호화 저장 및 전송</li>
+                      <li>해킹 등에 대비한 보안 시스템 운영</li>
+                      <li>개인정보 취급 직원의 교육 실시</li>
+                    </ul>
+
+                    <h3 className="text-base font-bold text-slate-900">제9조 (개인정보 보호책임자)</h3>
+                    <p>성명: 김수학 (원장)<br />연락처: 031-123-4567<br />이메일: g1230math@naver.com</p>
+                    <p>개인정보 관련 문의, 불만, 피해 구제 등은 위 담당자에게 연락해 주시기 바랍니다.</p>
+
+                    <h3 className="text-base font-bold text-slate-900">제10조 (고지의 의무)</h3>
+                    <p>이 개인정보처리방침은 법령·정책 변경 또는 학원 내부 방침 변경에 따라 수정될 수 있으며, 변경 시 웹사이트 공지사항을 통해 안내합니다.</p>
+                  </>
+                )}
+              </div>
+              <div className="p-4 border-t border-slate-200">
+                <button
+                  onClick={() => setLegalModal(null)}
+                  className="w-full py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+                >
+                  확인
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
