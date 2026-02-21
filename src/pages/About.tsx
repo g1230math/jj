@@ -1,6 +1,26 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Award, BookOpen, GraduationCap, Heart, Lightbulb, Target, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Award, BookOpen, GraduationCap, Heart, Lightbulb, Target, Users, ChevronDown, X } from 'lucide-react';
+import { cn } from '../lib/utils';
+
+const philosophyItems = [
+    {
+        icon: Target, title: '맞춤형 교육', desc: '학생별 수준 진단 후 개인 맞춤 커리큘럼 설계', color: 'bg-rose-500',
+        detail: '입학 시 정밀 진단 테스트를 통해 학생의 강점과 약점을 분석합니다. 이를 바탕으로 개인별 학습 계획서를 작성하고, 매월 정기 평가를 통해 커리큘럼을 지속적으로 조정합니다. 같은 학년이라도 학생마다 다른 교재와 진도를 배정하여 최적의 학습 효과를 보장합니다. 특히 취약 단원은 보충 수업을 통해 완벽히 보완합니다.',
+    },
+    {
+        icon: Lightbulb, title: '개념 중심', desc: '단순 풀이가 아닌 수학적 사고력과 개념 이해 중점', color: 'bg-amber-500',
+        detail: '공식 암기보다 "왜 그렇게 되는지"를 이해하는 것이 진정한 수학 실력입니다. 저희는 개념 원리를 시각적으로 설명하고, 다양한 관점에서 접근하여 학생이 스스로 문제 해결 방법을 도출할 수 있도록 지도합니다. 이런 접근은 처음 보는 유형에도 유연하게 대응할 수 있는 능력을 키워줍니다.',
+    },
+    {
+        icon: BookOpen, title: '반복 학습', desc: '체계적인 오답 관리와 단계별 반복 학습 시스템', color: 'bg-blue-500',
+        detail: '3단계 반복 학습 시스템을 운영합니다. ① 수업 중 개념 학습 및 연습, ② 오답 노트 작성 및 유사 문제 재풀이, ③ 정기 테스트를 통한 정착 확인. 오답 관리 시스템으로 틀린 문제를 자동 분류하고, 시험 전 취약 유형만 모아 집중 연습하는 오답 클리닉을 매주 운영합니다.',
+    },
+    {
+        icon: Heart, title: '소수정예', desc: '반당 최대 12명 소수정예로 꼼꼼한 밀착 관리', color: 'bg-emerald-500',
+        detail: '반당 최대 12명으로 제한하여 모든 학생에게 충분한 발문 기회와 개별 피드백을 제공합니다. 수업 중 이해도를 실시간으로 파악하며, 하위 30% 학생에게는 추가 보충 수업을 무료로 제공합니다. 학부모님께는 매주 SMS로 학습 현황 리포트를 발송합니다.',
+    },
+];
 
 const instructors = [
     {
@@ -43,6 +63,8 @@ const facilities = [
 ];
 
 export function About() {
+    const [openPhilosophy, setOpenPhilosophy] = useState<number | null>(null);
+
     return (
         <div className="flex flex-col">
             {/* Hero Section */}
@@ -109,23 +131,40 @@ export function About() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold text-slate-900 mb-3">교육 철학 & 커리큘럼</h2>
-                        <p className="text-slate-500 text-lg">학생 중심의 체계적인 교육 시스템</p>
+                        <p className="text-slate-500 text-lg">학생 중심의 체계적인 교육 시스템 — 각 항목을 클릭해 자세히 알아보세요</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { icon: Target, title: '맞춤형 교육', desc: '학생별 수준 진단 후 개인 맞춤 커리큘럼 설계', color: 'bg-rose-500' },
-                            { icon: Lightbulb, title: '개념 중심', desc: '단순 풀이가 아닌 수학적 사고력과 개념 이해 중점', color: 'bg-amber-500' },
-                            { icon: BookOpen, title: '반복 학습', desc: '체계적인 오답 관리와 단계별 반복 학습 시스템', color: 'bg-blue-500' },
-                            { icon: Heart, title: '소수정예', desc: '반당 최대 12명 소수정예로 꼼꼼한 밀착 관리', color: 'bg-emerald-500' },
-                        ].map((item, i) => (
+                        {philosophyItems.map((item, i) => (
                             <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * i }}
-                                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow"
+                                className={cn(
+                                    "bg-white rounded-2xl p-6 shadow-sm border transition-all cursor-pointer",
+                                    openPhilosophy === i ? "border-indigo-300 shadow-lg ring-2 ring-indigo-100" : "border-slate-100 hover:shadow-md"
+                                )}
+                                onClick={() => setOpenPhilosophy(openPhilosophy === i ? null : i)}
                             >
-                                <div className={`${item.color} w-14 h-14 rounded-xl flex items-center justify-center text-white mb-4`}>
-                                    <item.icon className="w-7 h-7" />
+                                <div className="flex items-start justify-between">
+                                    <div className={`${item.color} w-14 h-14 rounded-xl flex items-center justify-center text-white mb-4`}>
+                                        <item.icon className="w-7 h-7" />
+                                    </div>
+                                    <ChevronDown className={cn("w-5 h-5 text-slate-400 transition-transform", openPhilosophy === i && "rotate-180 text-indigo-500")} />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                                <p className="text-slate-500 leading-relaxed">{item.desc}</p>
+                                <p className="text-slate-500 leading-relaxed text-sm">{item.desc}</p>
+                                <AnimatePresence>
+                                    {openPhilosophy === i && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="mt-4 pt-4 border-t border-slate-100">
+                                                <p className="text-sm text-slate-600 leading-relaxed">{item.detail}</p>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         ))}
                     </div>
