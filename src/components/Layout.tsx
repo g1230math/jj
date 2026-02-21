@@ -38,7 +38,7 @@ export function Layout() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-16 object-contain" />
+                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-[60px] object-contain" />
               </Link>
             </div>
 
