@@ -28,7 +28,7 @@ export function Layout() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-10 object-contain" />
+                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-20 object-contain" />
               </Link>
             </div>
 
@@ -132,7 +132,7 @@ export function Layout() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-10 object-contain brightness-0 invert" />
+                <span className="font-bold text-xl text-white tracking-tight">진접 G1230 수학전문학원</span>
               </div>
               <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
                 경기도 남양주시 진접읍에 위치한 초·중·고 수학 전문 학원입니다.
