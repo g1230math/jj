@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { notices } from '../data/mockData';
-import { Image as ImageIcon, FileText, MessageCircle, Info, Download, ChevronDown, ChevronUp, Eye, Calendar, Tag, BookOpen, Clock, User } from 'lucide-react';
+import { Image as ImageIcon, FileText, MessageCircle, Info, Download, ChevronDown, ChevronUp, Eye, Calendar, Tag, BookOpen, Clock, User, Lock, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
 
@@ -108,10 +108,97 @@ const faqs = [
   },
 ];
 
+interface InquiryPost {
+  id: number;
+  title: string;
+  author: string;
+  date: string;
+  isPrivate: boolean;
+  category: string;
+  content: string;
+  answer?: string;
+  answerDate?: string;
+  views: number;
+}
+
+const inquiries: InquiryPost[] = [
+  {
+    id: 10, title: '여름 특강 일정이 궁금합니다', author: '김학부모', date: '2025.02.20',
+    isPrivate: false, category: '수업 문의', views: 45,
+    content: '안녕하세요. 중2 아이 학부모입니다. 여름방학 특강 일정과 커리큘럼이 궁금합니다. 언제부터 신청 가능한가요?',
+    answer: '안녕하세요! 여름 특강은 6월 중순부터 접수를 시작하며, 7월 21일~8월 16일(4주) 과정으로 운영됩니다. 개념 정리 + 문제풀이 병행으로 진행되며, 자세한 커리큘럼은 6월 초에 공지사항으로 안내드리겠습니다.',
+    answerDate: '2025.02.20',
+  },
+  {
+    id: 9, title: '수학 진단 테스트 결과 문의', author: '이○○맘', date: '2025.02.18',
+    isPrivate: true, category: '상담 문의', views: 12,
+    content: '지난주 진단 테스트 받았는데 결과가 언제 나오나요? 그리고 결과에 따라 반 배치가 달라지나요?',
+    answer: '안녕하세요. 진단 테스트 결과는 보통 2~3일 내에 나옵니다. 결과에 따라 기본반/심화반으로 배치가 달라지며, 상담 시 자세히 안내드립니다. 개별 연락 드리겠습니다.',
+    answerDate: '2025.02.19',
+  },
+  {
+    id: 8, title: '주차장 이용 관련 문의드립니다', author: '박학부모', date: '2025.02.17',
+    isPrivate: false, category: '시설 문의', views: 38,
+    content: '상담 방문 시 주차가 가능한가요? 주변에 주차할 곳이 있는지 궁금합니다.',
+    answer: '건물 지하 주차장에 학부모님 전용 주차 공간이 있습니다. 상담 시 30분 무료 주차가 가능하며, 위치는 오시는길 페이지를 참고해 주세요!',
+    answerDate: '2025.02.17',
+  },
+  {
+    id: 7, title: '수강료 납부 방법 문의', author: '정○○', date: '2025.02.15',
+    isPrivate: true, category: '수강 문의', views: 8,
+    content: '수강료 카드 결제나 자동이체가 가능한가요? 납부일은 언제인지도 알려주세요.',
+    answer: '카드결제, 계좌이체, 자동이체 모두 가능합니다. 수강료는 매월 25일 전후로 납부하시면 됩니다. 자세한 내용은 원무실(031-123-4567)로 문의해 주세요.',
+    answerDate: '2025.02.16',
+  },
+  {
+    id: 6, title: '초등 3학년도 입학 가능한가요?', author: '최맘', date: '2025.02.14',
+    isPrivate: false, category: '입학 문의', views: 67,
+    content: '초등 3학년 아이인데 수학 학원을 처음 보내려 합니다. 입학이 바로 가능한지, 진단 테스트를 따로 봐야 하는지 궁금합니다.',
+    answer: '네, 초3부터 수강 가능합니다! 입학 전 간단한 진단 테스트(약 30분)를 통해 현재 수준을 파악한 후, 적합한 반에 배치됩니다. 전화나 방문 상담으로 예약해 주세요.',
+    answerDate: '2025.02.14',
+  },
+  {
+    id: 5, title: '아이 성적 관련 상담 요청합니다', author: '한○○', date: '2025.02.12',
+    isPrivate: true, category: '상담 문의', views: 5,
+    content: '최근 시험에서 성적이 많이 떨어졌습니다. 담당 선생님과 개별 상담이 가능할까요?',
+    answer: '물론입니다. 담당 선생님께 전달하여 상담 일정을 잡아드리겠습니다. 내일 중으로 개별 연락 드리겠습니다.',
+    answerDate: '2025.02.13',
+  },
+  {
+    id: 4, title: '셔틀버스 노선 변경 요청', author: '윤학부모', date: '2025.02.10',
+    isPrivate: false, category: '차량 문의', views: 52,
+    content: '현재 3호차를 이용 중인데, 이사를 하게 되어 노선 변경이 가능한지 문의드립니다. 새 주소는 별내동입니다.',
+    answer: '별내동은 현재 2호차 노선에 포함되어 있습니다. 차량 담당자에게 전달하여 다음 달부터 변경 가능하도록 안내드리겠습니다. 상세 정류장은 차량운행 페이지를 참고해 주세요.',
+    answerDate: '2025.02.11',
+  },
+  {
+    id: 3, title: '보충 수업 가능 여부', author: '강○○맘', date: '2025.02.08',
+    isPrivate: false, category: '수업 문의', views: 41,
+    content: '아이가 아파서 2일 빠졌는데, 빠진 수업에 대한 보충이 가능한가요?',
+    answer: '네, 결석 시 보충 수업을 무료로 제공합니다. 담당 선생님과 일정을 조율하여 빠른 시일 내에 보충을 진행합니다. 수업 관련 자료도 별도로 전달해 드립니다.',
+    answerDate: '2025.02.09',
+  },
+  {
+    id: 2, title: '중3 고등 선행 수업 문의', author: '신학부모', date: '2025.02.05',
+    isPrivate: false, category: '수업 문의', views: 78,
+    content: '중3 아이가 고등 수학 선행을 시작하려 합니다. 현재 개설된 선행반 시간표와 난이도가 궁금합니다.',
+    answer: '고등 선행반은 월/수/금 19:00~21:00에 운영되며, 고1 수학(상) 과정부터 시작합니다. 현재 정원 8명 중 6명이 등록된 상태이니 서둘러 주세요! 수강안내 페이지에서 자세한 내용을 확인하실 수 있습니다.',
+    answerDate: '2025.02.06',
+  },
+  {
+    id: 1, title: '형제 할인이 있나요?', author: '송○○', date: '2025.02.03',
+    isPrivate: true, category: '수강 문의', views: 15,
+    content: '두 아이를 함께 보내려고 하는데, 형제 할인 혜택이 있는지 궁금합니다.',
+    answer: '네! 형제·자매가 동시에 등록하실 경우, 둘째 자녀부터 수강료 10% 할인이 적용됩니다. 원무실로 문의 주시면 자세히 안내드리겠습니다.',
+    answerDate: '2025.02.04',
+  },
+];
+
 export function Community() {
   const [activeTab, setActiveTab] = useState('notice');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [openBlog, setOpenBlog] = useState<number | null>(null);
+  const [openInquiry, setOpenInquiry] = useState<number | null>(null);
 
   const tabs = [
     { id: 'notice', name: '공지사항', icon: Info },
@@ -119,6 +206,7 @@ export function Community() {
     { id: 'gallery', name: '학원 갤러리', icon: ImageIcon },
     { id: 'resources', name: '자료실', icon: FileText },
     { id: 'faq', name: 'FAQ', icon: MessageCircle },
+    { id: 'inquiry', name: '문의게시판', icon: HelpCircle },
   ];
 
   const blogPosts = [
@@ -406,6 +494,134 @@ export function Community() {
                   </div>
                 </article>
               ))}
+            </div>
+          )}
+
+          {/* ── 문의게시판 ── */}
+          {activeTab === 'inquiry' && (
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <p className="text-sm text-slate-500">총 <span className="font-semibold text-slate-700">{inquiries.length}</span>개의 문의</p>
+                <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>비밀글은 작성자만 확인할 수 있습니다</span>
+                </div>
+              </div>
+
+              {/* Table header (desktop) */}
+              <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-2.5 bg-slate-100 rounded-xl text-xs font-semibold text-slate-500 mb-2">
+                <div className="col-span-1 text-center">번호</div>
+                <div className="col-span-2">분류</div>
+                <div className="col-span-5">제목</div>
+                <div className="col-span-1">작성자</div>
+                <div className="col-span-2">날짜</div>
+                <div className="col-span-1 text-center">상태</div>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {inquiries.map((post) => {
+                  const isOpen = openInquiry === post.id;
+                  return (
+                    <div key={post.id}>
+                      <button
+                        onClick={() => setOpenInquiry(isOpen ? null : post.id)}
+                        className="w-full text-left px-4 py-3.5 hover:bg-slate-50 transition-colors group"
+                      >
+                        {/* Desktop row */}
+                        <div className="hidden sm:grid grid-cols-12 gap-2 items-center">
+                          <div className="col-span-1 text-center text-sm text-slate-400">{post.id}</div>
+                          <div className="col-span-2">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{post.category}</span>
+                          </div>
+                          <div className="col-span-5 flex items-center gap-2">
+                            {post.isPrivate && <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                            <span className={cn("text-sm font-medium truncate", post.isPrivate ? "text-slate-500" : "text-slate-900 group-hover:text-indigo-600")}>
+                              {post.isPrivate ? '비밀글입니다' : post.title}
+                            </span>
+                          </div>
+                          <div className="col-span-1 text-xs text-slate-500 truncate">{post.author}</div>
+                          <div className="col-span-2 text-xs text-slate-400">{post.date}</div>
+                          <div className="col-span-1 text-center">
+                            {post.answer ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                <CheckCircle2 className="w-3 h-3" />답변완료
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">대기중</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Mobile row */}
+                        <div className="sm:hidden">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{post.category}</span>
+                            {post.isPrivate && <Lock className="w-3 h-3 text-amber-500" />}
+                            {post.answer ? (
+                              <span className="text-[10px] font-bold text-emerald-600">답변완료</span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-amber-600">대기중</span>
+                            )}
+                          </div>
+                          <p className={cn("text-sm font-medium", post.isPrivate ? "text-slate-500" : "text-slate-900")}>
+                            {post.isPrivate ? '비밀글입니다' : post.title}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">{post.author} · {post.date}</p>
+                        </div>
+                      </button>
+
+                      {/* Expanded content */}
+                      {isOpen && !post.isPrivate && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="px-4 pb-4"
+                        >
+                          <div className="bg-slate-50 rounded-xl p-4 space-y-4">
+                            {/* Question */}
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <HelpCircle className="w-4 h-4 text-indigo-500" />
+                                <span className="text-sm font-semibold text-slate-700">문의 내용</span>
+                              </div>
+                              <p className="text-sm text-slate-600 leading-relaxed pl-6">{post.content}</p>
+                            </div>
+                            {/* Answer */}
+                            {post.answer && (
+                              <div className="border-t border-slate-200 pt-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                  <span className="text-sm font-semibold text-emerald-700">학원 답변</span>
+                                  <span className="text-xs text-slate-400">{post.answerDate}</span>
+                                </div>
+                                <p className="text-sm text-slate-600 leading-relaxed pl-6">{post.answer}</p>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Private post message */}
+                      {isOpen && post.isPrivate && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="px-4 pb-4"
+                        >
+                          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
+                            <Lock className="w-5 h-5 text-amber-500 shrink-0" />
+                            <div>
+                              <p className="text-sm font-medium text-amber-800">비밀글입니다</p>
+                              <p className="text-xs text-amber-600">작성자 본인만 내용을 확인할 수 있습니다.</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
