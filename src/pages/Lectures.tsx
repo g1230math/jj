@@ -134,6 +134,20 @@ export function Lectures() {
     '고등': 'bg-indigo-100 text-indigo-700',
   };
 
+  const renderDifficulty = (level: number) => (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <Star
+          key={i}
+          className={cn(
+            "w-3 h-3",
+            i <= level ? "text-amber-400 fill-amber-400" : "text-slate-200"
+          )}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -272,6 +286,10 @@ export function Lectures() {
                   </div>
                   <h2 className="text-xl font-bold text-slate-900 mb-1">{activeVideo.title}</h2>
                   <p className="text-sm text-slate-500">강사: {activeVideo.instructor}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-slate-400">난이도</span>
+                    {renderDifficulty(activeVideo.level)}
+                  </div>
 
                   <button
                     onClick={() => setExpandedInfo(!expandedInfo)}
@@ -336,7 +354,7 @@ export function Lectures() {
             ) : (
               <div className="bg-slate-100 rounded-2xl aspect-video flex flex-col items-center justify-center text-slate-400">
                 <Play className="w-16 h-16 mb-4 opacity-40" />
-                <p className="text-lg font-medium">오른쪽 목록에서 강의를 선택하세요</p>
+                <p className="text-lg font-medium"><span className="lg:hidden">아래</span><span className="hidden lg:inline">오른쪽</span> 목록에서 강의를 선택하세요</p>
                 <p className="text-sm mt-1">총 {filteredLectures.length}개의 강의가 준비되어 있습니다</p>
               </div>
             )}
@@ -396,9 +414,12 @@ export function Lectures() {
                       <p className="text-xs text-slate-500 mt-0.5">{lecture.instructor} · {lecture.subject}</p>
                       <div className="flex items-center justify-between mt-1.5">
                         {getStatusBadge(lecture.id)}
-                        <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-medium", gradeColors[lecture.grade])}>
-                          {lecture.grade}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {renderDifficulty(lecture.level)}
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-medium", gradeColors[lecture.grade])}>
+                            {lecture.grade}
+                          </span>
+                        </div>
                       </div>
                       {getProgressBar(lecture.id)}
                     </div>
