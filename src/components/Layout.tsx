@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy } from 'lucide-react';
+import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -96,6 +96,20 @@ export function Layout() {
             </nav>
 
             <div className="flex items-center gap-3">
+              {/* 수능 D-day */}
+              {(() => {
+                const csatDate = new Date(2026, 10, 19); // 2026년 11월 19일 (목)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const diff = Math.ceil((csatDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                if (diff <= 0) return null;
+                return (
+                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-rose-500 to-orange-500 rounded-lg text-white shadow-sm shadow-rose-500/20">
+                    <Flame className="w-3.5 h-3.5" />
+                    <span className="text-xs font-bold whitespace-nowrap">수능 D-{diff}</span>
+                  </div>
+                );
+              })()}
               {user ? (
                 <div className="flex items-center gap-3">
                   <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors">
