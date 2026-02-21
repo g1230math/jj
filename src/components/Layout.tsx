@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users } from 'lucide-react';
+import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function Layout() {
@@ -15,6 +15,7 @@ export function Layout() {
     { name: '수강안내', path: '/courses', icon: BookOpen },
     { name: '동영상강의', path: '/lectures', icon: Video, requiresAuth: true },
     { name: '학사일정', path: '/calendar', icon: Calendar },
+    { name: '차량운행', path: '/shuttle', icon: Bus },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
     { name: '학부모서비스', path: '/parent-service', icon: Users, requiresAuth: true },
     { name: '오시는길', path: '/contact', icon: MapPin },

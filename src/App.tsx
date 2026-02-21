@@ -12,6 +12,7 @@ import { Contact } from './pages/Contact';
 import { About } from './pages/About';
 import { Courses } from './pages/Courses';
 import { ParentService } from './pages/ParentService';
+import { Shuttle } from './pages/Shuttle';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="community" element={<Community />} />
         <Route path="contact" element={<Contact />} />
         <Route path="calendar" element={<Calendar />} />
+        <Route path="shuttle" element={<Shuttle />} />
 
         {/* Protected Routes */}
         <Route path="dashboard" element={
