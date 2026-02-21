@@ -36,7 +36,7 @@ export function Layout() {
     { name: '학사일정', path: '/calendar', icon: Calendar },
     { name: '차량운행', path: '/shuttle', icon: Bus },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
-    { name: '대입성공스토리', path: '/success', icon: Trophy },
+    { name: '성공스토리', path: '/success', icon: Trophy },
     { name: '학부모서비스', path: '/parent-service', icon: Users, requiresAuth: true },
     { name: '오시는길', path: '/contact', icon: MapPin },
   ];
@@ -158,6 +158,7 @@ export function Layout() {
                     <Link
                       key={item.path}
                       to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-colors",
                         isActive
@@ -172,6 +173,7 @@ export function Layout() {
                 })}
                 {!user && (
                   <Link to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl mt-2"
                   >
                     <LogIn className="w-5 h-5" />
