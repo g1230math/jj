@@ -35,41 +35,123 @@ export function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative bg-indigo-900 text-white overflow-hidden">
+      <section className="relative bg-slate-900 text-white overflow-hidden min-h-[520px] flex items-center">
+        {/* Animated background */}
         <div className="absolute inset-0">
           <img
-            src="https://picsum.photos/seed/mathclass/1920/1080"
+            src="https://picsum.photos/seed/mathclass2025/1920/1080"
             alt="Classroom"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-15"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/90 via-slate-900/80 to-purple-900/70"></div>
+          {/* Animated grid pattern */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'linear-gradient(rgba(99,102,241,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,.3) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        {/* Floating geometric shapes */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.15 }}
+          transition={{ duration: 2 }}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <div className="absolute top-20 right-20 w-72 h-72 bg-indigo-500 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-cyan-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </motion.div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Text content */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-300 text-sm font-medium mb-6 backdrop-blur-sm"
+              >
+                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                2025년 봄학기 수강생 모집 중
+              </motion.div>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.15]">
+                수학의 <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">본질</span>을 꿰뚫는<br />
+                확실한 성적 향상
+              </h1>
+              <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-xl leading-relaxed">
+                진접 최고의 강사진과 체계적인 관리 시스템으로<br />
+                초등부터 수능까지 완벽하게 대비합니다.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/courses" className="inline-flex items-center justify-center px-7 py-3.5 text-base font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5">
+                  수강 안내 보기
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+                <Link to="/lectures" className="inline-flex items-center justify-center px-7 py-3.5 border border-slate-500/50 text-base font-medium rounded-xl text-slate-200 hover:bg-white/10 hover:border-slate-400/50 transition-all backdrop-blur-sm">
+                  <PlayCircle className="w-5 h-5 mr-2" />
+                  온라인 강의실
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Stats grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+              className="hidden lg:grid grid-cols-2 gap-4"
+            >
+              {[
+                { label: '누적 수강생', value: '1,200+', desc: '명', color: 'from-indigo-500/20 to-indigo-600/10' },
+                { label: '내신 1등급 비율', value: '87', desc: '%', color: 'from-emerald-500/20 to-emerald-600/10' },
+                { label: '수업 만족도', value: '4.9', desc: '/5.0', color: 'from-amber-500/20 to-amber-600/10' },
+                { label: '운영', value: '15', desc: '년', color: 'from-purple-500/20 to-purple-600/10' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 + i * 0.1, duration: 0.4 }}
+                  className={cn(
+                    "bg-gradient-to-br border border-white/10 rounded-2xl p-5 backdrop-blur-sm",
+                    stat.color
+                  )}
+                >
+                  <div className="text-sm text-slate-400 mb-1">{stat.label}</div>
+                  <div className="text-3xl font-bold text-white">
+                    {stat.value}<span className="text-lg text-slate-300 ml-1">{stat.desc}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Mobile stats strip */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl"
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="lg:hidden mt-10 grid grid-cols-3 gap-3"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
-              수학의 <span className="text-indigo-400">본질</span>을 꿰뚫는<br />
-              확실한 성적 향상
-            </h1>
-            <p className="text-lg md:text-xl text-indigo-100 mb-10 max-w-xl leading-relaxed">
-              진접 최고의 강사진과 체계적인 관리 시스템으로<br />
-              초등부터 수능까지 완벽하게 대비합니다.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/courses" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-indigo-900 bg-white hover:bg-indigo-50 transition-colors shadow-lg">
-                수강 안내 보기
-              </Link>
-              <Link to="/login" className="inline-flex items-center justify-center px-6 py-3 border border-indigo-400 text-base font-medium rounded-lg text-white hover:bg-indigo-800 transition-colors">
-                <PlayCircle className="w-5 h-5 mr-2" />
-                온라인 강의실
-              </Link>
-            </div>
+            {[
+              { label: '수강생', value: '1,200+' },
+              { label: '1등급 비율', value: '87%' },
+              { label: '만족도', value: '4.9/5.0' },
+            ].map(stat => (
+              <div key={stat.label} className="text-center bg-white/5 border border-white/10 rounded-xl py-3 backdrop-blur-sm">
+                <div className="text-lg font-bold text-white">{stat.value}</div>
+                <div className="text-[11px] text-slate-400">{stat.label}</div>
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
