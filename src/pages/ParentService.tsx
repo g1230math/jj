@@ -50,7 +50,7 @@ export function ParentService() {
     return (
         <div className="flex flex-col">
             {/* Hero */}
-            <section className="relative bg-gradient-to-br from-rose-800 via-pink-800 to-purple-900 text-white py-16 overflow-hidden wave-divider wave-divider-white">
+            <section className="relative bg-gradient-to-br from-rose-800 via-pink-800 to-purple-900 text-white py-20 overflow-hidden wave-divider wave-divider-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-10 right-10 w-64 h-64 bg-pink-400 rounded-full blur-3xl" />
                 </div>

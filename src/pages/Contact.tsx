@@ -6,7 +6,7 @@ export function Contact() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-blue-900 text-white py-16 overflow-hidden wave-divider wave-divider-white">
+      <section className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-blue-900 text-white py-20 overflow-hidden wave-divider wave-divider-white">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute bottom-10 right-20 w-72 h-72 bg-blue-400 rounded-full blur-3xl" />
         </div>

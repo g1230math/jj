@@ -128,7 +128,7 @@ export function Shuttle() {
     return (
         <div className="flex flex-col">
             {/* Hero */}
-            <section className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-blue-900 text-white py-16 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-blue-900 text-white py-20 overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-10 right-10 w-72 h-72 bg-blue-400 rounded-full blur-3xl" />
                 </div>

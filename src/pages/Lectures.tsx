@@ -137,7 +137,7 @@ export function Lectures() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-cyan-800 via-blue-800 to-blue-900 text-white py-16 overflow-hidden wave-divider wave-divider-white">
+      <section className="relative bg-gradient-to-br from-cyan-800 via-blue-800 to-blue-900 text-white py-20 overflow-hidden wave-divider wave-divider-white">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-64 h-64 bg-cyan-400 rounded-full blur-3xl" />
         </div>
