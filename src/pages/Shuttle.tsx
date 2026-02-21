@@ -182,14 +182,14 @@ export function Shuttle() {
                                     {/* Header */}
                                     <button
                                         onClick={() => setOpenBus(isOpen ? '' : route.id)}
-                                        className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                                        className="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className={`bg-gradient-to-br ${route.color} w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-sm`}>
-                                                <Bus className="w-7 h-7" />
+                                            <div className={`bg-gradient-to-br ${route.color} w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0`}>
+                                                <Bus className="w-5 h-5 sm:w-7 sm:h-7" />
                                             </div>
                                             <div className="text-left">
-                                                <h3 className="text-xl font-bold text-slate-900">{route.name}</h3>
+                                                <h3 className="text-base sm:text-xl font-bold text-slate-900">{route.name}</h3>
                                                 <p className="text-sm text-slate-500">
                                                     {direction === 'depart' ? `등원 ${route.departureTime} 출발` : `하원 ${route.returnTime} 출발`}
                                                     {' '}· 기사 {route.driver}
@@ -197,7 +197,7 @@ export function Shuttle() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className={cn("px-3 py-1 text-sm font-medium rounded-full", route.colorBg, route.colorText)}>
+                                            <span className={cn("hidden sm:inline-block px-3 py-1 text-sm font-medium rounded-full", route.colorBg, route.colorText)}>
                                                 {stops.length}개 정류장
                                             </span>
                                             {isOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
@@ -208,7 +208,7 @@ export function Shuttle() {
                                     {isOpen && (
                                         <div className="px-6 pb-6 border-t border-slate-100">
                                             {/* Driver info */}
-                                            <div className="flex items-center gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
                                                 <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600">
                                                     <Navigation className="w-5 h-5" />
                                                 </div>
@@ -217,7 +217,7 @@ export function Shuttle() {
                                                     <p className="text-sm text-slate-500">차량 문의</p>
                                                 </div>
                                                 <a href={`tel:${route.phone}`}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                                                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
                                                 >
                                                     <Phone className="w-4 h-4" /> {route.phone}
                                                 </a>

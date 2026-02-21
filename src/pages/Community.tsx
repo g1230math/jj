@@ -204,7 +204,7 @@ export function Community() {
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[400px]">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 min-h-[400px]">
           {activeTab === 'notice' && (
             <div className="divide-y divide-slate-100">
               {notices.map((notice) => (

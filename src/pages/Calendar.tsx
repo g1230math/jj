@@ -199,14 +199,14 @@ export function Calendar() {
                 <div
                   key={day.toString()}
                   className={cn(
-                    "min-h-[120px] p-2 border-b border-r border-slate-100 relative group",
+                    "min-h-[80px] md:min-h-[120px] p-1 md:p-2 border-b border-r border-slate-100 relative group",
                     !isSameMonth(day, currentDate) && "bg-slate-50/50 text-slate-400",
                     dayIdx % 7 === 6 && "border-r-0"
                   )}
                 >
                   <div className="flex justify-between items-start">
                     <span className={cn(
-                      "w-7 h-7 flex items-center justify-center rounded-full text-sm font-medium",
+                      "w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full text-xs md:text-sm font-medium",
                       isToday(day) ? "bg-indigo-600 text-white" :
                         hasHoliday || dayOfWeek === 0 ? "text-red-500" :
                           dayOfWeek === 6 ? "text-blue-500" : "text-slate-700"
@@ -219,7 +219,7 @@ export function Calendar() {
                       <div
                         key={event.id}
                         className={cn(
-                          "px-1.5 py-0.5 text-[10px] rounded truncate font-medium",
+                          "px-1 md:px-1.5 py-0.5 text-[8px] md:text-[10px] rounded truncate font-medium",
                           event.type === 'holiday'
                             ? "bg-purple-100 text-purple-700"
                             : `text-white ${event.color}`

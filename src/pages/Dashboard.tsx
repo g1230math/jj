@@ -102,12 +102,12 @@ export function Dashboard() {
 
   const renderParentDashboard = () => (
     <div className="space-y-6">
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex items-center justify-between">
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-indigo-900 mb-1">김지훈 학생 (중3)</h2>
           <p className="text-indigo-700 text-sm">현재 진접중학교 3학년 심화반 수강 중입니다.</p>
         </div>
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+        <button className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
           상담 신청하기
         </button>
       </div>
@@ -117,7 +117,7 @@ export function Dashboard() {
 
   const renderAdminDashboard = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
           { title: '전체 원생', value: '128명', icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
           { title: '오늘 출석률', value: '96%', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
