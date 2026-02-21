@@ -56,7 +56,7 @@ export function Layout() {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <Link to="/" className="flex items-center gap-2">
-                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-[60px] object-contain" />
+                <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-[54px] object-contain" />
               </Link>
             </div>
 
@@ -191,16 +191,6 @@ export function Layout() {
           <MessageCircle className="w-6 h-6" />
           <span className="absolute right-full mr-3 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:block">
             카카오톡 상담
-          </span>
-        </a>
-        <a
-          href="tel:031-123-4567"
-          className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-full shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:scale-110 transition-all duration-200"
-          title="전화 문의"
-        >
-          <Phone className="w-6 h-6" />
-          <span className="absolute right-full mr-3 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:block">
-            031-123-4567
           </span>
         </a>
       </div>
