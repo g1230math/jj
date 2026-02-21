@@ -27,25 +27,29 @@ export function Contact() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            {/* Mock Map Area */}
+            {/* Map - 제일프라자 */}
             <div className="h-[400px] bg-slate-100 relative w-full">
-              <img
-                src="https://picsum.photos/seed/map/1200/800"
-                alt="Map placeholder"
-                className="w-full h-full object-cover opacity-50"
-                referrerPolicy="no-referrer"
+              <iframe
+                src="https://maps.google.com/maps?q=%EC%A0%9C%EC%9D%BC%ED%94%84%EB%9D%BC%EC%9E%90+%EB%82%A8%EC%96%91%EC%A3%BC%EC%8B%9C+%EC%A7%84%EC%A0%91%EC%9D%8D+%ED%95%B4%EB%B0%80%EC%98%88%EB%8B%B91%EB%A1%9C+171&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="진접 G1230 수학전문학원 위치 - 제일프라자"
               />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-bounce">
-                  <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">진접 G1230 수학전문학원</p>
-                    <p className="text-sm text-slate-500">해밀예당1로 123</p>
-                  </div>
-                </div>
-              </div>
+            </div>
+            <div className="p-3 bg-slate-50 flex justify-center">
+              <a
+                href="https://map.naver.com/p/search/%EC%A0%9C%EC%9D%BC%ED%94%84%EB%9D%BC%EC%9E%90%20%EC%A7%84%EC%A0%91"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+              >
+                <MapPin className="w-4 h-4" />
+                네이버 지도에서 크게 보기 →
+              </a>
             </div>
           </div>
 
@@ -55,7 +59,7 @@ export function Contact() {
                 <MapPin className="w-5 h-5 text-indigo-600" />
                 학원 주소
               </h3>
-              <p className="text-slate-700">경기도 남양주시 진접읍 해밀예당1로 123, 진접프라자 4층</p>
+              <p className="text-slate-700">경기도 남양주시 진접읍 해밀예당1로 171, 제일프라자</p>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
