@@ -72,8 +72,8 @@ export function Login() {
         className="max-w-md w-full space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-slate-100"
       >
         <div>
-          <div className="mx-auto w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-4">
-            <span className="text-white font-bold text-2xl">진</span>
+          <div className="mx-auto flex items-center justify-center mb-4">
+            <img src="/jj/logo.png" alt="진접 G1230 수학전문학원" className="h-12 object-contain" />
           </div>
 
           {mode === 'select' && (
