@@ -79,7 +79,7 @@ export function Login() {
           {mode === 'select' && (
             <>
               <h2 className="text-center text-2xl font-extrabold text-slate-900 tracking-tight">로그인</h2>
-              <p className="mt-2 text-center text-sm text-slate-500">진접 수학전문학원에 오신 것을 환영합니다.</p>
+              <p className="mt-2 text-center text-sm text-slate-500">진접 G1230 수학전문학원에 오신 것을 환영합니다.</p>
 
               <div className="mt-8 space-y-3">
                 <button

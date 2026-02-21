@@ -27,28 +27,28 @@ const instructors = [
         name: '김수학',
         title: '원장 / 수학 전문 강사',
         desc: '서울대 수학교육과 졸업 | 15년 경력\n수능 수학 1등급 배출 다수',
-        avatar: 'https://i.pravatar.cc/300?u=inst1',
+        avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=inst1&backgroundColor=b6e3f4',
         color: 'from-indigo-500 to-blue-600',
     },
     {
         name: '박미적',
         title: '고등부 전문 강사',
         desc: '연세대 수학과 졸업 | 8년 경력\n미적분·기하 전문',
-        avatar: 'https://i.pravatar.cc/300?u=inst2',
+        avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=inst2&backgroundColor=c0aede',
         color: 'from-blue-500 to-cyan-600',
     },
     {
         name: '이함수',
         title: '중등부 전문 강사',
         desc: '고려대 수학과 졸업 | 10년 경력\n내신 집중 관리 전문',
-        avatar: 'https://i.pravatar.cc/300?u=inst3',
+        avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=inst3&backgroundColor=c0aede',
         color: 'from-emerald-500 to-teal-600',
     },
     {
         name: '최연산',
         title: '초등부 전문 강사',
         desc: '이화여대 수학교육과 졸업 | 7년 경력\n사고력·연산 능력 개발',
-        avatar: 'https://i.pravatar.cc/300?u=inst4',
+        avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=inst4&backgroundColor=fef3c7',
         color: 'from-amber-500 to-orange-600',
     },
 ];
@@ -77,7 +77,7 @@ export function About() {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">학원 소개</h1>
                         <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
-                            수학의 본질을 꿰뚫는 교육, 진접 수학전문학원
+                            수학의 본질을 꿰뚫는 교육, 진접 G1230 수학전문학원
                         </p>
                     </motion.div>
                 </div>
@@ -96,7 +96,7 @@ export function About() {
                             </div>
                             <div className="space-y-4 text-slate-600 leading-relaxed text-lg">
                                 <p>
-                                    안녕하세요, 진접 수학전문학원 원장 <strong className="text-slate-900">김수학</strong>입니다.
+                                    안녕하세요, 진접 G1230 수학전문학원 원장 <strong className="text-slate-900">김수학</strong>입니다.
                                 </p>
                                 <p>
                                     수학은 단순히 공식을 외우는 것이 아니라, <span className="text-indigo-600 font-semibold">
@@ -110,10 +110,10 @@ export function About() {
                                 </p>
                             </div>
                             <div className="mt-6 flex items-center gap-4">
-                                <img src="https://i.pravatar.cc/100?u=principal" alt="원장" className="w-14 h-14 rounded-full border-2 border-indigo-200" />
+                                <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=principal&backgroundColor=e0e7ff" alt="원장" className="w-14 h-14 rounded-full border-2 border-indigo-200" />
                                 <div>
                                     <p className="font-bold text-slate-900">김수학</p>
-                                    <p className="text-sm text-slate-500">진접 수학전문학원 원장</p>
+                                    <p className="text-sm text-slate-500">진접 G1230 수학전문학원 원장</p>
                                 </div>
                             </div>
                         </div>

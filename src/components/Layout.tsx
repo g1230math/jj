@@ -31,7 +31,7 @@ export function Layout() {
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">진</span>
                 </div>
-                <span className="font-bold text-xl text-slate-900 tracking-tight">진접수학전문학원</span>
+                <span className="font-bold text-xl text-slate-900 tracking-tight">진접 G1230 수학전문학원</span>
               </Link>
             </div>
 
@@ -138,7 +138,7 @@ export function Layout() {
                 <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">진</span>
                 </div>
-                <span className="font-bold text-xl text-white tracking-tight">진접수학전문학원</span>
+                <span className="font-bold text-xl text-white tracking-tight">진접 G1230 수학전문학원</span>
               </div>
               <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
                 경기도 남양주시 진접읍에 위치한 초·중·고 수학 전문 학원입니다.
@@ -164,7 +164,7 @@ export function Layout() {
             </div>
           </div>
           <div className="mt-8 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-            <p>&copy; 2025 진접수학전문학원. All rights reserved.</p>
+            <p>&copy; 2025 진접 G1230 수학전문학원. All rights reserved.</p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <a href="#" className="hover:text-white">이용약관</a>
               <a href="#" className="hover:text-white">개인정보처리방침</a>

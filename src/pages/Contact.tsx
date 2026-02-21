@@ -6,16 +6,16 @@ export function Contact() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">오시는 길</h1>
-        <p className="text-slate-500 mt-1">진접 수학전문학원으로 오시는 길을 안내해 드립니다.</p>
+        <p className="text-slate-500 mt-1">진접 G1230 수학전문학원으로 오시는 길을 안내해 드립니다.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {/* Mock Map Area */}
           <div className="h-[400px] bg-slate-100 relative w-full">
-            <img 
-              src="https://picsum.photos/seed/map/1200/800" 
-              alt="Map placeholder" 
+            <img
+              src="https://picsum.photos/seed/map/1200/800"
+              alt="Map placeholder"
               className="w-full h-full object-cover opacity-50"
               referrerPolicy="no-referrer"
             />
@@ -25,7 +25,7 @@ export function Contact() {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900">진접 수학전문학원</p>
+                  <p className="font-bold text-slate-900">진접 G1230 수학전문학원</p>
                   <p className="text-sm text-slate-500">해밀예당1로 123</p>
                 </div>
               </div>
@@ -74,7 +74,7 @@ export function Contact() {
               주차 안내
             </h3>
             <p className="text-sm text-slate-700">
-              건물 지하 1~2층 주차장 이용 가능합니다.<br/>
+              건물 지하 1~2층 주차장 이용 가능합니다.<br />
               (상담 방문 시 2시간 무료 주차권 지급)
             </p>
           </div>
