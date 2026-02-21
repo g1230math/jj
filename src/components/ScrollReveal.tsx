@@ -8,6 +8,7 @@ interface ScrollRevealProps {
     duration?: number;
     className?: string;
     once?: boolean;
+    key?: React.Key;
 }
 
 const directionVariants = {
@@ -111,8 +112,8 @@ export function SectionHeader({ badge, title, subtitle, center = true, dark = fa
         <ScrollReveal className={`mb-12 md:mb-16 ${center ? 'text-center' : ''}`}>
             {badge && (
                 <span className={`text-badge inline-block px-4 py-1.5 rounded-full mb-4 ${dark
-                        ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/30'
-                        : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/30'
+                    : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
                     }`}>
                     {badge}
                 </span>
