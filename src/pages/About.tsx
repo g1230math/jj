@@ -28,28 +28,28 @@ const instructors = [
         name: '김수학',
         title: '원장 / 수학 전문 강사',
         desc: '서울대 수학교육과 졸업 | 15년 경력\n수능 수학 1등급 배출 다수',
-        img: '/jj/instructors/instructor_principal.png',
+        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=c0aede&skinColor=f2d3b1',
         color: 'from-indigo-500 to-blue-600',
     },
     {
         name: '박미적',
         title: '고등부 전문 강사',
         desc: '연세대 수학과 졸업 | 8년 경력\n미적분·기하 전문',
-        img: '/jj/instructors/instructor_calculus.png',
+        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ParkMJ&backgroundColor=fef3c7&skinColor=f2d3b1',
         color: 'from-blue-500 to-cyan-600',
     },
     {
         name: '이함수',
         title: '중등부 전문 강사',
         desc: '고려대 수학과 졸업 | 10년 경력\n내신 집중 관리 전문',
-        img: '/jj/instructors/instructor_middle.png',
+        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=LeeHS&backgroundColor=b6e3f4&skinColor=f2d3b1',
         color: 'from-emerald-500 to-teal-600',
     },
     {
         name: '최연산',
         title: '초등부 전문 강사',
         desc: '이화여대 수학교육과 졸업 | 7년 경력\n사고력·연산 능력 개발',
-        img: '/jj/instructors/instructor_elementary.png',
+        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ChoiYS&backgroundColor=d1fae5&skinColor=f2d3b1',
         color: 'from-amber-500 to-orange-600',
     },
 ];
@@ -102,17 +102,7 @@ export function About() {
                             </div>
                             <div className="mt-8 flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
                                 <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                                    <img src="/jj/instructors/instructor_principal.png" alt="원장" className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            const el = e.currentTarget;
-                                            el.style.display = 'none';
-                                            el.parentElement!.classList.add('bg-gradient-to-br', 'from-indigo-500', 'to-purple-500', 'flex', 'items-center', 'justify-center');
-                                            const span = document.createElement('span');
-                                            span.className = 'text-white font-bold text-xl';
-                                            span.textContent = '김';
-                                            el.parentElement!.appendChild(span);
-                                        }}
-                                    />
+                                    <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=e0e7ff&skinColor=f2d3b1" alt="원장" className="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                     <p className="font-bold text-slate-900">김수학</p>

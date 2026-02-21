@@ -92,10 +92,10 @@ const testimonials = [
 ];
 
 const instructors = [
-  { name: '김수학', role: '원장 / 고등부 총괄', specialty: '수능 수학 15년 강의', img: '/jj/instructors/instructor1.webp' },
-  { name: '이정현', role: '중등부 수학', specialty: '내신 만점 전략 전문가', img: '/jj/instructors/instructor2.webp' },
-  { name: '박서연', role: '초등부 사고력', specialty: '영재원 대비 전문', img: '/jj/instructors/instructor3.webp' },
-  { name: '정민호', role: '고등부 수학', specialty: '수능 킬러 문항 전문', img: '/jj/instructors/instructor4.webp' },
+  { name: '김수학', role: '원장 / 고등부 총괄', specialty: '수능 수학 15년 강의', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=c0aede&skinColor=f2d3b1' },
+  { name: '이정현', role: '중등부 수학', specialty: '내신 만점 전략 전문가', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=LeeJH&backgroundColor=b6e3f4&skinColor=f2d3b1' },
+  { name: '박서연', role: '초등부 사고력', specialty: '영재원 대비 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ParkSY&backgroundColor=d1fae5&skinColor=f2d3b1' },
+  { name: '정민호', role: '고등부 수학', specialty: '수능 킬러 문항 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=JungMH&backgroundColor=fef3c7&skinColor=f2d3b1' },
 ];
 
 // ─── Component ──────────────────────────────────────
