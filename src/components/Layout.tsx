@@ -13,6 +13,11 @@ export function Layout() {
 
   // Scroll-aware header
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  // Scroll-aware header
+  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
