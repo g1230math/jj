@@ -104,9 +104,9 @@ export function Layout() {
                 const diff = Math.ceil((csatDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 if (diff <= 0) return null;
                 return (
-                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-rose-500 to-orange-500 rounded-lg text-white shadow-sm shadow-rose-500/20">
-                    <Flame className="w-3.5 h-3.5" />
-                    <span className="text-xs font-bold whitespace-nowrap">수능 D-{diff}</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-rose-500 to-orange-500 rounded-lg text-white shadow-sm shadow-rose-500/20">
+                    <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <span className="text-[10px] sm:text-xs font-bold whitespace-nowrap">수능 D-{diff}</span>
                   </div>
                 );
               })()}

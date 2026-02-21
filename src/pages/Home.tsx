@@ -217,13 +217,12 @@ export function Home() {
         </ScrollReveal>
 
         {/* Tab content */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={currentProgram.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               {currentProgram.features.map((f, i) => (
@@ -310,13 +309,12 @@ export function Home() {
           />
 
           <div className="max-w-3xl mx-auto relative">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={testimonialIdx}
                 initial={{ opacity: 0, x: 60 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -60 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.3 }}
                 className="glass-dark rounded-3xl p-8 md:p-10"
               >
                 <Quote className="w-10 h-10 text-indigo-400/40 mb-4" />

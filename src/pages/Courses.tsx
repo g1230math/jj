@@ -138,13 +138,12 @@ export function Courses() {
                 </ScrollReveal>
 
                 {/* Tab Content */}
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                     <motion.div
                         key={current.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
                     >
                         {/* Summary banner */}
                         <div className={cn("glass-card rounded-2xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4", current.borderColor)}>

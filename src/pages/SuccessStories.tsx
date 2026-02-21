@@ -191,7 +191,7 @@ export function SuccessStories() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col sm:flex-row gap-3">
                         {/* Year filter */}
-                        <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200">
+                        <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200 overflow-x-auto">
                             {(['전체', '2025', '2024', '2023'] as YearFilter[]).map(year => (
                                 <button
                                     key={year}
@@ -208,7 +208,7 @@ export function SuccessStories() {
                             ))}
                         </div>
                         {/* Category filter */}
-                        <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200">
+                        <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200 overflow-x-auto">
                             {(['전체', '서울권', '경기권', '의약학', '교대'] as CategoryFilter[]).map(cat => (
                                 <button
                                     key={cat}
