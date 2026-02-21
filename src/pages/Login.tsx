@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, UserRole } from '../context/AuthContext';
 import { motion } from 'motion/react';
 import { User, Users, GraduationCap, ShieldCheck, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
@@ -9,6 +9,8 @@ type Mode = 'select' | 'login' | 'signup' | 'demo';
 export function Login() {
   const { login, signup, demoLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from || '/dashboard';
   const [mode, setMode] = useState<Mode>('select');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +30,7 @@ export function Login() {
     if (result.error) {
       setError(result.error);
     } else {
-      navigate('/dashboard');
+      navigate(from);
     }
   };
 
@@ -47,7 +49,7 @@ export function Login() {
 
   const handleDemoLogin = (selectedRole: UserRole) => {
     demoLogin(selectedRole);
-    navigate('/dashboard');
+    navigate(from);
   };
 
   const roles = [
