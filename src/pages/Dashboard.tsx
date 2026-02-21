@@ -2,7 +2,8 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Users, CreditCard } from 'lucide-react';
 import { ShuttleAdmin } from '../components/ShuttleAdmin';
-import { studentGrades, lectures } from '../data/mockData';
+import { LectureAdmin } from '../components/LectureAdmin';
+import { studentGrades, getLectures, getAllProgress } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function Dashboard() {
@@ -75,20 +76,24 @@ export function Dashboard() {
             최근 수강 강의
           </h3>
           <div className="space-y-4">
-            {lectures.slice(0, 3).map(lecture => (
-              <div key={lecture.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                <img src={lecture.thumbnail} alt={lecture.title} className="w-24 h-16 object-cover rounded-lg" />
-                <div className="flex-1">
-                  <h4 className="font-medium text-slate-900 text-sm mb-1">{lecture.title}</h4>
-                  <p className="text-xs text-slate-500">{lecture.instructor} • {lecture.date}</p>
+            {getLectures().filter(l => l.isPublished).slice(0, 3).map(lecture => {
+              const progress = getAllProgress()[lecture.id];
+              const isCompleted = progress?.status === 'completed';
+              return (
+                <div key={lecture.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                  <img src={lecture.thumbnail} alt={lecture.title} className="w-24 h-16 object-cover rounded-lg" referrerPolicy="no-referrer" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-slate-900 text-sm mb-1">{lecture.title}</h4>
+                    <p className="text-xs text-slate-500">{lecture.instructor} • {lecture.date}</p>
+                  </div>
+                  {isCompleted ? (
+                    <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">수강완료</span>
+                  ) : (
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">미수강</span>
+                  )}
                 </div>
-                {lecture.watched ? (
-                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">수강완료</span>
-                ) : (
-                  <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">미수강</span>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -135,6 +140,9 @@ export function Dashboard() {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-64 flex items-center justify-center text-slate-500">
         관리자 상세 통계 대시보드 영역
       </div>
+
+      {/* Lecture Admin */}
+      <LectureAdmin />
 
       {/* Shuttle Admin */}
       <ShuttleAdmin />
