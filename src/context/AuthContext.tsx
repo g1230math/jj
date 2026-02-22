@@ -20,6 +20,7 @@ interface AuthContextType {
   demoLogin: (role: UserRole) => void;
   logout: () => void;
   isDemo: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,8 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsDemo(false);
   };
 
+  const isAdmin = user?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, demoLogin, logout, isDemo }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, demoLogin, logout, isDemo, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

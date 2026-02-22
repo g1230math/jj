@@ -498,7 +498,7 @@ export interface CalendarEvent {
 }
 
 export const SCHOOL_LIST = [
-  '전체', '해밀초', '진접초', '주곡초', '풍양중', '주곡중', '진접중', '광동중',
+  '전체', '해밀초', '진접초', '주곡초', '풍양중', '주곡중', '진접중', '광동중', '진접고', '별내고',
 ] as const;
 
 const defaultCalendarEvents: CalendarEvent[] = [
@@ -606,6 +606,27 @@ const defaultCalendarEvents: CalendarEvent[] = [
   { id: 'sc_gd6', title: '광동중 2학기 중간고사', date: '2026-10-12', type: 'exam', school: '광동중', color: 'bg-red-500', description: '2학기 중간고사 (10/12~10/15)' },
   { id: 'sc_gd7', title: '광동중 2학기 기말고사', date: '2026-12-09', type: 'exam', school: '광동중', color: 'bg-red-500', description: '2학기 기말고사 (12/9~12/11)' },
   { id: 'sc_gd8', title: '광동중 겨울방학/졸업식', date: '2026-12-31', type: 'school', school: '광동중', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // ═══════ 고등학교 2026 학사일정 (예상) ═══════
+  // --- 진접고 ---
+  { id: 'sc_jg1', title: '진접고 개학식', date: '2026-03-02', type: 'school', school: '진접고', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_jg2', title: '진접고 1학기 중간고사', date: '2026-04-22', type: 'exam', school: '진접고', color: 'bg-red-500', description: '1학기 중간고사 (4/22~4/24)' },
+  { id: 'sc_jg3', title: '진접고 1학기 기말고사', date: '2026-06-29', type: 'exam', school: '진접고', color: 'bg-red-500', description: '1학기 기말고사 (6/29~7/1)' },
+  { id: 'sc_jg4', title: '진접고 여름방학식', date: '2026-07-17', type: 'school', school: '진접고', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_jg5', title: '진접고 2학기 개학', date: '2026-08-17', type: 'school', school: '진접고', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_jg6', title: '진접고 2학기 중간고사', date: '2026-10-05', type: 'exam', school: '진접고', color: 'bg-red-500', description: '2학기 중간고사 (10/5~10/8)' },
+  { id: 'sc_jg7', title: '진접고 2학기 기말고사', date: '2026-12-02', type: 'exam', school: '진접고', color: 'bg-red-500', description: '2학기 기말고사 (12/2~12/4)' },
+  { id: 'sc_jg8', title: '진접고 겨울방학/졸업식', date: '2026-12-30', type: 'school', school: '진접고', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // --- 별내고 ---
+  { id: 'sc_bn1', title: '별내고 개학식', date: '2026-03-02', type: 'school', school: '별내고', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_bn2', title: '별내고 1학기 중간고사', date: '2026-04-22', type: 'exam', school: '별내고', color: 'bg-red-500', description: '1학기 중간고사 (4/22~4/24)' },
+  { id: 'sc_bn3', title: '별내고 1학기 기말고사', date: '2026-06-29', type: 'exam', school: '별내고', color: 'bg-red-500', description: '1학기 기말고사 (6/29~7/1)' },
+  { id: 'sc_bn4', title: '별내고 여름방학식', date: '2026-07-17', type: 'school', school: '별내고', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_bn5', title: '별내고 2학기 개학', date: '2026-08-17', type: 'school', school: '별내고', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_bn6', title: '별내고 2학기 중간고사', date: '2026-10-05', type: 'exam', school: '별내고', color: 'bg-red-500', description: '2학기 중간고사 (10/5~10/8)' },
+  { id: 'sc_bn7', title: '별내고 2학기 기말고사', date: '2026-12-02', type: 'exam', school: '별내고', color: 'bg-red-500', description: '2학기 기말고사 (12/2~12/4)' },
+  { id: 'sc_bn8', title: '별내고 겨울방학/졸업식', date: '2026-12-30', type: 'school', school: '별내고', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
 ];
 
 // legacy compat — for Home.tsx that reads calendarEvents directly
