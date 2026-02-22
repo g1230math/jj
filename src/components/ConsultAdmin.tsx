@@ -14,6 +14,10 @@ export function ConsultAdmin() {
     const [requests, setRequests] = useState<ConsultRequest[]>([]);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
+    useEffect(() => {
+        getConsultRequests().then(setRequests);
+    }, []);
+
     const pendingCount = requests.filter(r => r.status === 'pending').length;
 
     const updateStatus = async (id: string, status: ConsultRequest['status']) => {
