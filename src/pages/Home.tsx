@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Calendar as CalendarIcon, PlayCircle, Users, Star, Trophy, Clock, Sparkles, GraduationCap, Calculator, ChevronLeft, ChevronRight, Quote, Phone } from 'lucide-react';
-import { notices, calendarEvents } from '../data/mockData';
+import { getNotices, calendarEvents } from '../data/mockData';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
@@ -382,7 +382,7 @@ export function Home() {
                 </Link>
               </div>
               <div className="divide-y divide-slate-100">
-                {notices.map((notice) => (
+                {getNotices().map((notice) => (
                   <div key={notice.id} className="py-4 flex items-center justify-between group cursor-pointer hover:bg-slate-50/50 -mx-3 px-3 rounded-lg transition-colors">
                     <div className="flex items-center gap-3">
                       {notice.isNew && (

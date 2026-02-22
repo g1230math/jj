@@ -298,12 +298,194 @@ export function saveAssignments(assignments: InstructorAssignment[]) {
   localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(assignments));
 }
 
-// --- 기존 데이터 유지 ---
-export const notices = [
-  { id: 'n1', title: '2025학년도 1학기 중간고사 대비 특강 안내', date: '2025-02-20', isNew: true },
-  { id: 'n2', title: '3월 학사일정 및 휴원일 안내', date: '2025-02-18', isNew: false },
-  { id: 'n3', title: '진접 G1230 수학전문학원 방역 수칙 안내', date: '2025-02-10', isNew: false },
+// --- 커뮤니티 콘텐츠 관리 ---
+
+// ── 공지사항 ──
+export interface NoticeItem {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  isNew: boolean;
+  isPinned: boolean;
+}
+
+const NOTICES_KEY = 'g1230_notices';
+const defaultNotices: NoticeItem[] = [
+  { id: 'n1', title: '2025학년도 1학기 중간고사 대비 특강 안내', content: '중간고사 대비 특강이 3월 10일부터 시작됩니다. 자세한 일정은 학원으로 문의해 주세요.', date: '2025-02-20', isNew: true, isPinned: true },
+  { id: 'n2', title: '3월 학사일정 및 휴원일 안내', content: '3월 학사일정을 안내드립니다. 3월 1일(삼일절) 휴원합니다.', date: '2025-02-18', isNew: false, isPinned: false },
+  { id: 'n3', title: '진접 G1230 수학전문학원 방역 수칙 안내', content: '학원 출입 시 손 소독 및 마스크 착용을 권장합니다.', date: '2025-02-10', isNew: false, isPinned: false },
 ];
+
+export function getNotices(): NoticeItem[] {
+  const saved = localStorage.getItem(NOTICES_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultNotices;
+}
+export function saveNotices(items: NoticeItem[]) { localStorage.setItem(NOTICES_KEY, JSON.stringify(items)); }
+
+// 하위 호환 — 구 코드에서 import { notices } 사용
+export const notices = defaultNotices;
+
+// ── 블로그 포스트 ──
+export interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  date: string;
+  readTime: string;
+  tags: string[];
+  image: string;
+}
+
+const BLOG_KEY = 'g1230_blog';
+const defaultBlogPosts: BlogPost[] = [
+  {
+    id: 'blog1', title: '수학 성적을 올리는 5가지 학습 습관',
+    excerpt: '수학 성적 향상을 원한다면 단순히 문제를 많이 푸는 것만으로는 부족합니다.',
+    content: '## 1. 오답노트를 활용하세요\n\n틀린 문제를 그냥 넘기지 말고, 반드시 오답노트에 정리하세요.\n\n## 2. 개념 이해를 우선으로\n\n공식을 외우기 전에 \'왜 이 공식이 나오는지\'를 이해하세요.\n\n## 3. 매일 조금씩 꾸준히\n\n매일 30분~1시간씩 꾸준히 하는 것이 훨씬 효과적입니다.\n\n## 4. 시간을 정해서 풀기\n\n평소에도 타이머를 맞춰놓고 문제를 푸는 연습을 하세요.\n\n## 5. 질문을 두려워하지 마세요\n\n모르는 것이 당연합니다. 수업 중 바로 질문하세요.',
+    author: '김원장', date: '2025-02-20', readTime: '5분', tags: ['학습법', '수학공부', '성적향상'],
+    image: 'https://picsum.photos/seed/blog1/800/400',
+  },
+  {
+    id: 'blog2', title: '학부모가 알아야 할 중학 수학 → 고등 수학 연계 학습 전략',
+    excerpt: '중학교에서 고등학교로 올라가면 수학 난이도가 확 높아집니다.',
+    content: '## 중학 수학과 고등 수학의 차이\n\n중학 수학은 개념 이해와 기본 연산이 중심이지만, 고등 수학은 추상적 사고와 논리적 추론이 핵심입니다.\n\n## 중3 겨울방학 활용법\n\n- **인수분해** 완벽 마스터\n- **함수 개념** 깊이 이해\n- **방정식** 심화 학습\n\n## 부모님의 역할\n\n학습 환경을 만들어 주세요. 규칙적인 시간, 적절한 휴식, 그리고 격려가 중요합니다.',
+    author: '박미적', date: '2025-02-15', readTime: '7분', tags: ['중고연계', '학부모', '선행학습'],
+    image: 'https://picsum.photos/seed/blog2/800/400',
+  },
+  {
+    id: 'blog3', title: '수학 자신감을 키우는 방법: 수포자에서 수학 우등생으로',
+    excerpt: '"나는 수학을 못해"라고 생각하는 학생들이 많습니다. 하지만 올바른 방법으로 접근하면 누구나 수학을 잘할 수 있습니다.',
+    content: '## 수포자가 되는 이유\n\n특정 단원에서 개념이 끊기면서 시작됩니다.\n\n## 해결 방법\n\n### 1단계: 끊어진 고리 찾기\n진단테스트를 통해 정확한 취약점을 파악합니다.\n\n### 2단계: 기초부터 탄탄히\n한 학년 뒤로 돌아가더라도 기초를 다지는 것이 중요합니다.\n\n### 3단계: 성장 경험\n작은 성공을 쌓아가면 자신감이 생깁니다.',
+    author: '이함수', date: '2025-02-10', readTime: '6분', tags: ['수포자', '자신감', '성적향상'],
+    image: 'https://picsum.photos/seed/blog3/800/400',
+  },
+];
+
+export function getBlogPosts(): BlogPost[] {
+  const saved = localStorage.getItem(BLOG_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultBlogPosts;
+}
+export function saveBlogPosts(items: BlogPost[]) { localStorage.setItem(BLOG_KEY, JSON.stringify(items)); }
+
+// ── 갤러리 ──
+export interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  date: string;
+}
+
+const GALLERY_KEY = 'g1230_gallery';
+const defaultGallery: GalleryItem[] = [
+  { id: 'gal1', title: '학원 내부 시설', description: '쾌적한 학습 환경', imageUrl: 'https://picsum.photos/seed/gal1/600/400', date: '2025-02-20' },
+  { id: 'gal2', title: '자습실', description: '집중력을 높이는 자습 공간', imageUrl: 'https://picsum.photos/seed/gal2/600/400', date: '2025-02-18' },
+  { id: 'gal3', title: '수업 풍경', description: '소수정예 수업 진행 모습', imageUrl: 'https://picsum.photos/seed/gal3/600/400', date: '2025-02-15' },
+  { id: 'gal4', title: '학원 로비', description: '깔끔하고 밝은 로비', imageUrl: 'https://picsum.photos/seed/gal4/600/400', date: '2025-02-12' },
+  { id: 'gal5', title: '수학 올림피아드 수상', description: '학생 수상 기념 사진', imageUrl: 'https://picsum.photos/seed/gal5/600/400', date: '2025-02-10' },
+  { id: 'gal6', title: '학부모 간담회', description: '학부모 간담회 진행 모습', imageUrl: 'https://picsum.photos/seed/gal6/600/400', date: '2025-02-08' },
+];
+
+export function getGallery(): GalleryItem[] {
+  const saved = localStorage.getItem(GALLERY_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultGallery;
+}
+export function saveGallery(items: GalleryItem[]) { localStorage.setItem(GALLERY_KEY, JSON.stringify(items)); }
+
+// ── 자료실 ──
+export interface ResourceItem {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  downloads: number;
+  type: string;
+  size: string;
+  fileUrl: string;
+}
+
+const RESOURCES_KEY = 'g1230_resources';
+const defaultResources: ResourceItem[] = [
+  { id: 'res1', title: '[중3] 이차방정식 핵심 정리 노트', category: '학습자료', date: '2025-02-18', downloads: 156, type: 'PDF', size: '2.4MB', fileUrl: '' },
+  { id: 'res2', title: '[중2] 일차함수 그래프 연습문제 50선', category: '학습자료', date: '2025-02-15', downloads: 203, type: 'PDF', size: '3.1MB', fileUrl: '' },
+  { id: 'res3', title: '[고1] 다항식과 인수분해 개념 총정리', category: '학습자료', date: '2025-02-12', downloads: 189, type: 'PDF', size: '4.7MB', fileUrl: '' },
+  { id: 'res4', title: '[중3] 2025 1학기 중간고사 대비 모의고사', category: '시험 대비', date: '2025-02-20', downloads: 312, type: 'PDF', size: '5.6MB', fileUrl: '' },
+  { id: 'res5', title: '[중2] 2025 1학기 중간고사 대비 모의고사', category: '시험 대비', date: '2025-02-19', downloads: 287, type: 'PDF', size: '5.2MB', fileUrl: '' },
+  { id: 'res6', title: '2025학년도 교육 과정 안내서', category: '학부모 자료', date: '2025-02-01', downloads: 89, type: 'PDF', size: '3.5MB', fileUrl: '' },
+  { id: 'res7', title: '중등 수학 학습 로드맵 가이드', category: '학부모 자료', date: '2025-01-20', downloads: 156, type: 'PDF', size: '2.8MB', fileUrl: '' },
+];
+
+export function getResources(): ResourceItem[] {
+  const saved = localStorage.getItem(RESOURCES_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultResources;
+}
+export function saveResources(items: ResourceItem[]) { localStorage.setItem(RESOURCES_KEY, JSON.stringify(items)); }
+
+// ── FAQ ──
+export interface FaqItem {
+  id: string;
+  category: string;
+  question: string;
+  answer: string;
+  order: number;
+}
+
+const FAQ_KEY = 'g1230_faq';
+const defaultFaqs: FaqItem[] = [
+  { id: 'faq1', category: '입학 상담', question: '입학 상담은 어떻게 받을 수 있나요?', answer: '전화(031-123-4567)로 상담 예약 후 방문해 주시면 됩니다. 진단 테스트(약 40분) 후 맞춤 반 배정과 학습 계획을 안내드립니다.', order: 1 },
+  { id: 'faq2', category: '입학 상담', question: '중간에 반 변경이 가능한가요?', answer: '네, 가능합니다. 매월 정기 테스트 결과와 학습 진도를 종합적으로 판단하여 적절한 반으로 이동할 수 있습니다.', order: 2 },
+  { id: 'faq3', category: '입학 상담', question: '무료 체험 수업이 가능한가요?', answer: '네, 첫 방문 시 1회 무료 체험 수업을 제공합니다. 전화 또는 홈페이지를 통해 사전 예약해 주세요.', order: 3 },
+  { id: 'faq4', category: '수업 및 커리큘럼', question: '수업 시간과 요일은 어떻게 되나요?', answer: '학년과 반에 따라 다양한 시간대가 있습니다. 중등부는 주 3회, 고등부는 주 4~5회 수업을 기본으로 합니다.', order: 4 },
+  { id: 'faq5', category: '수업 및 커리큘럼', question: '온라인 수업도 병행하나요?', answer: '네, 동영상 강의실을 통해 수업 복습용 영상과 보충 강의를 제공합니다.', order: 5 },
+  { id: 'faq6', category: '수강료 및 결제', question: '수강료는 얼마인가요?', answer: '학년과 수강 시간에 따라 상이합니다. 중등 기본반은 월 25만원~35만원, 고등반은 월 30만원~45만원 수준입니다.', order: 6 },
+  { id: 'faq7', category: '차량 및 편의', question: '학원 차량 운행을 이용하려면 어떻게 하나요?', answer: '학원 등록 시 차량 이용 신청을 하시면 됩니다. 현재 3개 노선을 운행 중이며, 차량운행 페이지에서 확인하실 수 있습니다.', order: 7 },
+  { id: 'faq8', category: '차량 및 편의', question: '자습실 이용이 가능한가요?', answer: '네, 재원생은 평일 14:00~22:00까지 자습실을 무료로 이용할 수 있습니다.', order: 8 },
+];
+
+export function getFaqs(): FaqItem[] {
+  const saved = localStorage.getItem(FAQ_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultFaqs;
+}
+export function saveFaqs(items: FaqItem[]) { localStorage.setItem(FAQ_KEY, JSON.stringify(items)); }
+
+// ── 문의게시판 ──
+export interface InquiryItem {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  isPrivate: boolean;
+  category: string;
+  content: string;
+  answer?: string;
+  answerDate?: string;
+  views: number;
+}
+
+const INQUIRIES_KEY = 'g1230_inquiries';
+const defaultInquiries: InquiryItem[] = [
+  { id: 'inq1', title: '여름 특강 일정이 궁금합니다', author: '김학부모', date: '2025-02-20', isPrivate: false, category: '수업 문의', views: 45, content: '안녕하세요. 중2 아이 학부모입니다. 여름방학 특강 일정과 커리큘럼이 궁금합니다.', answer: '여름 특강은 7월 21일~8월 16일(4주) 과정으로 운영됩니다. 6월 초에 공지사항으로 안내드리겠습니다.', answerDate: '2025-02-20' },
+  { id: 'inq2', title: '수학 진단 테스트 결과 문의', author: '이○○맘', date: '2025-02-18', isPrivate: true, category: '상담 문의', views: 12, content: '진단 테스트 결과가 언제 나오나요?', answer: '결과는 보통 2~3일 내에 나옵니다. 개별 연락 드리겠습니다.', answerDate: '2025-02-19' },
+  { id: 'inq3', title: '주차장 이용 관련 문의드립니다', author: '박학부모', date: '2025-02-17', isPrivate: false, category: '시설 문의', views: 38, content: '상담 방문 시 주차가 가능한가요?', answer: '건물 지하 주차장에 학부모님 전용 주차 공간이 있습니다. 30분 무료 주차 가능합니다.', answerDate: '2025-02-17' },
+  { id: 'inq4', title: '셔틀버스 노선 변경 요청', author: '윤학부모', date: '2025-02-10', isPrivate: false, category: '차량 문의', views: 52, content: '현재 3호차를 이용 중인데 이사를 하게 되어 노선 변경이 가능한지 문의드립니다.' },
+  { id: 'inq5', title: '형제 할인이 있나요?', author: '송○○', date: '2025-02-03', isPrivate: true, category: '수강 문의', views: 15, content: '두 아이를 함께 보내려고 하는데 형제 할인 혜택이 있나요?' },
+];
+
+export function getInquiries(): InquiryItem[] {
+  const saved = localStorage.getItem(INQUIRIES_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultInquiries;
+}
+export function saveInquiries(items: InquiryItem[]) { localStorage.setItem(INQUIRIES_KEY, JSON.stringify(items)); }
+
 
 export const calendarEvents = [
   // 2026 한국 공휴일
