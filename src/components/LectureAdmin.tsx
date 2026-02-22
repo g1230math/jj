@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getLectures, saveLectures, getAssignments, type Lecture } from '../data/mockData';
 import { Plus, Trash2, Edit2, Eye, EyeOff, ChevronUp, ChevronDown, Save, X, Video } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -6,11 +6,16 @@ import { useAuth } from '../context/AuthContext';
 
 export function LectureAdmin() {
     const { user } = useAuth();
-    const [lectures, setLectures] = useState<Lecture[]>(getLectures());
+    const [lectures, setLectures] = useState<Lecture[]>([]);
+    const [assignments, setAssignmentsState] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [gradeTab, setGradeTab] = useState<'초등' | '중등' | '고등'>('고등');
-    const assignments = getAssignments();
+
+    useEffect(() => {
+        getLectures().then(setLectures);
+        getAssignments().then(setAssignmentsState);
+    }, []);
 
     // Determine allowed grades for current user
     const isAdmin = user?.role === 'admin';
@@ -47,7 +52,7 @@ export function LectureAdmin() {
         return isAdmin || allowedGrades.includes(grade);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         let updated: Lecture[];
         if (editingId) {
             updated = lectures.map(l =>
@@ -65,7 +70,7 @@ export function LectureAdmin() {
             };
             updated = [...lectures, newLecture];
         }
-        saveLectures(updated);
+        await saveLectures(updated);
         setLectures(updated);
         setShowForm(false);
         setEditingId(null);
@@ -93,22 +98,22 @@ export function LectureAdmin() {
         setShowForm(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('이 강의를 삭제하시겠습니까?')) return;
         const updated = lectures.filter(l => l.id !== id);
-        saveLectures(updated);
+        await saveLectures(updated);
         setLectures(updated);
     };
 
-    const handleTogglePublish = (id: string) => {
+    const handleTogglePublish = async (id: string) => {
         const updated = lectures.map(l =>
             l.id === id ? { ...l, isPublished: !l.isPublished } : l
         );
-        saveLectures(updated);
+        await saveLectures(updated);
         setLectures(updated);
     };
 
-    const handleMoveOrder = (id: string, direction: 'up' | 'down') => {
+    const handleMoveOrder = async (id: string, direction: 'up' | 'down') => {
         const gradeLectures = lectures
             .filter(l => l.grade === gradeTab)
             .sort((a, b) => a.order - b.order);
@@ -122,7 +127,7 @@ export function LectureAdmin() {
             const found = gradeLectures.find(gl => gl.id === l.id);
             return found ? { ...l, order: found.order } : l;
         });
-        saveLectures(updated);
+        await saveLectures(updated);
         setLectures(updated);
     };
 

@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Users, CreditCard } from 'lucide-react';
 import { ShuttleAdmin } from '../components/ShuttleAdmin';
 import { PopupAdmin } from '../components/PopupAdmin';
 import { LectureAdmin } from '../components/LectureAdmin';
 import { ConsultAdmin } from '../components/ConsultAdmin';
-import { studentGrades, getLectures, getAllProgress, getConsultRequests } from '../data/mockData';
+import { studentGrades, getLectures, getAllProgress, getConsultRequests, Lecture, LectureProgress, ConsultRequest } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function Dashboard() {
   const { user } = useAuth();
+
+  const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [progress, setProgress] = useState<Record<string, LectureProgress>>({});
+  const [pendingConsults, setPendingConsults] = useState(0);
+
+  useEffect(() => {
+    getLectures().then(setLectures);
+    getAllProgress().then(setProgress);
+    getConsultRequests().then(list => setPendingConsults(list.filter(r => r.status === 'pending').length));
+  }, []);
 
   if (!user) return null;
 
@@ -78,9 +88,9 @@ export function Dashboard() {
             최근 수강 강의
           </h3>
           <div className="space-y-4">
-            {getLectures().filter(l => l.isPublished).slice(0, 3).map(lecture => {
-              const progress = getAllProgress()[lecture.id];
-              const isCompleted = progress?.status === 'completed';
+            {lectures.filter(l => l.isPublished).slice(0, 3).map(lecture => {
+              const prog = progress[lecture.id];
+              const isCompleted = prog?.status === 'completed';
               return (
                 <div key={lecture.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
                   <img src={lecture.thumbnail} alt={lecture.title} className="w-24 h-16 object-cover rounded-lg" referrerPolicy="no-referrer" />
@@ -117,7 +127,7 @@ export function Dashboard() {
     </div>
   );
 
-  const pendingConsults = getConsultRequests().filter(r => r.status === 'pending').length;
+
 
   const renderAdminDashboard = () => (
     <div className="space-y-6">

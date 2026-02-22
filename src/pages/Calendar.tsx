@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, startOfWeek, endOfWeek, getDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, CalendarDays, BookOpen, GraduationCap, Flag, Sparkles, Plus, Edit2, Trash2, Save, X, School, Filter } from 'lucide-react';
@@ -36,9 +36,11 @@ export function Calendar() {
   const [schoolFilter, setSchoolFilter] = useState<string>('전체');
 
   // ── Event state (localStorage-backed) ──
-  const [events, setEvents] = useState<CalendarEvent[]>(getCalendarEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [eventModal, setEventModal] = useState<'add' | 'edit' | null>(null);
   const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null);
+
+  useEffect(() => { getCalendarEvents().then(setEvents); }, []);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -127,7 +129,7 @@ export function Calendar() {
   const openEditEvent = (ev: CalendarEvent) => { setEditEvent({ ...ev }); setEventModal('edit'); };
   const closeEventModal = () => { setEventModal(null); setEditEvent(null); };
 
-  const handleSaveEvent = () => {
+  const handleSaveEvent = async () => {
     if (!editEvent || !editEvent.title.trim() || !editEvent.date) return;
     const withColor = { ...editEvent, color: typeColorMap[editEvent.type] || 'bg-green-500' };
     let updated: CalendarEvent[];
@@ -137,15 +139,15 @@ export function Calendar() {
       updated = events.map(e => e.id === withColor.id ? withColor : e);
     }
     setEvents(updated);
-    saveCalendarEvents(updated);
+    await saveCalendarEvents(updated);
     closeEventModal();
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const handleDeleteEvent = async (id: string) => {
     if (!confirm('이 일정을 삭제하시겠습니까?')) return;
     const updated = events.filter(e => e.id !== id);
     setEvents(updated);
-    saveCalendarEvents(updated);
+    await saveCalendarEvents(updated);
   };
 
   return (

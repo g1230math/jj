@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getInstructorProfiles, getHomeStats, saveHomeStats, getHomeTestimonials, saveHomeTestimonials, getProgramFeatures, saveProgramFeatures, addConsultRequest, type HomeStat, type HomeTestimonial, type HomeProgramFeature } from '../data/mockData';
+import { getInstructorProfiles, getHomeStats, saveHomeStats, getHomeTestimonials, saveHomeTestimonials, getProgramFeatures, saveProgramFeatures, addConsultRequest, type HomeStat, type HomeTestimonial, type HomeProgramFeature, type NoticeItem } from '../data/mockData';
 import { ArrowRight, BookOpen, Calendar as CalendarIcon, PlayCircle, Users, Star, Trophy, Clock, Sparkles, GraduationCap, Calculator, ChevronLeft, ChevronRight, Quote, Phone, Plus, Edit2, Trash2, Save, X, CheckCircle, Send } from 'lucide-react';
 import { getNotices, calendarEvents } from '../data/mockData';
 import emailjs from '@emailjs/browser';
@@ -54,10 +54,19 @@ export function Home() {
   const currentShell = programShells[activeProgram];
 
   // Dynamic data
-  const [stats, setStats] = useState<HomeStat[]>(getHomeStats);
-  const [testimonials, setTestimonials] = useState<HomeTestimonial[]>(() => getHomeTestimonials().sort((a, b) => a.order - b.order));
-  const [programFeatures, setProgramFeatures] = useState<HomeProgramFeature[]>(getProgramFeatures);
-  const instructorProfiles = getInstructorProfiles();
+  const [stats, setStats] = useState<HomeStat[]>([]);
+  const [testimonials, setTestimonials] = useState<HomeTestimonial[]>([]);
+  const [programFeatures, setProgramFeatures] = useState<HomeProgramFeature[]>([]);
+  const [instructorProfiles, setInstructorProfiles] = useState<any[]>([]);
+  const [notices, setNotices] = useState<NoticeItem[]>([]);
+
+  useEffect(() => {
+    getHomeStats().then(setStats);
+    getHomeTestimonials().then(t => setTestimonials(t.sort((a, b) => a.order - b.order)));
+    getProgramFeatures().then(setProgramFeatures);
+    getInstructorProfiles().then(setInstructorProfiles);
+    getNotices().then(setNotices);
+  }, []);
 
   const currentFeatures = programFeatures.filter(f => f.departmentId === currentShell.id).sort((a, b) => a.order - b.order);
 
@@ -67,13 +76,13 @@ export function Home() {
   const openAddStat = () => { setEditStat({ id: genId('hs'), label: '', value: 0, suffix: '', desc: '', order: stats.length + 1 }); setStatModal('add'); };
   const openEditStat = (s: HomeStat) => { setEditStat({ ...s }); setStatModal('edit'); };
   const closeStat = () => { setStatModal(null); setEditStat(null); };
-  const handleSaveStat = () => {
+  const handleSaveStat = async () => {
     if (!editStat || !editStat.label.trim()) return;
     let updated = statModal === 'add' ? [...stats, editStat] : stats.map(s => s.id === editStat.id ? editStat : s);
     updated.sort((a, b) => a.order - b.order);
-    setStats(updated); saveHomeStats(updated); closeStat();
+    setStats(updated); await saveHomeStats(updated); closeStat();
   };
-  const handleDeleteStat = (id: string) => { if (!confirm('삭제하시겠습니까?')) return; const u = stats.filter(s => s.id !== id); setStats(u); saveHomeStats(u); };
+  const handleDeleteStat = async (id: string) => { if (!confirm('삭제하시겠습니까?')) return; const u = stats.filter(s => s.id !== id); setStats(u); await saveHomeStats(u); };
 
   // ── Testimonial CRUD ──
   const [testModal, setTestModal] = useState<'add' | 'edit' | null>(null);
@@ -81,16 +90,16 @@ export function Home() {
   const openAddTest = () => { setEditTest({ id: genId('ht'), name: '', grade: '', content: '', before: 0, after: 0, order: testimonials.length + 1 }); setTestModal('add'); };
   const openEditTest = (t: HomeTestimonial) => { setEditTest({ ...t }); setTestModal('edit'); };
   const closeTest = () => { setTestModal(null); setEditTest(null); };
-  const handleSaveTest = () => {
+  const handleSaveTest = async () => {
     if (!editTest || !editTest.content.trim()) return;
     let updated = testModal === 'add' ? [...testimonials, editTest] : testimonials.map(t => t.id === editTest.id ? editTest : t);
     updated.sort((a, b) => a.order - b.order);
-    setTestimonials(updated); saveHomeTestimonials(updated); closeTest();
+    setTestimonials(updated); await saveHomeTestimonials(updated); closeTest();
     if (testimonialIdx >= updated.length) setTestimonialIdx(0);
   };
-  const handleDeleteTest = (id: string) => {
+  const handleDeleteTest = async (id: string) => {
     if (!confirm('삭제하시겠습니까?')) return;
-    const u = testimonials.filter(t => t.id !== id); setTestimonials(u); saveHomeTestimonials(u);
+    const u = testimonials.filter(t => t.id !== id); setTestimonials(u); await saveHomeTestimonials(u);
     if (testimonialIdx >= u.length) setTestimonialIdx(Math.max(0, u.length - 1));
   };
 
@@ -100,12 +109,12 @@ export function Home() {
   const openAddFeat = () => { setEditFeat({ id: genId('pf'), departmentId: currentShell.id, title: '', desc: '', order: currentFeatures.length + 1 }); setFeatModal('add'); };
   const openEditFeat = (f: HomeProgramFeature) => { setEditFeat({ ...f }); setFeatModal('edit'); };
   const closeFeat = () => { setFeatModal(null); setEditFeat(null); };
-  const handleSaveFeat = () => {
+  const handleSaveFeat = async () => {
     if (!editFeat || !editFeat.title.trim()) return;
     let updated = featModal === 'add' ? [...programFeatures, editFeat] : programFeatures.map(f => f.id === editFeat.id ? editFeat : f);
-    setProgramFeatures(updated); saveProgramFeatures(updated); closeFeat();
+    setProgramFeatures(updated); await saveProgramFeatures(updated); closeFeat();
   };
-  const handleDeleteFeat = (id: string) => { if (!confirm('삭제하시겠습니까?')) return; const u = programFeatures.filter(f => f.id !== id); setProgramFeatures(u); saveProgramFeatures(u); };
+  const handleDeleteFeat = async (id: string) => { if (!confirm('삭제하시겠습니까?')) return; const u = programFeatures.filter(f => f.id !== id); setProgramFeatures(u); await saveProgramFeatures(u); };
 
   // ── Consult Request ──
   const [consultOpen, setConsultOpen] = useState(false);
@@ -116,7 +125,7 @@ export function Home() {
   const handleConsultSubmit = async () => {
     if (!consultForm.studentSchool || !consultForm.studentGrade || !consultForm.phone || !consultForm.preferredDate || !consultForm.preferredTime) return;
     setConsultSending(true);
-    addConsultRequest(consultForm);
+    await addConsultRequest(consultForm);
     // EmailJS
     try {
       const svcId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -444,7 +453,7 @@ export function Home() {
                   </Link>
                 </div>
                 <div className="divide-y divide-slate-100">
-                  {getNotices().map((notice) => (
+                  {notices.map((notice) => (
                     <div key={notice.id} className="py-4 flex items-center justify-between group cursor-pointer hover:bg-slate-50/50 -mx-3 px-3 rounded-lg transition-colors">
                       <div className="flex items-center gap-3">
                         {notice.isNew && (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getConsultRequests, saveConsultRequests, type ConsultRequest } from '../data/mockData';
 import { Phone, Calendar, Clock, CheckCircle, Trash2, User, School, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -11,22 +11,22 @@ const statusMap = {
 };
 
 export function ConsultAdmin() {
-    const [requests, setRequests] = useState<ConsultRequest[]>(getConsultRequests());
+    const [requests, setRequests] = useState<ConsultRequest[]>([]);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const pendingCount = requests.filter(r => r.status === 'pending').length;
 
-    const updateStatus = (id: string, status: ConsultRequest['status']) => {
+    const updateStatus = async (id: string, status: ConsultRequest['status']) => {
         const updated = requests.map(r => r.id === id ? { ...r, status } : r);
         setRequests(updated);
-        saveConsultRequests(updated);
+        await saveConsultRequests(updated);
     };
 
-    const deleteRequest = (id: string) => {
+    const deleteRequest = async (id: string) => {
         if (!confirm('이 상담 요청을 삭제하시겠습니까?')) return;
         const updated = requests.filter(r => r.id !== id);
         setRequests(updated);
-        saveConsultRequests(updated);
+        await saveConsultRequests(updated);
     };
 
     const formatDate = (iso: string) => {

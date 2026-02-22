@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getPopups, savePopups, getPopupSettings, savePopupSettings, type PopupItem, type PopupSettings } from '../data/mockData';
 import { Plus, Trash2, Edit2, Save, X, Image, Eye, EyeOff, ChevronUp, ChevronDown, Monitor, Smartphone } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ImageUploader } from './ImageUploader';
 
 export function PopupAdmin() {
-    const [popups, setPopups] = useState<PopupItem[]>(getPopups());
-    const [settings, setSettings] = useState<PopupSettings>(getPopupSettings());
+    const [popups, setPopups] = useState<PopupItem[]>([]);
+    const [settings, setSettings] = useState<PopupSettings>({ enabled: true, showOnce: false, delaySeconds: 1 });
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        getPopups().then(setPopups);
+        getPopupSettings().then(setSettings);
+    }, []);
 
     const emptyForm: Omit<PopupItem, 'id' | 'order'> = {
         imageUrl: '',
@@ -33,13 +38,13 @@ export function PopupAdmin() {
 
     const [form, setForm] = useState(emptyForm);
 
-    const handleToggleEnabled = () => {
+    const handleToggleEnabled = async () => {
         const updated = { ...settings, enabled: !settings.enabled };
         setSettings(updated);
-        savePopupSettings(updated);
+        await savePopupSettings(updated);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         let updated: PopupItem[];
         if (editingId) {
             updated = popups.map(p =>
@@ -53,7 +58,7 @@ export function PopupAdmin() {
             };
             updated = [...popups, newPopup];
         }
-        savePopups(updated);
+        await savePopups(updated);
         setPopups(updated);
         setShowForm(false);
         setEditingId(null);
@@ -67,22 +72,22 @@ export function PopupAdmin() {
         setShowForm(true);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('이 팝업을 삭제하시겠습니까?')) return;
         const updated = popups.filter(p => p.id !== id);
-        savePopups(updated);
+        await savePopups(updated);
         setPopups(updated);
     };
 
-    const handleToggleActive = (id: string) => {
+    const handleToggleActive = async (id: string) => {
         const updated = popups.map(p =>
             p.id === id ? { ...p, isActive: !p.isActive } : p
         );
-        savePopups(updated);
+        await savePopups(updated);
         setPopups(updated);
     };
 
-    const handleMoveOrder = (id: string, direction: 'up' | 'down') => {
+    const handleMoveOrder = async (id: string, direction: 'up' | 'down') => {
         const sorted = [...popups].sort((a, b) => a.order - b.order);
         const idx = sorted.findIndex(p => p.id === id);
         if ((direction === 'up' && idx === 0) || (direction === 'down' && idx === sorted.length - 1)) return;
@@ -94,7 +99,7 @@ export function PopupAdmin() {
             const found = sorted.find(s => s.id === p.id);
             return found ? { ...p, order: found.order } : p;
         });
-        savePopups(updated);
+        await savePopups(updated);
         setPopups(updated);
     };
 

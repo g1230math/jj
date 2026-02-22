@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getLectures, getProgress, saveProgress, getAllProgress, type Lecture, type LectureProgress } from '../data/mockData';
 import { Play, CheckCircle, Clock, Search, Filter, BookOpen, ChevronDown, ChevronUp, Star, StarOff, ArrowRight, BarChart3, Lock, LogIn } from 'lucide-react';
@@ -12,13 +12,18 @@ type SortOption = 'latest' | 'unwatched' | 'bookmarked';
 export function Lectures() {
   const { user } = useAuth();
   const isLoggedIn = !!user;
-  const allLectures = getLectures().filter(l => l.isPublished);
+  const [allLectures, setAllLectures] = useState<Lecture[]>([]);
   const [activeVideo, setActiveVideo] = useState<Lecture | null>(null);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [expandedInfo, setExpandedInfo] = useState(false);
-  const [progressMap, setProgressMap] = useState<Record<string, LectureProgress>>(getAllProgress());
+  const [progressMap, setProgressMap] = useState<Record<string, LectureProgress>>({});
+
+  useEffect(() => {
+    getLectures().then(l => setAllLectures(l.filter(x => x.isPublished)));
+    getAllProgress().then(setProgressMap);
+  }, []);
 
   // Filter and sort lectures
   const filteredLectures = useMemo(() => {
@@ -74,27 +79,27 @@ export function Lectures() {
     return allLectures.find(l => l.id === entries[0].lectureId);
   }, [progressMap, allLectures]);
 
-  const handleSelectLecture = (lecture: Lecture) => {
+  const handleSelectLecture = async (lecture: Lecture) => {
     setActiveVideo(lecture);
     setExpandedInfo(false);
-    saveProgress(lecture.id, {
+    await saveProgress(lecture.id, {
       status: progressMap[lecture.id]?.status === 'completed' ? 'completed' : 'in_progress',
       lastWatched: new Date().toISOString(),
       progress: progressMap[lecture.id]?.progress || 10,
     });
-    setProgressMap(getAllProgress());
+    setProgressMap(await getAllProgress());
   };
 
-  const handleMarkComplete = (lectureId: string) => {
-    saveProgress(lectureId, { status: 'completed', progress: 100 });
-    setProgressMap(getAllProgress());
+  const handleMarkComplete = async (lectureId: string) => {
+    await saveProgress(lectureId, { status: 'completed', progress: 100 });
+    setProgressMap(await getAllProgress());
   };
 
-  const handleToggleBookmark = (lectureId: string, e: React.MouseEvent) => {
+  const handleToggleBookmark = async (lectureId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const current = progressMap[lectureId]?.bookmarked || false;
-    saveProgress(lectureId, { bookmarked: !current });
-    setProgressMap(getAllProgress());
+    await saveProgress(lectureId, { bookmarked: !current });
+    setProgressMap(await getAllProgress());
   };
 
   const getStatusBadge = (lectureId: string) => {

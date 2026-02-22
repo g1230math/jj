@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Bus, Clock, MapPin, Navigation, ChevronDown, ChevronUp, Phone } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
 export interface ShuttleStop {
     name: string;
@@ -22,7 +23,6 @@ export interface ShuttleRoute {
     returnStops: ShuttleStop[];
 }
 
-const STORAGE_KEY = 'jinjeop-math-shuttle-routes';
 
 export const defaultRoutes: ShuttleRoute[] = [
     {
@@ -102,22 +102,28 @@ export const defaultRoutes: ShuttleRoute[] = [
     },
 ];
 
-export function getShuttleRoutes(): ShuttleRoute[] {
+export async function getShuttleRoutes(): Promise<ShuttleRoute[]> {
+    if (!supabase) return defaultRoutes;
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
-    } catch { }
-    return defaultRoutes;
+        const { data, error } = await supabase.from('site_data').select('value').eq('key', 'shuttle_routes').single();
+        if (error || !data) return defaultRoutes;
+        return data.value as ShuttleRoute[];
+    } catch { return defaultRoutes; }
 }
 
-export function saveShuttleRoutes(routes: ShuttleRoute[]) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(routes));
+export async function saveShuttleRoutes(routes: ShuttleRoute[]) {
+    if (!supabase) return;
+    try {
+        await supabase.from('site_data').upsert({ key: 'shuttle_routes', value: routes as any, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    } catch { /* silent */ }
 }
 
 export function Shuttle() {
-    const [routes, setRoutes] = useState<ShuttleRoute[]>(getShuttleRoutes());
+    const [routes, setRoutes] = useState<ShuttleRoute[]>(defaultRoutes);
     const [openBus, setOpenBus] = useState<string>('1');
     const [direction, setDirection] = useState<'depart' | 'return'>('depart');
+
+    useEffect(() => { getShuttleRoutes().then(setRoutes); }, []);
 
     useEffect(() => {
         const handleStorage = () => setRoutes(getShuttleRoutes());

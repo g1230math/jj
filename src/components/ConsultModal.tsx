@@ -22,7 +22,7 @@ export function ConsultModal({ open, onClose }: Props) {
     const handleSubmit = async () => {
         if (!form.studentSchool || !form.studentGrade || !form.phone || !form.preferredDate || !form.preferredTime) return;
         setSending(true);
-        addConsultRequest(form);
+        await addConsultRequest(form);
         try {
             const svcId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
             const tplId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;

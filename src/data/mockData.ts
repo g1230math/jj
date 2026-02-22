@@ -210,20 +210,32 @@ export const defaultLectures: Lecture[] = [
   },
 ];
 
-// --- localStorage 기반 강의 관리 ---
-const LECTURES_KEY = 'g1230_lectures';
+// ═══════ Supabase key-value helpers ═══════
+import { supabase } from '../lib/supabase';
 
-export function getLectures(): Lecture[] {
-  const saved = localStorage.getItem(LECTURES_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* fallback */ }
-  }
-  return defaultLectures;
+async function getData<T>(key: string, defaults: T): Promise<T> {
+  if (!supabase) return defaults;
+  try {
+    const { data, error } = await supabase.from('site_data').select('value').eq('key', key).single();
+    if (error || !data) return defaults;
+    return data.value as T;
+  } catch { return defaults; }
 }
 
-export function saveLectures(lectures: Lecture[]) {
-  localStorage.setItem(LECTURES_KEY, JSON.stringify(lectures));
+async function saveData<T>(key: string, value: T): Promise<void> {
+  if (!supabase) return;
+  try {
+    await supabase.from('site_data').upsert({ key, value: value as any, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  } catch { /* silent */ }
 }
+
+// --- 강의 관리 ---
+
+export async function getLectures(): Promise<Lecture[]> {
+  return getData('lectures', defaultLectures);
+}
+
+export async function saveLectures(items: Lecture[]) { await saveData('lectures', items); }
 
 // --- 수강 진도 관리 ---
 export interface LectureProgress {
@@ -235,18 +247,14 @@ export interface LectureProgress {
   notes: Array<{ content: string; createdAt: string }>;
 }
 
-const PROGRESS_KEY = 'g1230_lecture_progress';
 
-export function getAllProgress(): Record<string, LectureProgress> {
-  const saved = localStorage.getItem(PROGRESS_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* fallback */ }
-  }
-  return {};
+
+export async function getAllProgress(): Promise<Record<string, LectureProgress>> {
+  return getData('lecture_progress', {} as Record<string, LectureProgress>);
 }
 
-export function getProgress(lectureId: string): LectureProgress {
-  const all = getAllProgress();
+export async function getProgress(lectureId: string): Promise<LectureProgress> {
+  const all = await getAllProgress();
   return all[lectureId] || {
     lectureId,
     status: 'not_started',
@@ -257,8 +265,8 @@ export function getProgress(lectureId: string): LectureProgress {
   };
 }
 
-export function saveProgress(lectureId: string, update: Partial<LectureProgress>) {
-  const all = getAllProgress();
+export async function saveProgress(lectureId: string, update: Partial<LectureProgress>) {
+  const all = await getAllProgress();
   const current = all[lectureId] || {
     lectureId,
     status: 'not_started' as const,
@@ -268,7 +276,7 @@ export function saveProgress(lectureId: string, update: Partial<LectureProgress>
     notes: [],
   };
   all[lectureId] = { ...current, ...update };
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
+  await saveData('lecture_progress', all);
 }
 
 // --- 강사 담당 학년 ---
@@ -286,17 +294,11 @@ const defaultAssignments: InstructorAssignment[] = [
   { name: '최연산', grades: ['초등'] },
 ];
 
-export function getAssignments(): InstructorAssignment[] {
-  const saved = localStorage.getItem(ASSIGNMENTS_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* fallback */ }
-  }
-  return defaultAssignments;
+export async function getAssignments(): Promise<InstructorAssignment[]> {
+  return getData('instructor_assignments', defaultAssignments);
 }
 
-export function saveAssignments(assignments: InstructorAssignment[]) {
-  localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(assignments));
-}
+export async function saveAssignments(items: InstructorAssignment[]) { await saveData('instructor_assignments', items); }
 
 // --- 커뮤니티 콘텐츠 관리 ---
 
@@ -317,12 +319,10 @@ const defaultNotices: NoticeItem[] = [
   { id: 'n3', title: '진접 G1230 수학전문학원 방역 수칙 안내', content: '학원 출입 시 손 소독 및 마스크 착용을 권장합니다.', date: '2025-02-10', isNew: false, isPinned: false },
 ];
 
-export function getNotices(): NoticeItem[] {
-  const saved = localStorage.getItem(NOTICES_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultNotices;
+export async function getNotices(): Promise<NoticeItem[]> {
+  return getData('notices', defaultNotices);
 }
-export function saveNotices(items: NoticeItem[]) { localStorage.setItem(NOTICES_KEY, JSON.stringify(items)); }
+export async function saveNotices(items: NoticeItem[]) { await saveData('notices', items); }
 
 // 하위 호환 — 구 코드에서 import { notices } 사용
 export const notices = defaultNotices;
@@ -365,12 +365,10 @@ const defaultBlogPosts: BlogPost[] = [
   },
 ];
 
-export function getBlogPosts(): BlogPost[] {
-  const saved = localStorage.getItem(BLOG_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultBlogPosts;
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  return getData('blog', defaultBlogPosts);
 }
-export function saveBlogPosts(items: BlogPost[]) { localStorage.setItem(BLOG_KEY, JSON.stringify(items)); }
+export async function saveBlogPosts(items: BlogPost[]) { await saveData('blog', items); }
 
 // ── 갤러리 ──
 export interface GalleryItem {
@@ -391,12 +389,10 @@ const defaultGallery: GalleryItem[] = [
   { id: 'gal6', title: '학부모 간담회', description: '학부모 간담회 진행 모습', imageUrl: 'https://picsum.photos/seed/gal6/600/400', date: '2025-02-08' },
 ];
 
-export function getGallery(): GalleryItem[] {
-  const saved = localStorage.getItem(GALLERY_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultGallery;
+export async function getGallery(): Promise<GalleryItem[]> {
+  return getData('gallery', defaultGallery);
 }
-export function saveGallery(items: GalleryItem[]) { localStorage.setItem(GALLERY_KEY, JSON.stringify(items)); }
+export async function saveGallery(items: GalleryItem[]) { await saveData('gallery', items); }
 
 // ── 자료실 ──
 export interface ResourceItem {
@@ -421,12 +417,10 @@ const defaultResources: ResourceItem[] = [
   { id: 'res7', title: '중등 수학 학습 로드맵 가이드', category: '학부모 자료', date: '2025-01-20', downloads: 156, type: 'PDF', size: '2.8MB', fileUrl: '' },
 ];
 
-export function getResources(): ResourceItem[] {
-  const saved = localStorage.getItem(RESOURCES_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultResources;
+export async function getResources(): Promise<ResourceItem[]> {
+  return getData('resources', defaultResources);
 }
-export function saveResources(items: ResourceItem[]) { localStorage.setItem(RESOURCES_KEY, JSON.stringify(items)); }
+export async function saveResources(items: ResourceItem[]) { await saveData('resources', items); }
 
 // ── FAQ ──
 export interface FaqItem {
@@ -449,12 +443,10 @@ const defaultFaqs: FaqItem[] = [
   { id: 'faq8', category: '차량 및 편의', question: '자습실 이용이 가능한가요?', answer: '네, 재원생은 평일 14:00~22:00까지 자습실을 무료로 이용할 수 있습니다.', order: 8 },
 ];
 
-export function getFaqs(): FaqItem[] {
-  const saved = localStorage.getItem(FAQ_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultFaqs;
+export async function getFaqs(): Promise<FaqItem[]> {
+  return getData('faq', defaultFaqs);
 }
-export function saveFaqs(items: FaqItem[]) { localStorage.setItem(FAQ_KEY, JSON.stringify(items)); }
+export async function saveFaqs(items: FaqItem[]) { await saveData('faq', items); }
 
 // ── 문의게시판 ──
 export interface InquiryItem {
@@ -479,12 +471,10 @@ const defaultInquiries: InquiryItem[] = [
   { id: 'inq5', title: '형제 할인이 있나요?', author: '송○○', date: '2025-02-03', isPrivate: true, category: '수강 문의', views: 15, content: '두 아이를 함께 보내려고 하는데 형제 할인 혜택이 있나요?' },
 ];
 
-export function getInquiries(): InquiryItem[] {
-  const saved = localStorage.getItem(INQUIRIES_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultInquiries;
+export async function getInquiries(): Promise<InquiryItem[]> {
+  return getData('inquiries', defaultInquiries);
 }
-export function saveInquiries(items: InquiryItem[]) { localStorage.setItem(INQUIRIES_KEY, JSON.stringify(items)); }
+export async function saveInquiries(items: InquiryItem[]) { await saveData('inquiries', items); }
 
 // --- 학원 히스토리 관리 ---
 export interface HistoryItem {
@@ -511,14 +501,10 @@ const defaultHistoryItems: HistoryItem[] = [
   { id: 'hi12', year: '2025', title: '15주년, 새로운 도약', desc: '누적 합격자 320명 돌파. AI 기반 학습 분석 시스템 도입 예정.', icon: '🚀', order: 12 },
 ];
 
-export function getHistoryItems(): HistoryItem[] {
-  const raw = localStorage.getItem('g1230_historyItems');
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return defaultHistoryItems;
+export async function getHistoryItems(): Promise<HistoryItem[]> {
+  return getData('history_items', defaultHistoryItems);
 }
-export function saveHistoryItems(items: HistoryItem[]) {
-  localStorage.setItem('g1230_historyItems', JSON.stringify(items));
-}
+export async function saveHistoryItems(items: HistoryItem[]) { await saveData('history_items', items); }
 
 // --- 수강안내 부서 배너 관리 ---
 export interface DepartmentInfo {
@@ -534,14 +520,10 @@ const defaultDepartmentInfo: DepartmentInfo[] = [
   { id: 'high', grades: '고1 ~ 고3', desc: '수능·내신 1등급을 향한 체계적 관리', highlights: ['EBS 연계 분석', '킬러 문항 훈련', '1:1 첨삭'] },
 ];
 
-export function getDepartmentInfo(): DepartmentInfo[] {
-  const raw = localStorage.getItem('g1230_departmentInfo');
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return defaultDepartmentInfo;
+export async function getDepartmentInfo(): Promise<DepartmentInfo[]> {
+  return getData('department_info', defaultDepartmentInfo);
 }
-export function saveDepartmentInfo(items: DepartmentInfo[]) {
-  localStorage.setItem('g1230_departmentInfo', JSON.stringify(items));
-}
+export async function saveDepartmentInfo(items: DepartmentInfo[]) { await saveData('department_info', items); }
 
 // --- 학사일정 관리 ---
 export interface CalendarEvent {
@@ -692,17 +674,11 @@ export const calendarEvents = defaultCalendarEvents.map(e => ({
   date: (() => { const [y, m, d] = e.date.split('-').map(Number); return new Date(y, m - 1, d); })(),
 }));
 
-export function getCalendarEvents(): CalendarEvent[] {
-  const raw = localStorage.getItem('g1230_calendarEvents');
-  if (raw) {
-    try { return JSON.parse(raw); } catch { /* fall through */ }
-  }
-  return defaultCalendarEvents;
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+  return getData('calendar_events', defaultCalendarEvents);
 }
 
-export function saveCalendarEvents(items: CalendarEvent[]) {
-  localStorage.setItem('g1230_calendarEvents', JSON.stringify(items));
-}
+export async function saveCalendarEvents(items: CalendarEvent[]) { await saveData('calendar_events', items); }
 
 export const studentGrades = [
   { subject: '1학기 중간', score: 85 },
@@ -773,29 +749,17 @@ const defaultPopupSettings: PopupSettings = {
   defaultSlideInterval: 5,
 };
 
-export function getPopups(): PopupItem[] {
-  const saved = localStorage.getItem(POPUPS_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* fallback */ }
-  }
-  return defaultPopups;
+export async function getPopups(): Promise<PopupItem[]> {
+  return getData('popups', defaultPopups);
 }
 
-export function savePopups(popups: PopupItem[]) {
-  localStorage.setItem(POPUPS_KEY, JSON.stringify(popups));
+export async function savePopups(items: PopupItem[]) { await saveData('popups', items); }
+
+export async function getPopupSettings(): Promise<PopupSettings> {
+  return getData('popup_settings', defaultPopupSettings);
 }
 
-export function getPopupSettings(): PopupSettings {
-  const saved = localStorage.getItem(POPUP_SETTINGS_KEY);
-  if (saved) {
-    try { return JSON.parse(saved); } catch { /* fallback */ }
-  }
-  return defaultPopupSettings;
-}
-
-export function savePopupSettings(settings: PopupSettings) {
-  localStorage.setItem(POPUP_SETTINGS_KEY, JSON.stringify(settings));
-}
+export async function savePopupSettings(settings: PopupSettings) { await saveData('popup_settings', settings); }
 
 // ── 강사진 프로필 ──
 export interface InstructorProfile {
@@ -816,12 +780,10 @@ const defaultInstructors: InstructorProfile[] = [
   { id: 'inst4', name: '최연산', title: '초등부 전문 강사', desc: '이화여대 수학교육과 졸업 | 7년 경력\n사고력·연산 능력 개발', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ChoiYS&backgroundColor=d1fae5&skinColor=f2d3b1', color: 'from-amber-500 to-orange-600', order: 4 },
 ];
 
-export function getInstructorProfiles(): InstructorProfile[] {
-  const saved = localStorage.getItem(INSTRUCTORS_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultInstructors;
+export async function getInstructorProfiles(): Promise<InstructorProfile[]> {
+  return getData('instructors', defaultInstructors);
 }
-export function saveInstructorProfiles(items: InstructorProfile[]) { localStorage.setItem(INSTRUCTORS_KEY, JSON.stringify(items)); }
+export async function saveInstructorProfiles(items: InstructorProfile[]) { await saveData('instructors', items); }
 
 // ── 시설 갤러리 (About 페이지) ──
 export interface FacilityPhoto {
@@ -841,12 +803,10 @@ const defaultFacilities: FacilityPhoto[] = [
   { id: 'fac6', imageUrl: 'https://picsum.photos/seed/fac6/600/400', title: '휴게 공간', order: 6 },
 ];
 
-export function getFacilityPhotos(): FacilityPhoto[] {
-  const saved = localStorage.getItem(FACILITIES_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultFacilities;
+export async function getFacilityPhotos(): Promise<FacilityPhoto[]> {
+  return getData('facilities', defaultFacilities);
 }
-export function saveFacilityPhotos(items: FacilityPhoto[]) { localStorage.setItem(FACILITIES_KEY, JSON.stringify(items)); }
+export async function saveFacilityPhotos(items: FacilityPhoto[]) { await saveData('facilities', items); }
 
 // ── 수강 반 (개설 반 & 시간표) ──
 export interface CourseClass {
@@ -879,12 +839,10 @@ const defaultCourseClasses: CourseClass[] = [
   { id: 'cc11', departmentId: 'high', name: '수능 집중반', time: '화/목/토 20:00-22:00', price: '350,000원', students: 6, enrolled: 4, level: '고3', order: 4 },
 ];
 
-export function getCourseClasses(): CourseClass[] {
-  const saved = localStorage.getItem(COURSES_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultCourseClasses;
+export async function getCourseClasses(): Promise<CourseClass[]> {
+  return getData('courses', defaultCourseClasses);
 }
-export function saveCourseClasses(items: CourseClass[]) { localStorage.setItem(COURSES_KEY, JSON.stringify(items)); }
+export async function saveCourseClasses(items: CourseClass[]) { await saveData('courses', items); }
 
 // ── 합격 스토리 ──
 export interface SuccessStoryItem {
@@ -920,12 +878,10 @@ const defaultSuccessStories: SuccessStoryItem[] = [
   { id: 's12', name: '오○○', school: '중앙대학교', department: '약학과', admissionType: '수시 학생부종합', region: '의약학', year: '2023', previousSchool: '별내고', quote: '약대를 가려면 수학이 기본이라는 말을 여기서 실감했습니다.', gradeFrom: 2, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success12&backgroundColor=dbeafe', color: 'from-cyan-500 to-blue-500' },
 ];
 
-export function getSuccessStories(): SuccessStoryItem[] {
-  const saved = localStorage.getItem(SUCCESS_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultSuccessStories;
+export async function getSuccessStories(): Promise<SuccessStoryItem[]> {
+  return getData('success_stories', defaultSuccessStories);
 }
-export function saveSuccessStories(items: SuccessStoryItem[]) { localStorage.setItem(SUCCESS_KEY, JSON.stringify(items)); }
+export async function saveSuccessStories(items: SuccessStoryItem[]) { await saveData('success_stories', items); }
 
 // ── 합격 스토리 통계 ──
 export interface SuccessStoryStat {
@@ -945,12 +901,10 @@ const defaultSuccessStats: SuccessStoryStat[] = [
   { id: 'ss4', label: '수학 1등급 비율', value: 87, suffix: '', desc: '%', order: 4 },
 ];
 
-export function getSuccessStats(): SuccessStoryStat[] {
-  const saved = localStorage.getItem(SS_STAT_KEY);
-  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
-  return defaultSuccessStats;
+export async function getSuccessStats(): Promise<SuccessStoryStat[]> {
+  return getData('success_stats', defaultSuccessStats);
 }
-export function saveSuccessStats(items: SuccessStoryStat[]) { localStorage.setItem(SS_STAT_KEY, JSON.stringify(items)); }
+export async function saveSuccessStats(items: SuccessStoryStat[]) { await saveData('success_stats', items); }
 
 /* ═══════ HOME: Stats ═══════ */
 export interface HomeStat {
@@ -968,12 +922,10 @@ const defaultHomeStats: HomeStat[] = [
   { id: 'hs3', label: '수업 만족도', value: 4.9, suffix: '', desc: '/5.0', decimals: 1, order: 3 },
   { id: 'hs4', label: '운영', value: 15, suffix: '', desc: '년', order: 4 },
 ];
-export function getHomeStats(): HomeStat[] {
-  const raw = localStorage.getItem('g1230_homeStats');
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return defaultHomeStats;
+export async function getHomeStats(): Promise<HomeStat[]> {
+  return getData('home_stats', defaultHomeStats);
 }
-export function saveHomeStats(items: HomeStat[]) { localStorage.setItem('g1230_homeStats', JSON.stringify(items)); }
+export async function saveHomeStats(items: HomeStat[]) { await saveData('home_stats', items); }
 
 /* ═══════ HOME: Testimonials ═══════ */
 export interface HomeTestimonial {
@@ -991,12 +943,10 @@ const defaultTestimonials: HomeTestimonial[] = [
   { id: 'ht3', name: '박○○ 학부모', grade: '초5', content: '아이가 수학 학원을 즐거워합니다. 사고력 수업이 재밌다고 하네요. 영재원 준비도 잘 되고 있어요.', before: 78, after: 97, order: 3 },
   { id: 'ht4', name: '최○○ 학생', grade: '중3', content: '고등 선행까지 탄탄하게 준비할 수 있어서 좋아요. 모의고사 성적도 꾸준히 상승 중입니다.', before: 55, after: 88, order: 4 },
 ];
-export function getHomeTestimonials(): HomeTestimonial[] {
-  const raw = localStorage.getItem('g1230_homeTestimonials');
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return defaultTestimonials;
+export async function getHomeTestimonials(): Promise<HomeTestimonial[]> {
+  return getData('home_testimonials', defaultTestimonials);
 }
-export function saveHomeTestimonials(items: HomeTestimonial[]) { localStorage.setItem('g1230_homeTestimonials', JSON.stringify(items)); }
+export async function saveHomeTestimonials(items: HomeTestimonial[]) { await saveData('home_testimonials', items); }
 
 /* ═══════ HOME: Program Features ═══════ */
 export interface HomeProgramFeature {
@@ -1017,12 +967,10 @@ const defaultProgramFeatures: HomeProgramFeature[] = [
   { id: 'pf8', departmentId: 'high', title: '내신 1등급', desc: '학교별 기출 분석 + 내신 직전 집중 대비반 운영', order: 2 },
   { id: 'pf9', departmentId: 'high', title: '1:1 첨삭 관리', desc: '개인별 약점 분석 리포트와 맞춤형 보충 학습', order: 3 },
 ];
-export function getProgramFeatures(): HomeProgramFeature[] {
-  const raw = localStorage.getItem('g1230_programFeatures');
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return defaultProgramFeatures;
+export async function getProgramFeatures(): Promise<HomeProgramFeature[]> {
+  return getData('program_features', defaultProgramFeatures);
 }
-export function saveProgramFeatures(items: HomeProgramFeature[]) { localStorage.setItem('g1230_programFeatures', JSON.stringify(items)); }
+export async function saveProgramFeatures(items: HomeProgramFeature[]) { await saveData('program_features', items); }
 
 /* ═══════════════════════════════════════════
    CONSULT REQUESTS (상담 신청)
@@ -1041,18 +989,14 @@ export interface ConsultRequest {
 
 const CONSULT_KEY = 'g1230_consultRequests';
 
-export function getConsultRequests(): ConsultRequest[] {
-  const raw = localStorage.getItem(CONSULT_KEY);
-  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
-  return [];
+export async function getConsultRequests(): Promise<ConsultRequest[]> {
+  return getData('consult_requests', []);
 }
 
-export function saveConsultRequests(items: ConsultRequest[]) {
-  localStorage.setItem(CONSULT_KEY, JSON.stringify(items));
-}
+export async function saveConsultRequests(items: ConsultRequest[]) { await saveData('consult_requests', items); }
 
-export function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status' | 'createdAt'>): ConsultRequest {
-  const list = getConsultRequests();
+export async function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status' | 'createdAt'>): Promise<ConsultRequest> {
+  const list = await getConsultRequests();
   const newReq: ConsultRequest = {
     ...req,
     id: `consult_${Date.now()}`,
@@ -1060,6 +1004,6 @@ export function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status' | 'c
     createdAt: new Date().toISOString(),
   };
   list.unshift(newReq);
-  saveConsultRequests(list);
+  await saveConsultRequests(list);
   return newReq;
 }

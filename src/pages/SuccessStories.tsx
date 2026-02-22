@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, GraduationCap, Star, TrendingUp, ChevronDown, ChevronUp, Quote, Sparkles, Award, BookOpen, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -56,29 +56,34 @@ export function SuccessStories() {
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     // ── 합격 통계 state ──
-    const [ssStats, setSsStats] = useState<SuccessStoryStat[]>(() => getSuccessStats().sort((a, b) => a.order - b.order));
+    const [ssStats, setSsStats] = useState<SuccessStoryStat[]>([]);
     const [statModal, setStatModal] = useState<'add' | 'edit' | null>(null);
     const [editStat, setEditStat] = useState<SuccessStoryStat | null>(null);
 
     const openAddStat = () => { setEditStat({ id: genId('ss'), label: '', value: 0, suffix: '', desc: '명', order: ssStats.length + 1 }); setStatModal('add'); };
     const openEditStat = (s: SuccessStoryStat) => { setEditStat({ ...s }); setStatModal('edit'); };
     const closeStat = () => { setStatModal(null); setEditStat(null); };
-    const handleSaveStat = () => {
+    const handleSaveStat = async () => {
         if (!editStat || !editStat.label.trim()) return;
         let updated: SuccessStoryStat[];
         if (statModal === 'add') { updated = [...ssStats, editStat]; }
         else { updated = ssStats.map(s => s.id === editStat.id ? editStat : s); }
         updated.sort((a, b) => a.order - b.order);
-        setSsStats(updated); saveSuccessStats(updated); closeStat();
+        setSsStats(updated); await saveSuccessStats(updated); closeStat();
     };
-    const handleDeleteStat = (id: string) => {
+    const handleDeleteStat = async (id: string) => {
         if (!confirm('이 통계를 삭제하시겠습니까?')) return;
         const updated = ssStats.filter(s => s.id !== id);
-        setSsStats(updated); saveSuccessStats(updated);
+        setSsStats(updated); await saveSuccessStats(updated);
     };
 
     // ── 합격 스토리 state ──
-    const [stories, setStories] = useState<SuccessStoryItem[]>(getSuccessStories);
+    const [stories, setStories] = useState<SuccessStoryItem[]>([]);
+
+    useEffect(() => {
+        getSuccessStats().then(s => setSsStats(s.sort((a, b) => a.order - b.order)));
+        getSuccessStories().then(setStories);
+    }, []);
     const [storyModal, setStoryModal] = useState<'add' | 'edit' | null>(null);
     const [editStory, setEditStory] = useState<SuccessStoryItem | null>(null);
 
@@ -102,7 +107,7 @@ export function SuccessStories() {
     const openEditStory = (story: SuccessStoryItem) => { setEditStory({ ...story }); setStoryModal('edit'); };
     const closeStoryModal = () => { setStoryModal(null); setEditStory(null); };
 
-    const handleSaveStory = () => {
+    const handleSaveStory = async () => {
         if (!editStory || !editStory.name.trim() || !editStory.school.trim()) return;
         let updated: SuccessStoryItem[];
         if (storyModal === 'add') {
@@ -111,15 +116,15 @@ export function SuccessStories() {
             updated = stories.map(s => s.id === editStory.id ? editStory : s);
         }
         setStories(updated);
-        saveSuccessStories(updated);
+        await saveSuccessStories(updated);
         closeStoryModal();
     };
 
-    const handleDeleteStory = (id: string) => {
+    const handleDeleteStory = async (id: string) => {
         if (!confirm('이 합격 스토리를 삭제하시겠습니까?')) return;
         const updated = stories.filter(s => s.id !== id);
         setStories(updated);
-        saveSuccessStories(updated);
+        await saveSuccessStories(updated);
     };
 
     /* ─── story card renderer (shared between highlighted & others) ─── */

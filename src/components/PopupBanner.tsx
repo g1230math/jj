@@ -31,22 +31,24 @@ export function PopupBanner() {
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     useEffect(() => {
-        const settings = getPopupSettings();
-        if (!settings.enabled) return;
+        (async () => {
+            const settings = await getPopupSettings();
+            if (!settings.enabled) return;
 
-        const allPopups = getPopups();
-        const today = new Date().toISOString().split('T')[0];
-        const closedIds = getClosedToday();
+            const allPopups = await getPopups();
+            const today = new Date().toISOString().split('T')[0];
+            const closedIds = getClosedToday();
 
-        const filtered = allPopups
-            .filter(p => p.isActive && p.startDate <= today && today <= p.endDate)
-            .filter(p => !closedIds.includes(p.id))
-            .sort((a, b) => a.order - b.order);
+            const filtered = allPopups
+                .filter(p => p.isActive && p.startDate <= today && today <= p.endDate)
+                .filter(p => !closedIds.includes(p.id))
+                .sort((a, b) => a.order - b.order);
 
-        if (filtered.length > 0) {
-            setActivePopups(filtered);
-            setVisible(true);
-        }
+            if (filtered.length > 0) {
+                setActivePopups(filtered);
+                setVisible(true);
+            }
+        })();
     }, []);
 
     // Auto-slide for 2+ popups

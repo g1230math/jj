@@ -103,7 +103,7 @@ export function Courses() {
     const openEditClass = (cls: CourseClass) => { setEditClass({ ...cls }); setClassModal('edit'); };
     const closeClassModal = () => { setClassModal(null); setEditClass(null); };
 
-    const handleSaveClass = () => {
+    const handleSaveClass = async () => {
         if (!editClass || !editClass.name.trim()) return;
         let updated: CourseClass[];
         if (classModal === 'add') {
@@ -112,15 +112,15 @@ export function Courses() {
             updated = allClasses.map(c => c.id === editClass.id ? editClass : c);
         }
         setAllClasses(updated);
-        saveCourseClasses(updated);
+        await saveCourseClasses(updated);
         closeClassModal();
     };
 
-    const handleDeleteClass = (id: string) => {
+    const handleDeleteClass = async (id: string) => {
         if (!confirm('이 반을 삭제하시겠습니까?')) return;
         const updated = allClasses.filter(c => c.id !== id);
         setAllClasses(updated);
-        saveCourseClasses(updated);
+        await saveCourseClasses(updated);
     };
 
     /* ─── 부서 배너 수정 ─── */
@@ -131,13 +131,13 @@ export function Courses() {
         setDeptModal(true);
     };
 
-    const handleSaveDept = () => {
+    const handleSaveDept = async () => {
         if (!editDept) return;
         const updatedInfo: DepartmentInfo = { ...editDept, highlights: editHighlightsText.split(',').map(s => s.trim()).filter(Boolean) };
         const updated = deptInfoList.map(d => d.id === updatedInfo.id ? updatedInfo : d);
         if (!updated.find(d => d.id === updatedInfo.id)) updated.push(updatedInfo);
         setDeptInfoList(updated);
-        saveDepartmentInfo(updated);
+        await saveDepartmentInfo(updated);
         setDeptModal(false);
         setEditDept(null);
     };

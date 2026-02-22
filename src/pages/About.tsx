@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, BookOpen, GraduationCap, Heart, Lightbulb, Target, Users, ChevronDown, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -65,19 +65,25 @@ export function About() {
     const [openPhilosophy, setOpenPhilosophy] = useState<number | null>(null);
 
     // ── 강사진 state ──
-    const [instructors, setInstructors] = useState<InstructorProfile[]>(getInstructorProfiles);
+    const [instructors, setInstructors] = useState<InstructorProfile[]>([]);
     const [instModal, setInstModal] = useState<'add' | 'edit' | null>(null);
     const [editInst, setEditInst] = useState<InstructorProfile | null>(null);
 
     // ── 시설 갤러리 state ──
-    const [facilities, setFacilities] = useState<FacilityPhoto[]>(getFacilityPhotos);
+    const [facilities, setFacilities] = useState<FacilityPhoto[]>([]);
     const [facModal, setFacModal] = useState<'add' | 'edit' | null>(null);
     const [editFac, setEditFac] = useState<FacilityPhoto | null>(null);
 
     // ── 히스토리 state ──
-    const [historyItems, setHistoryItems] = useState<HistoryItem[]>(getHistoryItems);
+    const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
     const [histModal, setHistModal] = useState<'add' | 'edit' | null>(null);
     const [editHist, setEditHist] = useState<HistoryItem | null>(null);
+
+    useEffect(() => {
+        getInstructorProfiles().then(setInstructors);
+        getFacilityPhotos().then(setFacilities);
+        getHistoryItems().then(setHistoryItems);
+    }, []);
 
     /* ─── 강사 CRUD ─── */
     const emptyInst = (): InstructorProfile => ({
@@ -88,7 +94,7 @@ export function About() {
     const openEditInst = (inst: InstructorProfile) => { setEditInst({ ...inst }); setInstModal('edit'); };
     const closeInstModal = () => { setInstModal(null); setEditInst(null); };
 
-    const handleSaveInst = () => {
+    const handleSaveInst = async () => {
         if (!editInst || !editInst.name.trim()) return;
         let updated: InstructorProfile[];
         if (instModal === 'add') {
@@ -98,15 +104,15 @@ export function About() {
         }
         updated.sort((a, b) => a.order - b.order);
         setInstructors(updated);
-        saveInstructorProfiles(updated);
+        await saveInstructorProfiles(updated);
         closeInstModal();
     };
 
-    const handleDeleteInst = (id: string) => {
+    const handleDeleteInst = async (id: string) => {
         if (!confirm('이 강사를 삭제하시겠습니까?')) return;
         const updated = instructors.filter(i => i.id !== id);
         setInstructors(updated);
-        saveInstructorProfiles(updated);
+        await saveInstructorProfiles(updated);
     };
 
     /* ─── 시설 CRUD ─── */
@@ -118,7 +124,7 @@ export function About() {
     const openEditFac = (fac: FacilityPhoto) => { setEditFac({ ...fac }); setFacModal('edit'); };
     const closeFacModal = () => { setFacModal(null); setEditFac(null); };
 
-    const handleSaveFac = () => {
+    const handleSaveFac = async () => {
         if (!editFac || !editFac.title.trim()) return;
         let updated: FacilityPhoto[];
         if (facModal === 'add') {
@@ -128,15 +134,15 @@ export function About() {
         }
         updated.sort((a, b) => a.order - b.order);
         setFacilities(updated);
-        saveFacilityPhotos(updated);
+        await saveFacilityPhotos(updated);
         closeFacModal();
     };
 
-    const handleDeleteFac = (id: string) => {
+    const handleDeleteFac = async (id: string) => {
         if (!confirm('이 시설 사진을 삭제하시겠습니까?')) return;
         const updated = facilities.filter(f => f.id !== id);
         setFacilities(updated);
-        saveFacilityPhotos(updated);
+        await saveFacilityPhotos(updated);
     };
 
     /* ─── 히스토리 CRUD ─── */
@@ -145,7 +151,7 @@ export function About() {
     const openEditHist = (h: HistoryItem) => { setEditHist({ ...h }); setHistModal('edit'); };
     const closeHistModal = () => { setHistModal(null); setEditHist(null); };
 
-    const handleSaveHist = () => {
+    const handleSaveHist = async () => {
         if (!editHist || !editHist.title.trim()) return;
         let updated: HistoryItem[];
         if (histModal === 'add') {
@@ -155,15 +161,15 @@ export function About() {
         }
         updated.sort((a, b) => a.order - b.order);
         setHistoryItems(updated);
-        saveHistoryItems(updated);
+        await saveHistoryItems(updated);
         closeHistModal();
     };
 
-    const handleDeleteHist = (id: string) => {
+    const handleDeleteHist = async (id: string) => {
         if (!confirm('이 히스토리를 삭제하시겠습니까?')) return;
         const updated = historyItems.filter(h => h.id !== id);
         setHistoryItems(updated);
-        saveHistoryItems(updated);
+        await saveHistoryItems(updated);
     };
 
     return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   getNotices, saveNotices, type NoticeItem,
   getBlogPosts, saveBlogPosts, type BlogPost,
@@ -27,6 +27,7 @@ const labelCls = "block text-xs font-medium text-slate-600 mb-1";
    Top-level sub-components (won't remount on parent state change)
 ═══════════════════════════════════════════ */
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -49,12 +50,21 @@ export function Community() {
   const [activeTab, setActiveTab] = useState('notice');
 
   /* ── State for each section ── */
-  const [noticeList, setNoticeList] = useState<NoticeItem[]>(getNotices());
-  const [blogList, setBlogList] = useState<BlogPost[]>(getBlogPosts());
-  const [galleryList, setGalleryList] = useState<GalleryItem[]>(getGallery());
-  const [resourceList, setResourceList] = useState<ResourceItem[]>(getResources());
-  const [faqList, setFaqList] = useState<FaqItem[]>(getFaqs());
-  const [inquiryList, setInquiryList] = useState<InquiryItem[]>(getInquiries());
+  const [noticeList, setNoticeList] = useState<NoticeItem[]>([]);
+  const [blogList, setBlogList] = useState<BlogPost[]>([]);
+  const [galleryList, setGalleryList] = useState<GalleryItem[]>([]);
+  const [resourceList, setResourceList] = useState<ResourceItem[]>([]);
+  const [faqList, setFaqList] = useState<FaqItem[]>([]);
+  const [inquiryList, setInquiryList] = useState<InquiryItem[]>([]);
+
+  useEffect(() => {
+    getNotices().then(setNoticeList);
+    getBlogPosts().then(setBlogList);
+    getGallery().then(setGalleryList);
+    getResources().then(setResourceList);
+    getFaqs().then(setFaqList);
+    getInquiries().then(setInquiryList);
+  }, []);
 
   /* ── UI states ── */
   const [openFaq, setOpenFaq] = useState<string | null>(null);
@@ -83,107 +93,107 @@ export function Community() {
 
   /* ── Notice CRUD ── */
   const newNotice = (): NoticeItem => ({ id: '', title: '', content: '', date: today(), isNew: true, isPinned: false });
-  const handleSaveNotice = (item: NoticeItem) => {
+  const handleSaveNotice = async (item: NoticeItem) => {
     let list: NoticeItem[];
     if (isNew) {
       list = [{ ...item, id: genId('n') }, ...noticeList];
     } else {
       list = noticeList.map(n => n.id === item.id ? item : n);
     }
-    saveNotices(list); setNoticeList(list); setEditingNotice(null); setIsNew(false);
+    await saveNotices(list); setNoticeList(list); setEditingNotice(null); setIsNew(false);
   };
-  const deleteNotice = (id: string) => {
+  const deleteNotice = async (id: string) => {
     if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
     const list = noticeList.filter(n => n.id !== id);
-    saveNotices(list); setNoticeList(list);
+    await saveNotices(list); setNoticeList(list);
   };
 
   /* ── Blog CRUD ── */
   const newBlog = (): BlogPost => ({ id: '', title: '', excerpt: '', content: '', author: user?.name || '', date: today(), readTime: '5분', tags: [], image: '' });
-  const handleSaveBlog = (item: BlogPost) => {
+  const handleSaveBlog = async (item: BlogPost) => {
     let list: BlogPost[];
     if (isNew) {
       list = [{ ...item, id: genId('blog') }, ...blogList];
     } else {
       list = blogList.map(b => b.id === item.id ? item : b);
     }
-    saveBlogPosts(list); setBlogList(list); setEditingBlog(null); setIsNew(false);
+    await saveBlogPosts(list); setBlogList(list); setEditingBlog(null); setIsNew(false);
   };
-  const deleteBlog = (id: string) => {
+  const deleteBlog = async (id: string) => {
     if (!confirm('이 블로그 글을 삭제하시겠습니까?')) return;
     const list = blogList.filter(b => b.id !== id);
-    saveBlogPosts(list); setBlogList(list);
+    await saveBlogPosts(list); setBlogList(list);
   };
 
   /* ── Gallery CRUD ── */
   const newGalleryItem = (): GalleryItem => ({ id: '', title: '', description: '', imageUrl: '', date: today() });
-  const handleSaveGallery = (item: GalleryItem) => {
+  const handleSaveGallery = async (item: GalleryItem) => {
     let list: GalleryItem[];
     if (isNew) {
       list = [{ ...item, id: genId('gal') }, ...galleryList];
     } else {
       list = galleryList.map(g => g.id === item.id ? item : g);
     }
-    saveGallery(list); setGalleryList(list); setEditingGallery(null); setIsNew(false);
+    await saveGallery(list); setGalleryList(list); setEditingGallery(null); setIsNew(false);
   };
-  const deleteGalleryItem = (id: string) => {
+  const deleteGalleryItem = async (id: string) => {
     if (!confirm('이 갤러리 항목을 삭제하시겠습니까?')) return;
     const list = galleryList.filter(g => g.id !== id);
-    saveGallery(list); setGalleryList(list);
+    await saveGallery(list); setGalleryList(list);
   };
 
   /* ── Resource CRUD ── */
   const newResource = (): ResourceItem => ({ id: '', title: '', category: '학습자료', date: today(), downloads: 0, type: 'PDF', size: '', fileUrl: '' });
-  const handleSaveResource = (item: ResourceItem) => {
+  const handleSaveResource = async (item: ResourceItem) => {
     let list: ResourceItem[];
     if (isNew) {
       list = [{ ...item, id: genId('res') }, ...resourceList];
     } else {
       list = resourceList.map(r => r.id === item.id ? item : r);
     }
-    saveResources(list); setResourceList(list); setEditingResource(null); setIsNew(false);
+    await saveResources(list); setResourceList(list); setEditingResource(null); setIsNew(false);
   };
-  const deleteResourceItem = (id: string) => {
+  const deleteResourceItem = async (id: string) => {
     if (!confirm('이 자료를 삭제하시겠습니까?')) return;
     const list = resourceList.filter(r => r.id !== id);
-    saveResources(list); setResourceList(list);
+    await saveResources(list); setResourceList(list);
   };
 
   /* ── FAQ CRUD ── */
   const newFaqItem = (): FaqItem => ({ id: '', category: '일반', question: '', answer: '', order: faqList.length + 1 });
-  const handleSaveFaq = (item: FaqItem) => {
+  const handleSaveFaq = async (item: FaqItem) => {
     let list: FaqItem[];
     if (isNew) {
       list = [...faqList, { ...item, id: genId('faq') }];
     } else {
       list = faqList.map(f => f.id === item.id ? item : f);
     }
-    saveFaqs(list); setFaqList(list); setEditingFaq(null); setIsNew(false);
+    await saveFaqs(list); setFaqList(list); setEditingFaq(null); setIsNew(false);
   };
-  const deleteFaqItem = (id: string) => {
+  const deleteFaqItem = async (id: string) => {
     if (!confirm('이 FAQ를 삭제하시겠습니까?')) return;
     const list = faqList.filter(f => f.id !== id);
-    saveFaqs(list); setFaqList(list);
+    await saveFaqs(list); setFaqList(list);
   };
 
   /* ── Inquiry reply ── */
-  const submitReply = (id: string) => {
+  const submitReply = async (id: string) => {
     if (!replyText.trim()) return;
     const list = inquiryList.map(inq =>
       inq.id === id ? { ...inq, answer: replyText.trim(), answerDate: today() } : inq
     );
-    saveInquiries(list); setInquiryList(list); setReplyingInquiry(null); setReplyText('');
+    await saveInquiries(list); setInquiryList(list); setReplyingInquiry(null); setReplyText('');
   };
-  const deleteReply = (id: string) => {
+  const deleteReply = async (id: string) => {
     const list = inquiryList.map(inq =>
       inq.id === id ? { ...inq, answer: undefined, answerDate: undefined } : inq
     );
-    saveInquiries(list); setInquiryList(list);
+    await saveInquiries(list); setInquiryList(list);
   };
-  const deleteInquiry = (id: string) => {
+  const deleteInquiry = async (id: string) => {
     if (!confirm('이 문의를 삭제하시겠습니까?')) return;
     const list = inquiryList.filter(i => i.id !== id);
-    saveInquiries(list); setInquiryList(list);
+    await saveInquiries(list); setInquiryList(list);
   };
 
   /* ═══════════════════════════════════════════
