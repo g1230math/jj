@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Clock, Star, Users, ArrowRight, GraduationCap, Sparkles, Calculator, Phone, CheckCircle } from 'lucide-react';
+import { BookOpen, Clock, Star, Users, ArrowRight, GraduationCap, Sparkles, Calculator, Phone, CheckCircle, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ScrollReveal, Section, SectionHeader } from '../components/ScrollReveal';
+import { useAuth } from '../context/AuthContext';
+import { getCourseClasses, saveCourseClasses, type CourseClass } from '../data/mockData';
 
-const courses = [
+/* ─── helpers ─── */
+const genId = (prefix: string) => `${prefix}_${Date.now()}`;
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none";
+const labelCls = "block text-xs font-medium text-slate-600 mb-1";
+
+/* ─── Modal (top-level, won't remount) ─── */
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
+                    <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+                    <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5" /></button>
+                </div>
+                <div className="p-5 space-y-4">{children}</div>
+            </div>
+        </div>
+    );
+}
+
+/* ─── Department meta (icons, colors — rarely change, keep static) ─── */
+const departments = [
     {
-        id: 'elementary',
+        id: 'elementary' as const,
         name: '초등부',
         icon: Sparkles,
         color: 'from-emerald-500 to-teal-600',
@@ -17,14 +41,9 @@ const courses = [
         grades: '초3 ~ 초6',
         desc: '수학적 사고력과 연산 능력의 기초를 탄탄히',
         highlights: ['연산·사고력 강화', '서술형 문제 훈련', '영재원 대비'],
-        classes: [
-            { name: '기초 연산반', time: '월/수/금 15:00-16:30', price: '180,000원', students: 8, enrolled: 6, level: '초3~4' },
-            { name: '사고력 수학반', time: '화/목 15:00-16:30', price: '160,000원', students: 10, enrolled: 7, level: '초4~5' },
-            { name: '중등 준비반', time: '월/수/금 16:30-18:00', price: '200,000원', students: 8, enrolled: 5, level: '초5~6' },
-        ],
     },
     {
-        id: 'middle',
+        id: 'middle' as const,
         name: '중등부',
         icon: Calculator,
         color: 'from-blue-500 to-indigo-600',
@@ -34,15 +53,9 @@ const courses = [
         grades: '중1 ~ 중3',
         desc: '내신 완벽 대비, 수학 자신감 UP',
         highlights: ['교과서·기출 분석', '선행 학습', '월 1회 모의고사'],
-        classes: [
-            { name: '기본 개념반', time: '월/수/금 17:00-19:00', price: '220,000원', students: 12, enrolled: 9, level: '중1~2' },
-            { name: '심화 응용반', time: '화/목/토 17:00-19:00', price: '240,000원', students: 10, enrolled: 8, level: '중2~3' },
-            { name: '내신 대비 특강', time: '시험 2주 전 집중', price: '120,000원', students: 8, enrolled: 4, level: '중1~3' },
-            { name: '고등 선행반', time: '월/수/금 19:00-21:00', price: '260,000원', students: 8, enrolled: 6, level: '중3' },
-        ],
     },
     {
-        id: 'high',
+        id: 'high' as const,
         name: '고등부',
         icon: GraduationCap,
         color: 'from-indigo-500 to-purple-600',
@@ -52,18 +65,51 @@ const courses = [
         grades: '고1 ~ 고3',
         desc: '수능·내신 1등급을 향한 체계적 관리',
         highlights: ['EBS 연계 분석', '킬러 문항 훈련', '1:1 첨삭'],
-        classes: [
-            { name: '수학(상)·(하) 반', time: '월/수/금 18:00-20:00', price: '280,000원', students: 10, enrolled: 7, level: '고1' },
-            { name: '수학Ⅰ·Ⅱ 반', time: '화/목/토 18:00-20:00', price: '300,000원', students: 8, enrolled: 6, level: '고2' },
-            { name: '미적분·기하 반', time: '월/수/금 20:00-22:00', price: '320,000원', students: 8, enrolled: 5, level: '고2~3' },
-            { name: '수능 집중반', time: '화/목/토 20:00-22:00', price: '350,000원', students: 6, enrolled: 4, level: '고3' },
-        ],
     },
 ];
 
 export function Courses() {
+    const { isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
-    const current = courses[activeTab];
+    const current = departments[activeTab];
+
+    // ── 수강 반 state ──
+    const [allClasses, setAllClasses] = useState<CourseClass[]>(getCourseClasses);
+    const [classModal, setClassModal] = useState<'add' | 'edit' | null>(null);
+    const [editClass, setEditClass] = useState<CourseClass | null>(null);
+
+    const currentClasses = allClasses
+        .filter(c => c.departmentId === current.id)
+        .sort((a, b) => a.order - b.order);
+
+    /* ─── CRUD ─── */
+    const emptyClass = (): CourseClass => ({
+        id: genId('cc'), departmentId: current.id, name: '', time: '', price: '', students: 8, enrolled: 0, level: '', order: currentClasses.length + 1,
+    });
+
+    const openAddClass = () => { setEditClass(emptyClass()); setClassModal('add'); };
+    const openEditClass = (cls: CourseClass) => { setEditClass({ ...cls }); setClassModal('edit'); };
+    const closeClassModal = () => { setClassModal(null); setEditClass(null); };
+
+    const handleSaveClass = () => {
+        if (!editClass || !editClass.name.trim()) return;
+        let updated: CourseClass[];
+        if (classModal === 'add') {
+            updated = [...allClasses, editClass];
+        } else {
+            updated = allClasses.map(c => c.id === editClass.id ? editClass : c);
+        }
+        setAllClasses(updated);
+        saveCourseClasses(updated);
+        closeClassModal();
+    };
+
+    const handleDeleteClass = (id: string) => {
+        if (!confirm('이 반을 삭제하시겠습니까?')) return;
+        const updated = allClasses.filter(c => c.id !== id);
+        setAllClasses(updated);
+        saveCourseClasses(updated);
+    };
 
     return (
         <div className="flex flex-col">
@@ -119,7 +165,7 @@ export function Courses() {
                 {/* Tab Buttons */}
                 <ScrollReveal className="flex justify-center mb-10">
                     <div className="inline-flex bg-white rounded-2xl p-1.5 gap-1 shadow-sm border border-slate-100">
-                        {courses.map((c, i) => (
+                        {departments.map((c, i) => (
                             <button
                                 key={c.id}
                                 onClick={() => setActiveTab(i)}
@@ -161,13 +207,28 @@ export function Courses() {
                             </div>
                         </div>
 
+                        {/* Admin add button */}
+                        {isAdmin && (
+                            <div className="flex justify-end mb-4">
+                                <button onClick={openAddClass} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <Plus className="w-4 h-4" /> 반 추가
+                                </button>
+                            </div>
+                        )}
+
                         {/* Class cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {current.classes.map((cls, i) => {
-                                const percentage = Math.round((cls.enrolled / cls.students) * 100);
+                            {currentClasses.map((cls) => {
+                                const percentage = cls.students > 0 ? Math.round((cls.enrolled / cls.students) * 100) : 0;
                                 const isAlmostFull = percentage >= 75;
                                 return (
-                                    <div key={i} className="glass-card glass-card-hover rounded-2xl p-6">
+                                    <div key={cls.id} className="glass-card glass-card-hover rounded-2xl p-6 relative">
+                                        {isAdmin && (
+                                            <div className="absolute top-3 right-3 flex gap-1">
+                                                <button onClick={() => openEditClass(cls)} className="p-1.5 bg-slate-100 rounded-lg hover:bg-slate-200"><Edit2 className="w-3.5 h-3.5 text-indigo-600" /></button>
+                                                <button onClick={() => handleDeleteClass(cls.id)} className="p-1.5 bg-slate-100 rounded-lg hover:bg-slate-200"><Trash2 className="w-3.5 h-3.5 text-red-500" /></button>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
                                                 <h4 className="text-card-title text-slate-900">{cls.name}</h4>
@@ -202,6 +263,14 @@ export function Courses() {
                                 );
                             })}
                         </div>
+
+                        {currentClasses.length === 0 && (
+                            <div className="text-center py-12 text-slate-400">
+                                <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                                <p>개설된 반이 없습니다.</p>
+                                {isAdmin && <p className="text-sm mt-1">위의 "반 추가" 버튼으로 새 반을 추가하세요.</p>}
+                            </div>
+                        )}
                     </motion.div>
                 </AnimatePresence>
             </Section>
@@ -231,6 +300,54 @@ export function Courses() {
                     </ScrollReveal>
                 </div>
             </section>
+
+            {/* ─── 반 추가/수정 모달 ─── */}
+            {classModal && editClass && (
+                <Modal title={classModal === 'add' ? '반 추가' : '반 수정'} onClose={closeClassModal}>
+                    <div>
+                        <label className={labelCls}>반 이름 *</label>
+                        <input className={inputCls} value={editClass.name} onChange={e => setEditClass({ ...editClass, name: e.target.value })} placeholder="예: 기초 연산반" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>학부</label>
+                        <select className={inputCls} value={editClass.departmentId} onChange={e => setEditClass({ ...editClass, departmentId: e.target.value as CourseClass['departmentId'] })}>
+                            {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelCls}>대상 학년</label>
+                        <input className={inputCls} value={editClass.level} onChange={e => setEditClass({ ...editClass, level: e.target.value })} placeholder="예: 초3~4, 중1~2" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>수업 시간</label>
+                        <input className={inputCls} value={editClass.time} onChange={e => setEditClass({ ...editClass, time: e.target.value })} placeholder="예: 월/수/금 15:00-16:30" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>수강료 (월)</label>
+                        <input className={inputCls} value={editClass.price} onChange={e => setEditClass({ ...editClass, price: e.target.value })} placeholder="예: 180,000원" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className={labelCls}>정원</label>
+                            <input type="number" className={inputCls} value={editClass.students} onChange={e => setEditClass({ ...editClass, students: Number(e.target.value) })} min={1} />
+                        </div>
+                        <div>
+                            <label className={labelCls}>현재 등록 수</label>
+                            <input type="number" className={inputCls} value={editClass.enrolled} onChange={e => setEditClass({ ...editClass, enrolled: Number(e.target.value) })} min={0} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelCls}>순서</label>
+                        <input type="number" className={inputCls} value={editClass.order} onChange={e => setEditClass({ ...editClass, order: Number(e.target.value) })} min={1} />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={closeClassModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+                        <button onClick={handleSaveClass} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            <Save className="w-4 h-4" /> 저장
+                        </button>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }

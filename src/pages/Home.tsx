@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getInstructorProfiles } from '../data/mockData';
 import { ArrowRight, BookOpen, Calendar as CalendarIcon, PlayCircle, Users, Star, Trophy, Clock, Sparkles, GraduationCap, Calculator, ChevronLeft, ChevronRight, Quote, Phone } from 'lucide-react';
 import { getNotices, calendarEvents } from '../data/mockData';
 import { format } from 'date-fns';
@@ -92,12 +93,7 @@ const testimonials = [
   },
 ];
 
-const instructors = [
-  { name: '김수학', role: '원장 / 고등부 총괄', specialty: '수능 수학 15년 강의', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=c0aede&skinColor=f2d3b1' },
-  { name: '이정현', role: '중등부 수학', specialty: '내신 만점 전략 전문가', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=LeeJH&backgroundColor=b6e3f4&skinColor=f2d3b1' },
-  { name: '박서연', role: '초등부 사고력', specialty: '영재원 대비 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ParkSY&backgroundColor=d1fae5&skinColor=f2d3b1' },
-  { name: '정민호', role: '고등부 수학', specialty: '수능 킬러 문항 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=JungMH&backgroundColor=fef3c7&skinColor=f2d3b1' },
-];
+const instructorProfiles = getInstructorProfiles();
 
 // ─── Component ──────────────────────────────────────
 export function Home() {
@@ -266,8 +262,8 @@ export function Home() {
         />
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {instructors.map((instructor, i) => (
-            <div key={instructor.name}>
+          {instructorProfiles.map((instructor, i) => (
+            <div key={instructor.id}>
               <ScrollReveal delay={i * 0.1}>
                 <div className="glass-card glass-card-hover rounded-2xl overflow-hidden group">
                   <div className="aspect-[4/5] bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
@@ -288,8 +284,8 @@ export function Home() {
                   </div>
                   <div className="p-5">
                     <h3 className="text-card-title text-slate-900">{instructor.name}</h3>
-                    <p className="text-sm text-indigo-600 font-medium mb-1">{instructor.role}</p>
-                    <p className="text-xs text-slate-500">{instructor.specialty}</p>
+                    <p className="text-sm text-indigo-600 font-medium mb-1">{instructor.title}</p>
+                    <p className="text-xs text-slate-500 whitespace-pre-line">{instructor.desc}</p>
                   </div>
                 </div>
               </ScrollReveal>

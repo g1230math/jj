@@ -1,8 +1,35 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Award, BookOpen, GraduationCap, Heart, Lightbulb, Target, Users, ChevronDown } from 'lucide-react';
+import { Award, BookOpen, GraduationCap, Heart, Lightbulb, Target, Users, ChevronDown, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ScrollReveal, CountUp, Section, SectionHeader } from '../components/ScrollReveal';
+import { useAuth } from '../context/AuthContext';
+import { ImageUploader } from '../components/ImageUploader';
+import {
+    getInstructorProfiles, saveInstructorProfiles, type InstructorProfile,
+    getFacilityPhotos, saveFacilityPhotos, type FacilityPhoto,
+} from '../data/mockData';
+
+/* ─── helpers ─── */
+const genId = (prefix: string) => `${prefix}_${Date.now()}`;
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none";
+const labelCls = "block text-xs font-medium text-slate-600 mb-1";
+
+/* ─── Modal (top-level) ─── */
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
+                    <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+                    <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5" /></button>
+                </div>
+                <div className="p-5 space-y-4">{children}</div>
+            </div>
+        </div>
+    );
+}
 
 const philosophyItems = [
     {
@@ -23,39 +50,88 @@ const philosophyItems = [
     },
 ];
 
-const instructors = [
-    {
-        name: '김수학',
-        title: '원장 / 수학 전문 강사',
-        desc: '서울대 수학교육과 졸업 | 15년 경력\n수능 수학 1등급 배출 다수',
-        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=c0aede&skinColor=f2d3b1',
-        color: 'from-indigo-500 to-blue-600',
-    },
-    {
-        name: '박미적',
-        title: '고등부 전문 강사',
-        desc: '연세대 수학과 졸업 | 8년 경력\n미적분·기하 전문',
-        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ParkMJ&backgroundColor=fef3c7&skinColor=f2d3b1',
-        color: 'from-blue-500 to-cyan-600',
-    },
-    {
-        name: '이함수',
-        title: '중등부 전문 강사',
-        desc: '고려대 수학과 졸업 | 10년 경력\n내신 집중 관리 전문',
-        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=LeeHS&backgroundColor=b6e3f4&skinColor=f2d3b1',
-        color: 'from-emerald-500 to-teal-600',
-    },
-    {
-        name: '최연산',
-        title: '초등부 전문 강사',
-        desc: '이화여대 수학교육과 졸업 | 7년 경력\n사고력·연산 능력 개발',
-        img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ChoiYS&backgroundColor=d1fae5&skinColor=f2d3b1',
-        color: 'from-amber-500 to-orange-600',
-    },
+const colorOptions = [
+    { label: '인디고-블루', value: 'from-indigo-500 to-blue-600' },
+    { label: '블루-시안', value: 'from-blue-500 to-cyan-600' },
+    { label: '에머럴드-틸', value: 'from-emerald-500 to-teal-600' },
+    { label: '앰버-오렌지', value: 'from-amber-500 to-orange-600' },
+    { label: '로즈-핑크', value: 'from-rose-500 to-pink-600' },
+    { label: '바이올렛-퍼플', value: 'from-violet-500 to-purple-600' },
 ];
 
 export function About() {
+    const { isAdmin } = useAuth();
     const [openPhilosophy, setOpenPhilosophy] = useState<number | null>(null);
+
+    // ── 강사진 state ──
+    const [instructors, setInstructors] = useState<InstructorProfile[]>(getInstructorProfiles);
+    const [instModal, setInstModal] = useState<'add' | 'edit' | null>(null);
+    const [editInst, setEditInst] = useState<InstructorProfile | null>(null);
+
+    // ── 시설 갤러리 state ──
+    const [facilities, setFacilities] = useState<FacilityPhoto[]>(getFacilityPhotos);
+    const [facModal, setFacModal] = useState<'add' | 'edit' | null>(null);
+    const [editFac, setEditFac] = useState<FacilityPhoto | null>(null);
+
+    /* ─── 강사 CRUD ─── */
+    const emptyInst = (): InstructorProfile => ({
+        id: genId('inst'), name: '', title: '', desc: '', img: '', color: colorOptions[0].value, order: instructors.length + 1,
+    });
+
+    const openAddInst = () => { setEditInst(emptyInst()); setInstModal('add'); };
+    const openEditInst = (inst: InstructorProfile) => { setEditInst({ ...inst }); setInstModal('edit'); };
+    const closeInstModal = () => { setInstModal(null); setEditInst(null); };
+
+    const handleSaveInst = () => {
+        if (!editInst || !editInst.name.trim()) return;
+        let updated: InstructorProfile[];
+        if (instModal === 'add') {
+            updated = [...instructors, editInst];
+        } else {
+            updated = instructors.map(i => i.id === editInst.id ? editInst : i);
+        }
+        updated.sort((a, b) => a.order - b.order);
+        setInstructors(updated);
+        saveInstructorProfiles(updated);
+        closeInstModal();
+    };
+
+    const handleDeleteInst = (id: string) => {
+        if (!confirm('이 강사를 삭제하시겠습니까?')) return;
+        const updated = instructors.filter(i => i.id !== id);
+        setInstructors(updated);
+        saveInstructorProfiles(updated);
+    };
+
+    /* ─── 시설 CRUD ─── */
+    const emptyFac = (): FacilityPhoto => ({
+        id: genId('fac'), imageUrl: '', title: '', order: facilities.length + 1,
+    });
+
+    const openAddFac = () => { setEditFac(emptyFac()); setFacModal('add'); };
+    const openEditFac = (fac: FacilityPhoto) => { setEditFac({ ...fac }); setFacModal('edit'); };
+    const closeFacModal = () => { setFacModal(null); setEditFac(null); };
+
+    const handleSaveFac = () => {
+        if (!editFac || !editFac.title.trim()) return;
+        let updated: FacilityPhoto[];
+        if (facModal === 'add') {
+            updated = [...facilities, editFac];
+        } else {
+            updated = facilities.map(f => f.id === editFac.id ? editFac : f);
+        }
+        updated.sort((a, b) => a.order - b.order);
+        setFacilities(updated);
+        saveFacilityPhotos(updated);
+        closeFacModal();
+    };
+
+    const handleDeleteFac = (id: string) => {
+        if (!confirm('이 시설 사진을 삭제하시겠습니까?')) return;
+        const updated = facilities.filter(f => f.id !== id);
+        setFacilities(updated);
+        saveFacilityPhotos(updated);
+    };
 
     return (
         <div className="flex flex-col">
@@ -102,10 +178,10 @@ export function About() {
                             </div>
                             <div className="mt-8 flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
                                 <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                                    <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=e0e7ff&skinColor=f2d3b1" alt="원장" className="w-full h-full object-cover" />
+                                    <img src={instructors[0]?.img || 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=e0e7ff&skinColor=f2d3b1'} alt="원장" className="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-slate-900">김수학</p>
+                                    <p className="font-bold text-slate-900">{instructors[0]?.name || '김수학'}</p>
                                     <p className="text-sm text-slate-500">진접 G1230 수학전문학원 원장</p>
                                 </div>
                             </div>
@@ -234,11 +310,24 @@ export function About() {
                     title="강사진 소개"
                     subtitle="검증된 실력과 열정의 강사진"
                 />
+                {isAdmin && (
+                    <div className="flex justify-end mb-4">
+                        <button onClick={openAddInst} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                            <Plus className="w-4 h-4" /> 강사 추가
+                        </button>
+                    </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {instructors.map((inst, i) => (
-                        <div key={i}>
+                        <div key={inst.id}>
                             <ScrollReveal delay={0.1 * i}>
-                                <div className="glass-card glass-card-hover rounded-2xl overflow-hidden group">
+                                <div className="glass-card glass-card-hover rounded-2xl overflow-hidden group relative">
+                                    {isAdmin && (
+                                        <div className="absolute top-2 right-2 z-10 flex gap-1">
+                                            <button onClick={() => openEditInst(inst)} className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm"><Edit2 className="w-3.5 h-3.5 text-indigo-600" /></button>
+                                            <button onClick={() => handleDeleteInst(inst.id)} className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm"><Trash2 className="w-3.5 h-3.5 text-red-500" /></button>
+                                        </div>
+                                    )}
                                     <div className={cn("bg-gradient-to-br p-6 flex justify-center", inst.color)}>
                                         <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/30 shadow-lg group-hover:scale-105 transition-transform">
                                             <img src={inst.img} alt={inst.name} className="w-full h-full object-cover"
@@ -273,20 +362,31 @@ export function About() {
                     title="시설 갤러리"
                     subtitle="쾌적한 학습 환경을 제공합니다"
                 />
+                {isAdmin && (
+                    <div className="flex justify-end mb-4">
+                        <button onClick={openAddFac} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                            <Plus className="w-4 h-4" /> 시설 사진 추가
+                        </button>
+                    </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[
-                        'https://picsum.photos/seed/fac1/600/400',
-                        'https://picsum.photos/seed/fac2/600/400',
-                        'https://picsum.photos/seed/fac3/600/400',
-                        'https://picsum.photos/seed/fac4/600/400',
-                        'https://picsum.photos/seed/fac5/600/400',
-                        'https://picsum.photos/seed/fac6/600/400',
-                    ].map((img, i) => (
-                        <ScrollReveal key={i.toString()} delay={0.05 * i} direction="scale">
-                            <div className="glass-card rounded-2xl overflow-hidden group">
+                    {facilities.map((fac, i) => (
+                        <ScrollReveal key={fac.id} delay={0.05 * i} direction="scale">
+                            <div className="glass-card rounded-2xl overflow-hidden group relative">
+                                {isAdmin && (
+                                    <div className="absolute top-2 right-2 z-10 flex gap-1">
+                                        <button onClick={() => openEditFac(fac)} className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm"><Edit2 className="w-3.5 h-3.5 text-indigo-600" /></button>
+                                        <button onClick={() => handleDeleteFac(fac.id)} className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-sm"><Trash2 className="w-3.5 h-3.5 text-red-500" /></button>
+                                    </div>
+                                )}
                                 <div className="aspect-[4/3] overflow-hidden">
-                                    <img src={img} alt={`시설 ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                                    <img src={fac.imageUrl} alt={fac.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
                                 </div>
+                                {fac.title && (
+                                    <div className="p-3 text-center">
+                                        <p className="text-sm font-medium text-slate-700">{fac.title}</p>
+                                    </div>
+                                )}
                             </div>
                         </ScrollReveal>
                     ))}
@@ -323,6 +423,88 @@ export function About() {
                     </div>
                 </div>
             </section>
+
+            {/* ─── 강사 모달 ─── */}
+            {instModal && editInst && (
+                <Modal title={instModal === 'add' ? '강사 추가' : '강사 수정'} onClose={closeInstModal}>
+                    <div>
+                        <label className={labelCls}>이름 *</label>
+                        <input className={inputCls} value={editInst.name} onChange={e => setEditInst({ ...editInst, name: e.target.value })} placeholder="강사 이름" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>직책 *</label>
+                        <input className={inputCls} value={editInst.title} onChange={e => setEditInst({ ...editInst, title: e.target.value })} placeholder="예: 원장 / 수학 전문 강사" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>설명 (학력·경력)</label>
+                        <textarea className={inputCls + " h-20"} value={editInst.desc} onChange={e => setEditInst({ ...editInst, desc: e.target.value })} placeholder="줄바꿈으로 구분" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>프로필 이미지</label>
+                        <ImageUploader
+                            currentImageUrl={editInst.img}
+                            onUpload={(result) => setEditInst({ ...editInst, img: result.url })}
+                            onUrlChange={(url) => setEditInst({ ...editInst, img: url })}
+                        />
+                    </div>
+                    <div>
+                        <label className={labelCls}>카드 배경 색상</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {colorOptions.map(c => (
+                                <button
+                                    key={c.value}
+                                    onClick={() => setEditInst({ ...editInst, color: c.value })}
+                                    className={cn(
+                                        "p-2 rounded-lg text-xs font-medium border-2 transition-all",
+                                        editInst.color === c.value ? "border-indigo-500 bg-indigo-50" : "border-slate-200 hover:border-slate-300"
+                                    )}
+                                >
+                                    <div className={cn("h-4 rounded bg-gradient-to-r mb-1", c.value)} />
+                                    {c.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelCls}>순서</label>
+                        <input type="number" className={inputCls} value={editInst.order} onChange={e => setEditInst({ ...editInst, order: Number(e.target.value) })} min={1} />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={closeInstModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+                        <button onClick={handleSaveInst} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            <Save className="w-4 h-4" /> 저장
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* ─── 시설 모달 ─── */}
+            {facModal && editFac && (
+                <Modal title={facModal === 'add' ? '시설 사진 추가' : '시설 사진 수정'} onClose={closeFacModal}>
+                    <div>
+                        <label className={labelCls}>제목 *</label>
+                        <input className={inputCls} value={editFac.title} onChange={e => setEditFac({ ...editFac, title: e.target.value })} placeholder="예: 강의실, 자습실" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>사진</label>
+                        <ImageUploader
+                            currentImageUrl={editFac.imageUrl}
+                            onUpload={(result) => setEditFac({ ...editFac, imageUrl: result.url })}
+                            onUrlChange={(url) => setEditFac({ ...editFac, imageUrl: url })}
+                        />
+                    </div>
+                    <div>
+                        <label className={labelCls}>순서</label>
+                        <input type="number" className={inputCls} value={editFac.order} onChange={e => setEditFac({ ...editFac, order: Number(e.target.value) })} min={1} />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={closeFacModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+                        <button onClick={handleSaveFac} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            <Save className="w-4 h-4" /> 저장
+                        </button>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }

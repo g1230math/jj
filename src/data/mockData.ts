@@ -619,3 +619,133 @@ export function getPopupSettings(): PopupSettings {
 export function savePopupSettings(settings: PopupSettings) {
   localStorage.setItem(POPUP_SETTINGS_KEY, JSON.stringify(settings));
 }
+
+// ── 강사진 프로필 ──
+export interface InstructorProfile {
+  id: string;
+  name: string;
+  title: string;
+  desc: string;
+  img: string;
+  color: string;
+  order: number;
+}
+
+const INSTRUCTORS_KEY = 'g1230_instructors';
+const defaultInstructors: InstructorProfile[] = [
+  { id: 'inst1', name: '김수학', title: '원장 / 수학 전문 강사', desc: '서울대 수학교육과 졸업 | 15년 경력\n수능 수학 1등급 배출 다수', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=KimMath&backgroundColor=c0aede&skinColor=f2d3b1', color: 'from-indigo-500 to-blue-600', order: 1 },
+  { id: 'inst2', name: '박미적', title: '고등부 전문 강사', desc: '연세대 수학과 졸업 | 8년 경력\n미적분·기하 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ParkMJ&backgroundColor=fef3c7&skinColor=f2d3b1', color: 'from-blue-500 to-cyan-600', order: 2 },
+  { id: 'inst3', name: '이함수', title: '중등부 전문 강사', desc: '고려대 수학과 졸업 | 10년 경력\n내신 집중 관리 전문', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=LeeHS&backgroundColor=b6e3f4&skinColor=f2d3b1', color: 'from-emerald-500 to-teal-600', order: 3 },
+  { id: 'inst4', name: '최연산', title: '초등부 전문 강사', desc: '이화여대 수학교육과 졸업 | 7년 경력\n사고력·연산 능력 개발', img: 'https://api.dicebear.com/9.x/adventurer/svg?seed=ChoiYS&backgroundColor=d1fae5&skinColor=f2d3b1', color: 'from-amber-500 to-orange-600', order: 4 },
+];
+
+export function getInstructorProfiles(): InstructorProfile[] {
+  const saved = localStorage.getItem(INSTRUCTORS_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultInstructors;
+}
+export function saveInstructorProfiles(items: InstructorProfile[]) { localStorage.setItem(INSTRUCTORS_KEY, JSON.stringify(items)); }
+
+// ── 시설 갤러리 (About 페이지) ──
+export interface FacilityPhoto {
+  id: string;
+  imageUrl: string;
+  title: string;
+  order: number;
+}
+
+const FACILITIES_KEY = 'g1230_facilities';
+const defaultFacilities: FacilityPhoto[] = [
+  { id: 'fac1', imageUrl: 'https://picsum.photos/seed/fac1/600/400', title: '강의실', order: 1 },
+  { id: 'fac2', imageUrl: 'https://picsum.photos/seed/fac2/600/400', title: '자습실', order: 2 },
+  { id: 'fac3', imageUrl: 'https://picsum.photos/seed/fac3/600/400', title: '로비', order: 3 },
+  { id: 'fac4', imageUrl: 'https://picsum.photos/seed/fac4/600/400', title: '상담실', order: 4 },
+  { id: 'fac5', imageUrl: 'https://picsum.photos/seed/fac5/600/400', title: '교재실', order: 5 },
+  { id: 'fac6', imageUrl: 'https://picsum.photos/seed/fac6/600/400', title: '휴게 공간', order: 6 },
+];
+
+export function getFacilityPhotos(): FacilityPhoto[] {
+  const saved = localStorage.getItem(FACILITIES_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultFacilities;
+}
+export function saveFacilityPhotos(items: FacilityPhoto[]) { localStorage.setItem(FACILITIES_KEY, JSON.stringify(items)); }
+
+// ── 수강 반 (개설 반 & 시간표) ──
+export interface CourseClass {
+  id: string;
+  departmentId: 'elementary' | 'middle' | 'high';
+  name: string;
+  time: string;
+  price: string;
+  students: number;
+  enrolled: number;
+  level: string;
+  order: number;
+}
+
+const COURSES_KEY = 'g1230_courses';
+const defaultCourseClasses: CourseClass[] = [
+  // 초등부
+  { id: 'cc1', departmentId: 'elementary', name: '기초 연산반', time: '월/수/금 15:00-16:30', price: '180,000원', students: 8, enrolled: 6, level: '초3~4', order: 1 },
+  { id: 'cc2', departmentId: 'elementary', name: '사고력 수학반', time: '화/목 15:00-16:30', price: '160,000원', students: 10, enrolled: 7, level: '초4~5', order: 2 },
+  { id: 'cc3', departmentId: 'elementary', name: '중등 준비반', time: '월/수/금 16:30-18:00', price: '200,000원', students: 8, enrolled: 5, level: '초5~6', order: 3 },
+  // 중등부
+  { id: 'cc4', departmentId: 'middle', name: '기본 개념반', time: '월/수/금 17:00-19:00', price: '220,000원', students: 12, enrolled: 9, level: '중1~2', order: 1 },
+  { id: 'cc5', departmentId: 'middle', name: '심화 응용반', time: '화/목/토 17:00-19:00', price: '240,000원', students: 10, enrolled: 8, level: '중2~3', order: 2 },
+  { id: 'cc6', departmentId: 'middle', name: '내신 대비 특강', time: '시험 2주 전 집중', price: '120,000원', students: 8, enrolled: 4, level: '중1~3', order: 3 },
+  { id: 'cc7', departmentId: 'middle', name: '고등 선행반', time: '월/수/금 19:00-21:00', price: '260,000원', students: 8, enrolled: 6, level: '중3', order: 4 },
+  // 고등부
+  { id: 'cc8', departmentId: 'high', name: '수학(상)·(하) 반', time: '월/수/금 18:00-20:00', price: '280,000원', students: 10, enrolled: 7, level: '고1', order: 1 },
+  { id: 'cc9', departmentId: 'high', name: '수학Ⅰ·Ⅱ 반', time: '화/목/토 18:00-20:00', price: '300,000원', students: 8, enrolled: 6, level: '고2', order: 2 },
+  { id: 'cc10', departmentId: 'high', name: '미적분·기하 반', time: '월/수/금 20:00-22:00', price: '320,000원', students: 8, enrolled: 5, level: '고2~3', order: 3 },
+  { id: 'cc11', departmentId: 'high', name: '수능 집중반', time: '화/목/토 20:00-22:00', price: '350,000원', students: 6, enrolled: 4, level: '고3', order: 4 },
+];
+
+export function getCourseClasses(): CourseClass[] {
+  const saved = localStorage.getItem(COURSES_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultCourseClasses;
+}
+export function saveCourseClasses(items: CourseClass[]) { localStorage.setItem(COURSES_KEY, JSON.stringify(items)); }
+
+// ── 합격 스토리 ──
+export interface SuccessStoryItem {
+  id: string;
+  name: string;
+  school: string;
+  department: string;
+  admissionType: string;
+  region: '서울권' | '경기권' | '의약학' | '교대';
+  year: string;
+  previousSchool: string;
+  quote: string;
+  gradeFrom?: number;
+  gradeTo?: number;
+  highlight: boolean;
+  avatar: string;
+  color: string;
+}
+
+const SUCCESS_KEY = 'g1230_success_stories';
+const defaultSuccessStories: SuccessStoryItem[] = [
+  { id: 's1', name: '김○○', school: '서울대학교', department: '수학교육과', admissionType: '수시 학생부종합', region: '서울권', year: '2025', previousSchool: '진접고', quote: '수학에 대한 자신감이 부족했지만, G1230에서 개념부터 탄탄히 다지면서 수능 수학 1등급을 받을 수 있었습니다. 선생님들의 세심한 관리 덕분입니다.', gradeFrom: 4, gradeTo: 1, highlight: true, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success1&backgroundColor=c0aede', color: 'from-indigo-600 to-blue-600' },
+  { id: 's2', name: '이○○', school: '연세대학교', department: '전자공학과', admissionType: '정시', region: '서울권', year: '2025', previousSchool: '진접고', quote: '고2 때 수학이 3등급이었는데, G1230에서 1년 동안 집중적으로 관리 받으면서 수능에서 1등급을 받았습니다.', gradeFrom: 3, gradeTo: 1, highlight: true, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success2&backgroundColor=b6e3f4', color: 'from-blue-600 to-cyan-600' },
+  { id: 's3', name: '박○○', school: '고려대학교', department: '경영학과', admissionType: '수시 논술', region: '서울권', year: '2025', previousSchool: '별내고', quote: '수학 논술 준비를 여기서 했는데, 기출 분석과 실전 연습이 정말 도움이 됐습니다.', gradeFrom: 2, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success3&backgroundColor=fef3c7', color: 'from-rose-600 to-pink-600' },
+  { id: 's4', name: '정○○', school: '가천대학교', department: '의예과', admissionType: '정시', region: '의약학', year: '2025', previousSchool: '진건고', quote: '의대를 목표로 수학 만점을 노렸고, G1230의 킬러 문항 집중 훈련이 결정적이었습니다.', gradeFrom: 2, gradeTo: 1, highlight: true, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success4&backgroundColor=d1fae5', color: 'from-emerald-600 to-teal-600' },
+  { id: 's5', name: '최○○', school: '서울교대', department: '초등교육과', admissionType: '수시 학생부교과', region: '교대', year: '2025', previousSchool: '별내고', quote: '내신 수학을 끌어올리는 데 G1230이 정말 큰 도움이 됐어요. 오답 클리닉이 최고였습니다.', gradeFrom: 3, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success5&backgroundColor=ffe4e6', color: 'from-amber-600 to-orange-600' },
+  { id: 's6', name: '한○○', school: '성균관대학교', department: '소프트웨어학과', admissionType: '정시', region: '서울권', year: '2025', previousSchool: '진접고', quote: '수능 수학 92점으로 성균관대에 합격했습니다. 모의고사 집중 훈련이 실전에서 빛을 발했어요.', gradeFrom: 3, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success6&backgroundColor=dbeafe', color: 'from-violet-600 to-indigo-600' },
+  { id: 's7', name: '윤○○', school: '경희대학교', department: '한의예과', admissionType: '수시 학생부종합', region: '의약학', year: '2025', previousSchool: '진접고', quote: '한의대 합격의 핵심은 수학이었습니다. 개념을 깊이 이해하게 해주신 선생님께 감사드립니다.', gradeFrom: 3, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success7&backgroundColor=fef9c3', color: 'from-teal-600 to-emerald-600' },
+  { id: 's8', name: '강○○', school: '서울시립대학교', department: '수학과', admissionType: '정시', region: '서울권', year: '2024', previousSchool: '진접고', quote: '수학 4등급에서 시작해 2등급까지 올린 뒤 서울시립대에 합격했습니다.', gradeFrom: 4, gradeTo: 2, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success8&backgroundColor=e0e7ff', color: 'from-blue-500 to-indigo-500' },
+  { id: 's9', name: '조○○', school: '경기대학교', department: '건축학과', admissionType: '수시 학생부교과', region: '경기권', year: '2024', previousSchool: '별내고', quote: '내신 수학 1등급을 유지할 수 있었던 건 G1230의 체계적인 시험 대비 덕분이에요.', gradeFrom: 2, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success9&backgroundColor=fce7f3', color: 'from-pink-500 to-rose-500' },
+  { id: 's10', name: '임○○', school: '인하대학교', department: '화학공학과', admissionType: '정시', region: '경기권', year: '2024', previousSchool: '진건고', quote: '수능 수학에서 예상보다 높은 점수를 받아 인하대에 합격할 수 있었습니다.', gradeFrom: 3, gradeTo: 2, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success10&backgroundColor=d1fae5', color: 'from-emerald-500 to-green-500' },
+  { id: 's11', name: '서○○', school: '한양대학교', department: '기계공학과', admissionType: '정시', region: '서울권', year: '2023', previousSchool: '진접고', quote: '재수 시절 G1230에서 수학을 다시 시작했고, 한양대에 당당히 합격했습니다.', gradeFrom: 5, gradeTo: 2, highlight: true, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success11&backgroundColor=fef3c7', color: 'from-amber-500 to-yellow-500' },
+  { id: 's12', name: '오○○', school: '중앙대학교', department: '약학과', admissionType: '수시 학생부종합', region: '의약학', year: '2023', previousSchool: '별내고', quote: '약대를 가려면 수학이 기본이라는 말을 여기서 실감했습니다.', gradeFrom: 2, gradeTo: 1, highlight: false, avatar: 'https://api.dicebear.com/9.x/adventurer/svg?seed=success12&backgroundColor=dbeafe', color: 'from-cyan-500 to-blue-500' },
+];
+
+export function getSuccessStories(): SuccessStoryItem[] {
+  const saved = localStorage.getItem(SUCCESS_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultSuccessStories;
+}
+export function saveSuccessStories(items: SuccessStoryItem[]) { localStorage.setItem(SUCCESS_KEY, JSON.stringify(items)); }
