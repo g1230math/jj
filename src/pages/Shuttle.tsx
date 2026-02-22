@@ -134,15 +134,16 @@ export function Shuttle() {
     return (
         <div className="flex flex-col">
             {/* Hero */}
-            <section className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-blue-900 text-white py-20 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-blue-900 text-white py-20 overflow-hidden wave-divider wave-divider-white">
                 <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-10 right-10 w-72 h-72 bg-blue-400 rounded-full blur-3xl" />
+                    <div className="absolute top-20 right-20 w-64 h-64 bg-blue-400 rounded-full blur-3xl" />
+                    <div className="absolute bottom-10 left-20 w-80 h-80 bg-slate-400 rounded-full blur-3xl" />
                 </div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                        <Bus className="w-16 h-16 mx-auto mb-4 text-blue-400" />
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">학원 차량 운행</h1>
-                        <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+                        <span className="text-badge inline-block px-4 py-1.5 bg-blue-500/20 border border-blue-400/30 rounded-full text-blue-300 mb-4 backdrop-blur-sm">SHUTTLE BUS</span>
+                        <h1 className="text-hero text-white mb-4">학원 차량 운행</h1>
+                        <p className="text-xl text-blue-200 max-w-2xl mx-auto font-light">
                             안전하고 편리한 등·하원 차량 서비스를 운행합니다
                         </p>
                     </motion.div>
