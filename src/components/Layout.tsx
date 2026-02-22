@@ -294,13 +294,23 @@ export function Layout() {
                 </a>
               </div>
             </div>
-            <div>
+            <div className="md:col-span-1">
               <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-4 font-display">바로가기</h3>
-              <ul className="space-y-2.5 text-sm">
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm">
                 <li><Link to="/about" className="hover:text-white transition-colors">학원소개</Link></li>
                 <li><Link to="/courses" className="hover:text-white transition-colors">수강안내</Link></li>
+                <li><Link to="/lectures" className="hover:text-white transition-colors">동영상 강의</Link></li>
                 <li><Link to="/calendar" className="hover:text-white transition-colors">학사일정</Link></li>
+                <li><Link to="/success" className="hover:text-white transition-colors">합격 현황</Link></li>
                 <li><Link to="/community" className="hover:text-white transition-colors">커뮤니티</Link></li>
+                <li><Link to="/parent-service" className="hover:text-white transition-colors">학부모 서비스</Link></li>
+                <li><Link to="/shuttle" className="hover:text-white transition-colors">셔틀버스</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">오시는 길</Link></li>
+                <li>
+                  <Link to="/" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { const btn = document.querySelector('[data-consult-btn]') as HTMLButtonElement; btn?.click(); }, 300); }} className="text-emerald-400 hover:text-emerald-300 transition-colors font-semibold">
+                    온라인 상담 신청
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>

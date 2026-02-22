@@ -517,7 +517,7 @@ export function Home() {
                   <Phone className="w-5 h-5 mr-2" />
                   031-123-4567
                 </a>
-                <button onClick={() => setConsultOpen(true)} className="inline-flex items-center px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-all">
+                <button data-consult-btn onClick={() => setConsultOpen(true)} className="inline-flex items-center px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-all">
                   온라인 상담 신청 <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
               </div>
