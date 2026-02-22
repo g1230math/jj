@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Bus, Plus, Trash2, Save, ArrowUp, ArrowDown, RotateCcw, Clock, MapPin, GripVertical } from 'lucide-react';
+import { Bus, Plus, Trash2, Save, ArrowUp, ArrowDown, RotateCcw, Clock, MapPin, GripVertical, X } from 'lucide-react';
 import { ShuttleRoute, ShuttleStop, getShuttleRoutes, saveShuttleRoutes, defaultRoutes } from '../pages/Shuttle';
+
+const vehicleColors = [
+    { color: 'from-blue-500 to-blue-600', colorBg: 'bg-blue-50', colorText: 'text-blue-700' },
+    { color: 'from-emerald-500 to-emerald-600', colorBg: 'bg-emerald-50', colorText: 'text-emerald-700' },
+    { color: 'from-amber-500 to-orange-600', colorBg: 'bg-amber-50', colorText: 'text-amber-700' },
+    { color: 'from-rose-500 to-pink-600', colorBg: 'bg-rose-50', colorText: 'text-rose-700' },
+    { color: 'from-violet-500 to-purple-600', colorBg: 'bg-violet-50', colorText: 'text-violet-700' },
+    { color: 'from-cyan-500 to-teal-600', colorBg: 'bg-cyan-50', colorText: 'text-cyan-700' },
+];
 
 export function ShuttleAdmin() {
     const [routes, setRoutes] = useState<ShuttleRoute[]>(getShuttleRoutes());
@@ -24,6 +33,34 @@ export function ShuttleAdmin() {
 
     const updateRoute = (id: string, updates: Partial<ShuttleRoute>) => {
         setRoutes(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+    };
+
+    const addRoute = () => {
+        const nextNum = routes.length + 1;
+        const palette = vehicleColors[(nextNum - 1) % vehicleColors.length];
+        const newRoute: ShuttleRoute = {
+            id: `route_${Date.now()}`,
+            name: `${nextNum}호차`,
+            ...palette,
+            driver: '',
+            phone: '',
+            departureTime: '14:30',
+            returnTime: '22:10',
+            stops: [{ name: '출발 정류장', time: '14:30' }, { name: '학원 도착', time: '15:00' }],
+            returnStops: [{ name: '학원 출발', time: '22:10' }, { name: '도착 정류장', time: '22:30' }],
+        };
+        const updated = [...routes, newRoute];
+        setRoutes(updated);
+        setActiveRouteId(newRoute.id);
+    };
+
+    const removeRoute = (id: string) => {
+        if (routes.length <= 1) { alert('최소 1대의 차량이 필요합니다.'); return; }
+        const target = routes.find(r => r.id === id);
+        if (!confirm(`"${target?.name ?? ''}" 차량을 삭제하시겠습니까?`)) return;
+        const updated = routes.filter(r => r.id !== id);
+        setRoutes(updated);
+        if (activeRouteId === id) setActiveRouteId(updated[0]?.id || '');
     };
 
     const updateStop = (routeId: string, direction: 'stops' | 'returnStops', index: number, updates: Partial<ShuttleStop>) => {
@@ -130,17 +167,33 @@ export function ShuttleAdmin() {
             </div>
 
             {/* Bus tabs */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
                 {routes.map(route => (
-                    <button key={route.id} onClick={() => setActiveRouteId(route.id)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeRouteId === route.id
+                    <div key={route.id} className="relative group">
+                        <button onClick={() => setActiveRouteId(route.id)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeRouteId === route.id
                                 ? 'bg-indigo-600 text-white shadow-sm'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                    >
-                        <Bus className="w-4 h-4" /> {route.name}
-                    </button>
+                                }`}
+                        >
+                            <Bus className="w-4 h-4" /> {route.name}
+                        </button>
+                        {routes.length > 1 && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); removeRoute(route.id); }}
+                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600"
+                                title="차량 삭제"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        )}
+                    </div>
                 ))}
+                <button onClick={addRoute}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors border-2 border-dashed border-indigo-200"
+                >
+                    <Plus className="w-4 h-4" /> 차량 추가
+                </button>
             </div>
 
             {/* Route Settings */}
