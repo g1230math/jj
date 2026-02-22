@@ -486,46 +486,145 @@ export function getInquiries(): InquiryItem[] {
 }
 export function saveInquiries(items: InquiryItem[]) { localStorage.setItem(INQUIRIES_KEY, JSON.stringify(items)); }
 
+// --- 학사일정 관리 ---
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // ISO 'YYYY-MM-DD'
+  type: 'holiday' | 'academy' | 'school' | 'exam';
+  school: string; // '전체', '해밀초', '진접초', '주곡초', '풍양중', '주곡중', '진접중', '광동중', or any custom
+  color: string;
+  description: string;
+}
 
-export const calendarEvents = [
-  // 2026 한국 공휴일
-  { id: 'h1', title: '신정', date: new Date(2026, 0, 1), type: 'holiday', color: 'bg-purple-500', description: '새해 첫날' },
-  { id: 'h2', title: '설날 연휴', date: new Date(2026, 1, 16), type: 'holiday', color: 'bg-purple-500', description: '설날 연휴 (2/16~2/18)' },
-  { id: 'h3', title: '설날', date: new Date(2026, 1, 17), type: 'holiday', color: 'bg-purple-500', description: '음력 1월 1일' },
-  { id: 'h4', title: '설날 연휴', date: new Date(2026, 1, 18), type: 'holiday', color: 'bg-purple-500', description: '설날 연휴 (2/16~2/18)' },
-  { id: 'h5', title: '삼일절', date: new Date(2026, 2, 1), type: 'holiday', color: 'bg-purple-500', description: '3·1 독립운동 기념일' },
-  { id: 'h6', title: '대체공휴일', date: new Date(2026, 2, 2), type: 'holiday', color: 'bg-purple-500', description: '삼일절 대체공휴일 (일→월)' },
-  { id: 'h7', title: '어린이날', date: new Date(2026, 4, 5), type: 'holiday', color: 'bg-purple-500', description: '' },
-  { id: 'h8', title: '부처님오신날', date: new Date(2026, 4, 24), type: 'holiday', color: 'bg-purple-500', description: '음력 4월 8일' },
-  { id: 'h9', title: '현충일', date: new Date(2026, 5, 6), type: 'holiday', color: 'bg-purple-500', description: '호국영령 추모일' },
-  { id: 'h10', title: '광복절', date: new Date(2026, 7, 15), type: 'holiday', color: 'bg-purple-500', description: '제81주년 광복절' },
-  { id: 'h11', title: '추석 연휴', date: new Date(2026, 8, 24), type: 'holiday', color: 'bg-purple-500', description: '추석 연휴 (9/24~9/26)' },
-  { id: 'h12', title: '추석', date: new Date(2026, 8, 25), type: 'holiday', color: 'bg-purple-500', description: '음력 8월 15일' },
-  { id: 'h13', title: '추석 연휴', date: new Date(2026, 8, 26), type: 'holiday', color: 'bg-purple-500', description: '추석 연휴 (9/24~9/26)' },
-  { id: 'h14', title: '개천절', date: new Date(2026, 9, 3), type: 'holiday', color: 'bg-purple-500', description: '단군 건국 기념일' },
-  { id: 'h15', title: '한글날', date: new Date(2026, 9, 9), type: 'holiday', color: 'bg-purple-500', description: '세종대왕 한글 반포 기념일' },
-  { id: 'h16', title: '크리스마스', date: new Date(2026, 11, 25), type: 'holiday', color: 'bg-purple-500', description: '' },
-  // 학원 일정 (2월)
-  { id: 'e0', title: '설 연휴 휴원', date: new Date(2026, 1, 16), type: 'academy', color: 'bg-blue-500', description: '설날 연휴 휴원 (2/16~2/18)' },
-  { id: 'e1', title: '중간고사 대비반 개강', date: new Date(2026, 1, 25), type: 'academy', color: 'bg-blue-500', description: '중등·고등부 중간고사 대비 특강 개강' },
-  // 학원 일정 (3월~)
-  { id: 'e4', title: '봄학기 개강', date: new Date(2026, 2, 2), type: 'academy', color: 'bg-blue-500', description: '2026학년도 1학기 정규 수업 시작' },
-  { id: 'e5', title: '학부모 간담회', date: new Date(2026, 2, 14), type: 'academy', color: 'bg-blue-500', description: '1학기 학습 계획 및 진도 안내' },
-  { id: 'e6', title: '월말 정기 테스트', date: new Date(2026, 2, 28), type: 'academy', color: 'bg-blue-500', description: '전 학년 월말 정기 평가' },
-  { id: 'e7', title: '중간고사 특강 시작', date: new Date(2026, 3, 6), type: 'academy', color: 'bg-blue-500', description: '중·고등부 1학기 중간고사 대비 집중 특강' },
-  { id: 'e8', title: '월말 정기 테스트', date: new Date(2026, 3, 25), type: 'academy', color: 'bg-blue-500', description: '전 학년 월말 정기 평가' },
-  { id: 'e9', title: '기말고사 대비반', date: new Date(2026, 5, 1), type: 'academy', color: 'bg-blue-500', description: '1학기 기말고사 대비 특강 개강' },
-  { id: 'e10', title: '여름방학 특강', date: new Date(2026, 6, 20), type: 'academy', color: 'bg-blue-500', description: '여름방학 집중 보충 및 선행 프로그램' },
-  // 학교 행사
-  { id: 'e2', title: '진접중 체육대회', date: new Date(2026, 4, 8), type: 'school', color: 'bg-green-500', description: '진접중학교 봄 체육대회' },
-  { id: 'e11', title: '진접중 중간고사', date: new Date(2026, 3, 13), type: 'exam', color: 'bg-red-500', description: '진접중학교 1학기 중간고사 (4/13~4/15)' },
-  { id: 'e12', title: '오남중 중간고사', date: new Date(2026, 3, 15), type: 'exam', color: 'bg-red-500', description: '오남중학교 1학기 중간고사 (4/15~4/17)' },
-  // 시험 일정
-  { id: 'e3', title: '3월 모의고사', date: new Date(2026, 2, 12), type: 'exam', color: 'bg-red-500', description: '고1·2·3 전국연합학력평가' },
-  { id: 'e13', title: '6월 모의평가', date: new Date(2026, 5, 4), type: 'exam', color: 'bg-red-500', description: '대학수학능력시험 6월 모의평가' },
-  { id: 'e14', title: '9월 모의평가', date: new Date(2026, 8, 2), type: 'exam', color: 'bg-red-500', description: '대학수학능력시험 9월 모의평가' },
-  { id: 'e15', title: '수능', date: new Date(2026, 10, 19), type: 'exam', color: 'bg-red-500', description: '2027학년도 대학수학능력시험' },
+export const SCHOOL_LIST = [
+  '전체', '해밀초', '진접초', '주곡초', '풍양중', '주곡중', '진접중', '광동중',
+] as const;
+
+const defaultCalendarEvents: CalendarEvent[] = [
+  // ═══════ 2026 한국 공휴일 ═══════
+  { id: 'h1', title: '신정', date: '2026-01-01', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '새해 첫날' },
+  { id: 'h2', title: '설날 연휴', date: '2026-02-16', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '설날 연휴 (2/16~2/18)' },
+  { id: 'h3', title: '설날', date: '2026-02-17', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '음력 1월 1일' },
+  { id: 'h4', title: '설날 연휴', date: '2026-02-18', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '설날 연휴 (2/16~2/18)' },
+  { id: 'h5', title: '삼일절', date: '2026-03-01', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '3·1 독립운동 기념일' },
+  { id: 'h6', title: '대체공휴일', date: '2026-03-02', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '삼일절 대체공휴일 (일→월)' },
+  { id: 'h7', title: '어린이날', date: '2026-05-05', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '' },
+  { id: 'h8', title: '부처님오신날', date: '2026-05-24', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '음력 4월 8일' },
+  { id: 'h9', title: '현충일', date: '2026-06-06', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '호국영령 추모일' },
+  { id: 'h10', title: '광복절', date: '2026-08-15', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '제81주년 광복절' },
+  { id: 'h11', title: '추석 연휴', date: '2026-09-24', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '추석 연휴 (9/24~9/26)' },
+  { id: 'h12', title: '추석', date: '2026-09-25', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '음력 8월 15일' },
+  { id: 'h13', title: '추석 연휴', date: '2026-09-26', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '추석 연휴 (9/24~9/26)' },
+  { id: 'h14', title: '개천절', date: '2026-10-03', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '단군 건국 기념일' },
+  { id: 'h15', title: '한글날', date: '2026-10-09', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '세종대왕 한글 반포 기념일' },
+  { id: 'h16', title: '크리스마스', date: '2026-12-25', type: 'holiday', school: '전체', color: 'bg-purple-500', description: '' },
+
+  // ═══════ 학원 일정 ═══════
+  { id: 'e0', title: '설 연휴 휴원', date: '2026-02-16', type: 'academy', school: '전체', color: 'bg-blue-500', description: '설날 연휴 휴원 (2/16~2/18)' },
+  { id: 'e1', title: '중간고사 대비반 개강', date: '2026-02-25', type: 'academy', school: '전체', color: 'bg-blue-500', description: '중등·고등부 중간고사 대비 특강 개강' },
+  { id: 'e4', title: '봄학기 개강', date: '2026-03-02', type: 'academy', school: '전체', color: 'bg-blue-500', description: '2026학년도 1학기 정규 수업 시작' },
+  { id: 'e5', title: '학부모 간담회', date: '2026-03-14', type: 'academy', school: '전체', color: 'bg-blue-500', description: '1학기 학습 계획 및 진도 안내' },
+  { id: 'e6', title: '월말 정기 테스트', date: '2026-03-28', type: 'academy', school: '전체', color: 'bg-blue-500', description: '전 학년 월말 정기 평가' },
+  { id: 'e7', title: '중간고사 특강 시작', date: '2026-04-06', type: 'academy', school: '전체', color: 'bg-blue-500', description: '중·고등부 1학기 중간고사 대비 집중 특강' },
+  { id: 'e8', title: '월말 정기 테스트', date: '2026-04-25', type: 'academy', school: '전체', color: 'bg-blue-500', description: '전 학년 월말 정기 평가' },
+  { id: 'e9', title: '기말고사 대비반', date: '2026-06-01', type: 'academy', school: '전체', color: 'bg-blue-500', description: '1학기 기말고사 대비 특강 개강' },
+  { id: 'e10', title: '여름방학 특강', date: '2026-07-20', type: 'academy', school: '전체', color: 'bg-blue-500', description: '여름방학 집중 보충 및 선행 프로그램' },
+
+  // ═══════ 시험 일정 (전국) ═══════
+  { id: 'e3', title: '3월 모의고사', date: '2026-03-12', type: 'exam', school: '전체', color: 'bg-red-500', description: '고1·2·3 전국연합학력평가' },
+  { id: 'e13', title: '6월 모의평가', date: '2026-06-04', type: 'exam', school: '전체', color: 'bg-red-500', description: '대학수학능력시험 6월 모의평가' },
+  { id: 'e14', title: '9월 모의평가', date: '2026-09-02', type: 'exam', school: '전체', color: 'bg-red-500', description: '대학수학능력시험 9월 모의평가' },
+  { id: 'e15', title: '수능', date: '2026-11-19', type: 'exam', school: '전체', color: 'bg-red-500', description: '2027학년도 대학수학능력시험' },
+
+  // ═══════ 초등학교 2026 학사일정 (예상) ═══════
+  // --- 해밀초 ---
+  { id: 'sc_he1', title: '해밀초 입학/개학', date: '2026-03-02', type: 'school', school: '해밀초', color: 'bg-green-500', description: '2026학년도 1학기 입학식 및 개학' },
+  { id: 'sc_he2', title: '해밀초 학부모 상담주간', date: '2026-03-30', type: 'school', school: '해밀초', color: 'bg-green-500', description: '학부모 상담주간 (3/30~4/3)' },
+  { id: 'sc_he3', title: '해밀초 봄 재량휴업일', date: '2026-05-04', type: 'school', school: '해밀초', color: 'bg-green-500', description: '봄 재량휴업일' },
+  { id: 'sc_he4', title: '해밀초 여름방학식', date: '2026-07-17', type: 'school', school: '해밀초', color: 'bg-green-500', description: '1학기 여름방학 시작' },
+  { id: 'sc_he5', title: '해밀초 2학기 개학', date: '2026-08-24', type: 'school', school: '해밀초', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_he6', title: '해밀초 가을 재량휴업일', date: '2026-10-12', type: 'school', school: '해밀초', color: 'bg-green-500', description: '가을 재량휴업일 (한글날 연계)' },
+  { id: 'sc_he7', title: '해밀초 겨울방학/졸업식', date: '2027-01-05', type: 'school', school: '해밀초', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // --- 진접초 ---
+  { id: 'sc_ji1', title: '진접초 입학/개학', date: '2026-03-02', type: 'school', school: '진접초', color: 'bg-green-500', description: '2026학년도 1학기 입학식 및 개학' },
+  { id: 'sc_ji2', title: '진접초 학부모 상담주간', date: '2026-03-30', type: 'school', school: '진접초', color: 'bg-green-500', description: '학부모 상담주간 (3/30~4/3)' },
+  { id: 'sc_ji3', title: '진접초 봄 재량휴업일', date: '2026-05-04', type: 'school', school: '진접초', color: 'bg-green-500', description: '봄 재량휴업일' },
+  { id: 'sc_ji4', title: '진접초 여름방학식', date: '2026-07-17', type: 'school', school: '진접초', color: 'bg-green-500', description: '1학기 여름방학 시작' },
+  { id: 'sc_ji5', title: '진접초 2학기 개학', date: '2026-08-24', type: 'school', school: '진접초', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_ji6', title: '진접초 가을 재량휴업일', date: '2026-10-12', type: 'school', school: '진접초', color: 'bg-green-500', description: '가을 재량휴업일 (한글날 연계)' },
+  { id: 'sc_ji7', title: '진접초 겨울방학/졸업식', date: '2027-01-05', type: 'school', school: '진접초', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // --- 주곡초 ---
+  { id: 'sc_ju1', title: '주곡초 입학/개학', date: '2026-03-02', type: 'school', school: '주곡초', color: 'bg-green-500', description: '2026학년도 1학기 입학식 및 개학' },
+  { id: 'sc_ju2', title: '주곡초 학부모 상담주간', date: '2026-03-30', type: 'school', school: '주곡초', color: 'bg-green-500', description: '학부모 상담주간 (3/30~4/3)' },
+  { id: 'sc_ju3', title: '주곡초 봄 재량휴업일', date: '2026-05-04', type: 'school', school: '주곡초', color: 'bg-green-500', description: '봄 재량휴업일' },
+  { id: 'sc_ju4', title: '주곡초 여름방학식', date: '2026-07-17', type: 'school', school: '주곡초', color: 'bg-green-500', description: '1학기 여름방학 시작' },
+  { id: 'sc_ju5', title: '주곡초 2학기 개학', date: '2026-08-24', type: 'school', school: '주곡초', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_ju6', title: '주곡초 가을 재량휴업일', date: '2026-10-12', type: 'school', school: '주곡초', color: 'bg-green-500', description: '가을 재량휴업일 (한글날 연계)' },
+  { id: 'sc_ju7', title: '주곡초 겨울방학/졸업식', date: '2027-01-05', type: 'school', school: '주곡초', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // ═══════ 중학교 2026 학사일정 (예상) ═══════
+  // --- 풍양중 ---
+  { id: 'sc_py1', title: '풍양중 개학식', date: '2026-03-02', type: 'school', school: '풍양중', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_py2', title: '풍양중 1학기 중간고사', date: '2026-04-27', type: 'exam', school: '풍양중', color: 'bg-red-500', description: '1학기 중간고사 (4/27~4/30)' },
+  { id: 'sc_py3', title: '풍양중 1학기 기말고사', date: '2026-07-01', type: 'exam', school: '풍양중', color: 'bg-red-500', description: '1학기 기말고사 (7/1~7/3)' },
+  { id: 'sc_py4', title: '풍양중 여름방학식', date: '2026-07-17', type: 'school', school: '풍양중', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_py5', title: '풍양중 2학기 개학', date: '2026-08-17', type: 'school', school: '풍양중', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_py6', title: '풍양중 2학기 중간고사', date: '2026-10-12', type: 'exam', school: '풍양중', color: 'bg-red-500', description: '2학기 중간고사 (10/12~10/15)' },
+  { id: 'sc_py7', title: '풍양중 2학기 기말고사', date: '2026-12-09', type: 'exam', school: '풍양중', color: 'bg-red-500', description: '2학기 기말고사 (12/9~12/11)' },
+  { id: 'sc_py8', title: '풍양중 겨울방학/졸업식', date: '2026-12-31', type: 'school', school: '풍양중', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // --- 주곡중 ---
+  { id: 'sc_jm1', title: '주곡중 개학식', date: '2026-03-02', type: 'school', school: '주곡중', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_jm2', title: '주곡중 1학기 중간고사', date: '2026-04-27', type: 'exam', school: '주곡중', color: 'bg-red-500', description: '1학기 중간고사 (4/27~4/30)' },
+  { id: 'sc_jm3', title: '주곡중 1학기 기말고사', date: '2026-07-01', type: 'exam', school: '주곡중', color: 'bg-red-500', description: '1학기 기말고사 (7/1~7/3)' },
+  { id: 'sc_jm4', title: '주곡중 여름방학식', date: '2026-07-17', type: 'school', school: '주곡중', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_jm5', title: '주곡중 2학기 개학', date: '2026-08-17', type: 'school', school: '주곡중', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_jm6', title: '주곡중 2학기 중간고사', date: '2026-10-12', type: 'exam', school: '주곡중', color: 'bg-red-500', description: '2학기 중간고사 (10/12~10/15)' },
+  { id: 'sc_jm7', title: '주곡중 2학기 기말고사', date: '2026-12-09', type: 'exam', school: '주곡중', color: 'bg-red-500', description: '2학기 기말고사 (12/9~12/11)' },
+  { id: 'sc_jm8', title: '주곡중 겨울방학/졸업식', date: '2026-12-31', type: 'school', school: '주곡중', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+
+  // --- 진접중 ---
+  { id: 'sc_jj1', title: '진접중 개학식', date: '2026-03-02', type: 'school', school: '진접중', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_jj2', title: '진접중 1학기 중간고사', date: '2026-04-27', type: 'exam', school: '진접중', color: 'bg-red-500', description: '1학기 중간고사 (4/27~4/30)' },
+  { id: 'sc_jj3', title: '진접중 1학기 기말고사', date: '2026-07-01', type: 'exam', school: '진접중', color: 'bg-red-500', description: '1학기 기말고사 (7/1~7/3)' },
+  { id: 'sc_jj4', title: '진접중 여름방학식', date: '2026-07-17', type: 'school', school: '진접중', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_jj5', title: '진접중 2학기 개학', date: '2026-08-17', type: 'school', school: '진접중', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_jj6', title: '진접중 2학기 중간고사', date: '2026-10-12', type: 'exam', school: '진접중', color: 'bg-red-500', description: '2학기 중간고사 (10/12~10/15)' },
+  { id: 'sc_jj7', title: '진접중 2학기 기말고사', date: '2026-12-09', type: 'exam', school: '진접중', color: 'bg-red-500', description: '2학기 기말고사 (12/9~12/11)' },
+  { id: 'sc_jj8', title: '진접중 겨울방학/졸업식', date: '2026-12-31', type: 'school', school: '진접중', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
+  { id: 'e2', title: '진접중 체육대회', date: '2026-05-08', type: 'school', school: '진접중', color: 'bg-green-500', description: '진접중학교 봄 체육대회' },
+
+  // --- 광동중 ---
+  { id: 'sc_gd1', title: '광동중 개학식', date: '2026-03-02', type: 'school', school: '광동중', color: 'bg-green-500', description: '2026학년도 1학기 개학' },
+  { id: 'sc_gd2', title: '광동중 1학기 중간고사', date: '2026-04-27', type: 'exam', school: '광동중', color: 'bg-red-500', description: '1학기 중간고사 (4/27~4/30)' },
+  { id: 'sc_gd3', title: '광동중 1학기 기말고사', date: '2026-07-01', type: 'exam', school: '광동중', color: 'bg-red-500', description: '1학기 기말고사 (7/1~7/3)' },
+  { id: 'sc_gd4', title: '광동중 여름방학식', date: '2026-07-17', type: 'school', school: '광동중', color: 'bg-green-500', description: '여름방학 시작' },
+  { id: 'sc_gd5', title: '광동중 2학기 개학', date: '2026-08-17', type: 'school', school: '광동중', color: 'bg-green-500', description: '2학기 개학식' },
+  { id: 'sc_gd6', title: '광동중 2학기 중간고사', date: '2026-10-12', type: 'exam', school: '광동중', color: 'bg-red-500', description: '2학기 중간고사 (10/12~10/15)' },
+  { id: 'sc_gd7', title: '광동중 2학기 기말고사', date: '2026-12-09', type: 'exam', school: '광동중', color: 'bg-red-500', description: '2학기 기말고사 (12/9~12/11)' },
+  { id: 'sc_gd8', title: '광동중 겨울방학/졸업식', date: '2026-12-31', type: 'school', school: '광동중', color: 'bg-green-500', description: '겨울방학식 및 졸업식' },
 ];
+
+// legacy compat — for Home.tsx that reads calendarEvents directly
+export const calendarEvents = defaultCalendarEvents.map(e => ({
+  ...e,
+  date: (() => { const [y, m, d] = e.date.split('-').map(Number); return new Date(y, m - 1, d); })(),
+}));
+
+export function getCalendarEvents(): CalendarEvent[] {
+  const raw = localStorage.getItem('g1230_calendarEvents');
+  if (raw) {
+    try { return JSON.parse(raw); } catch { /* fall through */ }
+  }
+  return defaultCalendarEvents;
+}
+
+export function saveCalendarEvents(items: CalendarEvent[]) {
+  localStorage.setItem('g1230_calendarEvents', JSON.stringify(items));
+}
 
 export const studentGrades = [
   { subject: '1학기 중간', score: 85 },
