@@ -926,3 +926,76 @@ export function getSuccessStories(): SuccessStoryItem[] {
   return defaultSuccessStories;
 }
 export function saveSuccessStories(items: SuccessStoryItem[]) { localStorage.setItem(SUCCESS_KEY, JSON.stringify(items)); }
+
+/* ═══════ HOME: Stats ═══════ */
+export interface HomeStat {
+  id: string;
+  label: string;
+  value: number;
+  suffix: string;
+  desc: string;
+  decimals?: number;
+  order: number;
+}
+const defaultHomeStats: HomeStat[] = [
+  { id: 'hs1', label: '누적 수강생', value: 1200, suffix: '+', desc: '명', order: 1 },
+  { id: 'hs2', label: '내신 1등급 비율', value: 87, suffix: '', desc: '%', order: 2 },
+  { id: 'hs3', label: '수업 만족도', value: 4.9, suffix: '', desc: '/5.0', decimals: 1, order: 3 },
+  { id: 'hs4', label: '운영', value: 15, suffix: '', desc: '년', order: 4 },
+];
+export function getHomeStats(): HomeStat[] {
+  const raw = localStorage.getItem('g1230_homeStats');
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return defaultHomeStats;
+}
+export function saveHomeStats(items: HomeStat[]) { localStorage.setItem('g1230_homeStats', JSON.stringify(items)); }
+
+/* ═══════ HOME: Testimonials ═══════ */
+export interface HomeTestimonial {
+  id: string;
+  name: string;
+  grade: string;
+  content: string;
+  before: number;
+  after: number;
+  order: number;
+}
+const defaultTestimonials: HomeTestimonial[] = [
+  { id: 'ht1', name: '김○○ 학부모', grade: '중2', content: '수학 성적이 60점대에서 94점으로 올랐습니다. 선생님의 꼼꼼한 관리와 오답 클리닉 덕분이에요.', before: 62, after: 94, order: 1 },
+  { id: 'ht2', name: '이○○ 학생', grade: '고1', content: '수학을 싫어했는데 여기서 개념부터 다시 잡고 나니까 자신감이 생겼어요. 이번 중간고사 1등급!', before: 71, after: 96, order: 2 },
+  { id: 'ht3', name: '박○○ 학부모', grade: '초5', content: '아이가 수학 학원을 즐거워합니다. 사고력 수업이 재밌다고 하네요. 영재원 준비도 잘 되고 있어요.', before: 78, after: 97, order: 3 },
+  { id: 'ht4', name: '최○○ 학생', grade: '중3', content: '고등 선행까지 탄탄하게 준비할 수 있어서 좋아요. 모의고사 성적도 꾸준히 상승 중입니다.', before: 55, after: 88, order: 4 },
+];
+export function getHomeTestimonials(): HomeTestimonial[] {
+  const raw = localStorage.getItem('g1230_homeTestimonials');
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return defaultTestimonials;
+}
+export function saveHomeTestimonials(items: HomeTestimonial[]) { localStorage.setItem('g1230_homeTestimonials', JSON.stringify(items)); }
+
+/* ═══════ HOME: Program Features ═══════ */
+export interface HomeProgramFeature {
+  id: string;
+  departmentId: 'elementary' | 'middle' | 'high';
+  title: string;
+  desc: string;
+  order: number;
+}
+const defaultProgramFeatures: HomeProgramFeature[] = [
+  { id: 'pf1', departmentId: 'elementary', title: '연산/사고력 강화', desc: '기초 연산 능력과 수학적 사고력 개발에 초점', order: 1 },
+  { id: 'pf2', departmentId: 'elementary', title: '서술형 대비', desc: '교과 서술형 문제 풀이 훈련으로 실전 감각 향상', order: 2 },
+  { id: 'pf3', departmentId: 'elementary', title: '영재원 준비반', desc: '심화 사고력 및 영재교육원 입시 대비 특별반', order: 3 },
+  { id: 'pf4', departmentId: 'middle', title: '내신 완벽 대비', desc: '교과서 분석, 기출 유형 훈련, 오답 클리닉 제공', order: 1 },
+  { id: 'pf5', departmentId: 'middle', title: '선행 학습', desc: '다음 학기 내용 미리 준비하여 학교 수업에서 자신감', order: 2 },
+  { id: 'pf6', departmentId: 'middle', title: '정기 모의고사', desc: '월 1회 실전 모의고사로 약점 파악 및 보완', order: 3 },
+  { id: 'pf7', departmentId: 'high', title: '수능 만점 전략', desc: 'EBS 연계 분석, 킬러 문항 집중 훈련 과정', order: 1 },
+  { id: 'pf8', departmentId: 'high', title: '내신 1등급', desc: '학교별 기출 분석 + 내신 직전 집중 대비반 운영', order: 2 },
+  { id: 'pf9', departmentId: 'high', title: '1:1 첨삭 관리', desc: '개인별 약점 분석 리포트와 맞춤형 보충 학습', order: 3 },
+];
+export function getProgramFeatures(): HomeProgramFeature[] {
+  const raw = localStorage.getItem('g1230_programFeatures');
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return defaultProgramFeatures;
+}
+export function saveProgramFeatures(items: HomeProgramFeature[]) { localStorage.setItem('g1230_programFeatures', JSON.stringify(items)); }
+
