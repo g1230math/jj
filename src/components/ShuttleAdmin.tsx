@@ -12,22 +12,29 @@ const vehicleColors = [
 ];
 
 export function ShuttleAdmin() {
-    const [routes, setRoutes] = useState<ShuttleRoute[]>(getShuttleRoutes());
-    const [activeRouteId, setActiveRouteId] = useState<string>(routes[0]?.id || '1');
+    const [routes, setRoutes] = useState<ShuttleRoute[]>([]);
+    const [activeRouteId, setActiveRouteId] = useState<string>('1');
     const [saved, setSaved] = useState(false);
+
+    useEffect(() => {
+        getShuttleRoutes().then(r => {
+            setRoutes(r);
+            if (r.length > 0) setActiveRouteId(r[0].id);
+        });
+    }, []);
 
     const activeRoute = routes.find(r => r.id === activeRouteId);
 
-    const handleSave = () => {
-        saveShuttleRoutes(routes);
+    const handleSave = async () => {
+        await saveShuttleRoutes(routes);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
     };
 
-    const handleReset = () => {
+    const handleReset = async () => {
         if (confirm('기본 노선으로 초기화하시겠습니까? 변경 내용이 모두 사라집니다.')) {
             setRoutes(defaultRoutes);
-            saveShuttleRoutes(defaultRoutes);
+            await saveShuttleRoutes(defaultRoutes);
         }
     };
 
