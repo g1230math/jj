@@ -1024,3 +1024,42 @@ export function getProgramFeatures(): HomeProgramFeature[] {
 }
 export function saveProgramFeatures(items: HomeProgramFeature[]) { localStorage.setItem('g1230_programFeatures', JSON.stringify(items)); }
 
+/* ═══════════════════════════════════════════
+   CONSULT REQUESTS (상담 신청)
+═══════════════════════════════════════════ */
+export interface ConsultRequest {
+  id: string;
+  studentSchool: string;
+  studentGrade: string;
+  phone: string;
+  preferredDate: string;
+  preferredTime: string;
+  message: string;
+  status: 'pending' | 'confirmed' | 'completed';
+  createdAt: string;
+}
+
+const CONSULT_KEY = 'g1230_consultRequests';
+
+export function getConsultRequests(): ConsultRequest[] {
+  const raw = localStorage.getItem(CONSULT_KEY);
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return [];
+}
+
+export function saveConsultRequests(items: ConsultRequest[]) {
+  localStorage.setItem(CONSULT_KEY, JSON.stringify(items));
+}
+
+export function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status' | 'createdAt'>): ConsultRequest {
+  const list = getConsultRequests();
+  const newReq: ConsultRequest = {
+    ...req,
+    id: `consult_${Date.now()}`,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  };
+  list.unshift(newReq);
+  saveConsultRequests(list);
+  return newReq;
+}

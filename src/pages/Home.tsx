@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getInstructorProfiles, getHomeStats, saveHomeStats, getHomeTestimonials, saveHomeTestimonials, getProgramFeatures, saveProgramFeatures, type HomeStat, type HomeTestimonial, type HomeProgramFeature } from '../data/mockData';
-import { ArrowRight, BookOpen, Calendar as CalendarIcon, PlayCircle, Users, Star, Trophy, Clock, Sparkles, GraduationCap, Calculator, ChevronLeft, ChevronRight, Quote, Phone, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { getInstructorProfiles, getHomeStats, saveHomeStats, getHomeTestimonials, saveHomeTestimonials, getProgramFeatures, saveProgramFeatures, addConsultRequest, type HomeStat, type HomeTestimonial, type HomeProgramFeature } from '../data/mockData';
+import { ArrowRight, BookOpen, Calendar as CalendarIcon, PlayCircle, Users, Star, Trophy, Clock, Sparkles, GraduationCap, Calculator, ChevronLeft, ChevronRight, Quote, Phone, Plus, Edit2, Trash2, Save, X, CheckCircle, Send } from 'lucide-react';
 import { getNotices, calendarEvents } from '../data/mockData';
+import emailjs from '@emailjs/browser';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
@@ -106,6 +107,35 @@ export function Home() {
   };
   const handleDeleteFeat = (id: string) => { if (!confirm('삭제하시겠습니까?')) return; const u = programFeatures.filter(f => f.id !== id); setProgramFeatures(u); saveProgramFeatures(u); };
 
+  // ── Consult Request ──
+  const [consultOpen, setConsultOpen] = useState(false);
+  const [consultSubmitted, setConsultSubmitted] = useState(false);
+  const [consultSending, setConsultSending] = useState(false);
+  const [consultForm, setConsultForm] = useState({ studentSchool: '', studentGrade: '', phone: '', preferredDate: '', preferredTime: '', message: '' });
+  const resetConsult = () => { setConsultOpen(false); setConsultSubmitted(false); setConsultForm({ studentSchool: '', studentGrade: '', phone: '', preferredDate: '', preferredTime: '', message: '' }); };
+  const handleConsultSubmit = async () => {
+    if (!consultForm.studentSchool || !consultForm.studentGrade || !consultForm.phone || !consultForm.preferredDate || !consultForm.preferredTime) return;
+    setConsultSending(true);
+    addConsultRequest(consultForm);
+    // EmailJS
+    try {
+      const svcId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const tplId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const pubKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      if (svcId && tplId && pubKey) {
+        await emailjs.send(svcId, tplId, {
+          studentInfo: `${consultForm.studentSchool} ${consultForm.studentGrade}`,
+          phone: consultForm.phone,
+          preferredDate: consultForm.preferredDate,
+          preferredTime: consultForm.preferredTime,
+          message: consultForm.message || '(없음)',
+          createdAt: new Date().toLocaleString('ko-KR'),
+        }, pubKey);
+      }
+    } catch (e) { console.warn('EmailJS 발송 실패 (로컬 저장은 완료됨):', e); }
+    setConsultSending(false);
+    setConsultSubmitted(true);
+  };
 
   return (
     <>
@@ -487,9 +517,9 @@ export function Home() {
                   <Phone className="w-5 h-5 mr-2" />
                   031-123-4567
                 </a>
-                <Link to="/contact" className="inline-flex items-center px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-all">
+                <button onClick={() => setConsultOpen(true)} className="inline-flex items-center px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-all">
                   온라인 상담 신청 <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
+                </button>
               </div>
             </ScrollReveal>
           </div>
@@ -544,6 +574,73 @@ export function Home() {
           </Modal>
         )
       }
+
+      {/* ═══ CONSULT MODAL ═══ */}
+      {consultOpen && (
+        <Modal title="무료 상담 신청" onClose={resetConsult}>
+          {consultSubmitted ? (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">상담 신청이 접수되었습니다!</h3>
+              <p className="text-sm text-slate-500 mb-6">원장님 확인 후 연락 드리겠습니다.</p>
+              <button onClick={resetConsult} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">확인</button>
+            </motion.div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className={labelCls}>학교 <span className="text-red-500">*</span></label>
+                <input className={inputCls} placeholder="예: 진접중학교, 풍양중학교" value={consultForm.studentSchool} onChange={e => setConsultForm({ ...consultForm, studentSchool: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>학년 <span className="text-red-500">*</span></label>
+                <select className={inputCls} value={consultForm.studentGrade} onChange={e => setConsultForm({ ...consultForm, studentGrade: e.target.value })}>
+                  <option value="">선택하세요</option>
+                  <option>초3</option><option>초4</option><option>초5</option><option>초6</option>
+                  <option>중1</option><option>중2</option><option>중3</option>
+                  <option>고1</option><option>고2</option><option>고3</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>전화번호 <span className="text-red-500">*</span></label>
+                <input type="tel" className={inputCls} placeholder="010-0000-0000" value={consultForm.phone} onChange={e => setConsultForm({ ...consultForm, phone: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>희망 날짜 <span className="text-red-500">*</span></label>
+                  <input type="date" className={inputCls} value={consultForm.preferredDate} onChange={e => setConsultForm({ ...consultForm, preferredDate: e.target.value })} />
+                </div>
+                <div>
+                  <label className={labelCls}>희망 시간 <span className="text-red-500">*</span></label>
+                  <select className={inputCls} value={consultForm.preferredTime} onChange={e => setConsultForm({ ...consultForm, preferredTime: e.target.value })}>
+                    <option value="">선택</option>
+                    <option>14:00</option><option>15:00</option><option>16:00</option>
+                    <option>17:00</option><option>18:00</option><option>19:00</option>
+                    <option>20:00</option><option>21:00</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className={labelCls}>추가 메모 (선택)</label>
+                <textarea className={inputCls} rows={2} placeholder="상담 요청 사항을 입력해주세요." value={consultForm.message} onChange={e => setConsultForm({ ...consultForm, message: e.target.value })} />
+              </div>
+              <button
+                onClick={handleConsultSubmit}
+                disabled={consultSending || !consultForm.studentSchool || !consultForm.studentGrade || !consultForm.phone || !consultForm.preferredDate || !consultForm.preferredTime}
+                className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+              >
+                {consultSending ? (
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> 전송 중...</>
+                ) : (
+                  <><Send className="w-4 h-4" /> 상담 신청하기</>
+                )}
+              </button>
+              <p className="text-xs text-slate-400 text-center">로그인 없이 신청 가능합니다</p>
+            </div>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

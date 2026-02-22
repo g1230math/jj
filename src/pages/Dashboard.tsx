@@ -4,7 +4,8 @@ import { BookOpen, CheckCircle, Clock, TrendingUp, Users, CreditCard } from 'luc
 import { ShuttleAdmin } from '../components/ShuttleAdmin';
 import { PopupAdmin } from '../components/PopupAdmin';
 import { LectureAdmin } from '../components/LectureAdmin';
-import { studentGrades, getLectures, getAllProgress } from '../data/mockData';
+import { ConsultAdmin } from '../components/ConsultAdmin';
+import { studentGrades, getLectures, getAllProgress, getConsultRequests } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function Dashboard() {
@@ -116,6 +117,8 @@ export function Dashboard() {
     </div>
   );
 
+  const pendingConsults = getConsultRequests().filter(r => r.status === 'pending').length;
+
   const renderAdminDashboard = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -123,7 +126,7 @@ export function Dashboard() {
           { title: '전체 원생', value: '128명', icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
           { title: '오늘 출석률', value: '96%', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
           { title: '미납 원비', value: '3건', icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-100' },
-          { title: '신규 상담', value: '2건', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
+          { title: '신규 상담', value: `${pendingConsults}건`, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex items-center gap-4">
@@ -141,6 +144,9 @@ export function Dashboard() {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-64 flex items-center justify-center text-slate-500">
         관리자 상세 통계 대시보드 영역
       </div>
+
+      {/* Consult Admin — admin only */}
+      {user?.role === 'admin' && <ConsultAdmin />}
 
       {/* Lecture Admin */}
       <LectureAdmin />
