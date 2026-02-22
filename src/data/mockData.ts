@@ -351,3 +351,89 @@ export const studentGrades = [
   { subject: '2학기 중간', score: 88 },
   { subject: '2학기 기말', score: 95 },
 ];
+
+// --- 팝업 관리 ---
+export interface PopupItem {
+  id: string;
+  imageUrl: string;
+  clickAction: 'link' | 'page' | 'none';
+  linkUrl: string;
+  targetPage: string;
+  openInNewTab: boolean;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  order: number;
+  pcWidth: number;
+  pcTop: number;
+  pcLeft: number;
+  pcCenterAlign: boolean;
+  mobileWidth: number;
+  mobileTop: number;
+  mobileCenterAlign: boolean;
+  showCloseToday: boolean;
+  showOverlay: boolean;
+  slideInterval: number;
+}
+
+export interface PopupSettings {
+  enabled: boolean;
+  defaultSlideInterval: number;
+}
+
+const POPUPS_KEY = 'g1230_popups';
+const POPUP_SETTINGS_KEY = 'g1230_popup_settings';
+
+const defaultPopups: PopupItem[] = [
+  {
+    id: 'popup_default_1',
+    imageUrl: 'https://picsum.photos/seed/g1230popup/400/500',
+    clickAction: 'page',
+    linkUrl: '',
+    targetPage: '/courses',
+    openInNewTab: false,
+    startDate: '2026-02-22',
+    endDate: '2026-03-31',
+    isActive: true,
+    order: 1,
+    pcWidth: 400,
+    pcTop: 100,
+    pcLeft: 100,
+    pcCenterAlign: true,
+    mobileWidth: 300,
+    mobileTop: 50,
+    mobileCenterAlign: true,
+    showCloseToday: true,
+    showOverlay: true,
+    slideInterval: 5,
+  },
+];
+
+const defaultPopupSettings: PopupSettings = {
+  enabled: true,
+  defaultSlideInterval: 5,
+};
+
+export function getPopups(): PopupItem[] {
+  const saved = localStorage.getItem(POPUPS_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch { /* fallback */ }
+  }
+  return defaultPopups;
+}
+
+export function savePopups(popups: PopupItem[]) {
+  localStorage.setItem(POPUPS_KEY, JSON.stringify(popups));
+}
+
+export function getPopupSettings(): PopupSettings {
+  const saved = localStorage.getItem(POPUP_SETTINGS_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch { /* fallback */ }
+  }
+  return defaultPopupSettings;
+}
+
+export function savePopupSettings(settings: PopupSettings) {
+  localStorage.setItem(POPUP_SETTINGS_KEY, JSON.stringify(settings));
+}

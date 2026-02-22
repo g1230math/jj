@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, CheckCircle, Clock, TrendingUp, Users, CreditCard } from 'lucide-react';
 import { ShuttleAdmin } from '../components/ShuttleAdmin';
+import { PopupAdmin } from '../components/PopupAdmin';
 import { LectureAdmin } from '../components/LectureAdmin';
 import { studentGrades, getLectures, getAllProgress } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -146,6 +147,9 @@ export function Dashboard() {
 
       {/* Shuttle Admin */}
       <ShuttleAdmin />
+
+      {/* Popup Admin — admin only */}
+      {user?.role === 'admin' && <PopupAdmin />}
     </div>
   );
 
