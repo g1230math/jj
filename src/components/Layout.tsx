@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { ConsultModal } from './ConsultModal';
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -11,6 +12,7 @@ export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
+  const [consultOpen, setConsultOpen] = useState(false);
 
   // Scroll-aware header
   useEffect(() => {
@@ -307,9 +309,9 @@ export function Layout() {
                 <li><Link to="/shuttle" className="hover:text-white transition-colors">셔틀버스</Link></li>
                 <li><Link to="/contact" className="hover:text-white transition-colors">오시는 길</Link></li>
                 <li>
-                  <Link to="/" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { const btn = document.querySelector('[data-consult-btn]') as HTMLButtonElement; btn?.click(); }, 300); }} className="text-emerald-400 hover:text-emerald-300 transition-colors font-semibold">
+                  <button onClick={() => setConsultOpen(true)} className="text-emerald-400 hover:text-emerald-300 transition-colors font-semibold text-left">
                     온라인 상담 신청
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -468,6 +470,8 @@ export function Layout() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConsultModal open={consultOpen} onClose={() => setConsultOpen(false)} />
     </div>
   );
 }
