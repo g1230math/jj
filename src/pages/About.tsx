@@ -8,6 +8,7 @@ import { ImageUploader } from '../components/ImageUploader';
 import {
     getInstructorProfiles, saveInstructorProfiles, type InstructorProfile,
     getFacilityPhotos, saveFacilityPhotos, type FacilityPhoto,
+    getHistoryItems, saveHistoryItems, type HistoryItem,
 } from '../data/mockData';
 
 /* ─── helpers ─── */
@@ -73,6 +74,11 @@ export function About() {
     const [facModal, setFacModal] = useState<'add' | 'edit' | null>(null);
     const [editFac, setEditFac] = useState<FacilityPhoto | null>(null);
 
+    // ── 히스토리 state ──
+    const [historyItems, setHistoryItems] = useState<HistoryItem[]>(getHistoryItems);
+    const [histModal, setHistModal] = useState<'add' | 'edit' | null>(null);
+    const [editHist, setEditHist] = useState<HistoryItem | null>(null);
+
     /* ─── 강사 CRUD ─── */
     const emptyInst = (): InstructorProfile => ({
         id: genId('inst'), name: '', title: '', desc: '', img: '', color: colorOptions[0].value, order: instructors.length + 1,
@@ -131,6 +137,33 @@ export function About() {
         const updated = facilities.filter(f => f.id !== id);
         setFacilities(updated);
         saveFacilityPhotos(updated);
+    };
+
+    /* ─── 히스토리 CRUD ─── */
+    const emptyHist = (): HistoryItem => ({ id: genId('hi'), year: new Date().getFullYear().toString(), title: '', desc: '', icon: '📌', order: historyItems.length + 1 });
+    const openAddHist = () => { setEditHist(emptyHist()); setHistModal('add'); };
+    const openEditHist = (h: HistoryItem) => { setEditHist({ ...h }); setHistModal('edit'); };
+    const closeHistModal = () => { setHistModal(null); setEditHist(null); };
+
+    const handleSaveHist = () => {
+        if (!editHist || !editHist.title.trim()) return;
+        let updated: HistoryItem[];
+        if (histModal === 'add') {
+            updated = [...historyItems, editHist];
+        } else {
+            updated = historyItems.map(h => h.id === editHist.id ? editHist : h);
+        }
+        updated.sort((a, b) => a.order - b.order);
+        setHistoryItems(updated);
+        saveHistoryItems(updated);
+        closeHistModal();
+    };
+
+    const handleDeleteHist = (id: string) => {
+        if (!confirm('이 히스토리를 삭제하시겠습니까?')) return;
+        const updated = historyItems.filter(h => h.id !== id);
+        setHistoryItems(updated);
+        saveHistoryItems(updated);
     };
 
     return (
@@ -251,27 +284,21 @@ export function About() {
                     title="학원 히스토리"
                     subtitle="15년간 걸어온 진접 G1230의 발자취"
                 />
+                {isAdmin && (
+                    <div className="flex justify-end mb-4">
+                        <button onClick={openAddHist} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                            <Plus className="w-4 h-4" /> 히스토리 추가
+                        </button>
+                    </div>
+                )}
                 <div className="relative">
                     {/* Timeline line */}
                     <div className="absolute left-4 md:left-1/2 md:-translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-300 via-indigo-400 to-indigo-300" />
 
-                    {[
-                        { year: '2011', title: '학원 개원', desc: '진접읍 해밀예당 1로 171에 "G1230 수학전문학원" 개원. 중등부 2개 반으로 시작.', icon: '🏫', color: 'from-indigo-500 to-blue-600' },
-                        { year: '2012', title: '초등부 개설', desc: '초등 3~6학년 대상 기초 연산·사고력 과정 신설. 학생 수 50명 돌파.', icon: '📚', color: 'from-emerald-500 to-teal-600' },
-                        { year: '2014', title: '고등부 확장', desc: '고등 내신·수능 전문 과정 개설. 첫 수능 수학 1등급 배출.', icon: '🎓', color: 'from-blue-500 to-indigo-600' },
-                        { year: '2015', title: '100명 돌파', desc: '재원생 100명 돌파. 소수정예 시스템으로 학생별 맞춤 관리 체계 확립.', icon: '🎯', color: 'from-rose-500 to-pink-600' },
-                        { year: '2017', title: '셔틀버스 운행 시작', desc: '진접·별내·진건 지역 3개 노선 셔틀버스 운행 개시.', icon: '🚌', color: 'from-amber-500 to-orange-600' },
-                        { year: '2018', title: '첫 SKY 합격자 배출', desc: '서울대학교 합격생 배출. 누적 주요 대학 합격자 30명 돌파.', icon: '🏆', color: 'from-yellow-500 to-amber-600' },
-                        { year: '2019', title: '학원 확장 이전', desc: '증가하는 수요에 맞춰 현 위치(제일프라자)로 확장 이전. 자습실·상담실 신설.', icon: '🏢', color: 'from-violet-500 to-purple-600' },
-                        { year: '2020', title: '온라인 강의 시스템 도입', desc: '코로나19 대응 비대면 수업 체계 구축. 동영상 강의실 개설.', icon: '💻', color: 'from-cyan-500 to-blue-600' },
-                        { year: '2021', title: '10주년 & 200명 돌파', desc: '개원 10주년 기념. 재원생 200명 돌파, 누적 합격자 150명 달성.', icon: '🎉', color: 'from-pink-500 to-rose-600' },
-                        { year: '2023', title: '학부모 서비스 런칭', desc: '실시간 출결 확인, 성적표 조회, 온라인 상담 신청 시스템 오픈.', icon: '📱', color: 'from-teal-500 to-emerald-600' },
-                        { year: '2024', title: '의약학 합격자 다수 배출', desc: '의대·약대·한의대 합격자 15명 돌파. 심화 수학 전문 과정 강화.', icon: '⚕️', color: 'from-red-500 to-rose-600' },
-                        { year: '2025', title: '15주년, 새로운 도약', desc: '누적 합격자 320명 돌파. AI 기반 학습 분석 시스템 도입 예정.', icon: '🚀', color: 'from-indigo-600 to-purple-600' },
-                    ].map((item, i) => (
-                        <ScrollReveal key={item.year} delay={0.05 * i}>
+                    {historyItems.sort((a, b) => a.order - b.order).map((item, i) => (
+                        <ScrollReveal key={item.id} delay={0.05 * i}>
                             <div className={cn(
-                                "relative flex items-start gap-4 md:gap-8 mb-8 last:mb-0",
+                                "relative flex items-start gap-4 md:gap-8 mb-8 last:mb-0 group",
                                 i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
                             )}>
                                 {/* Dot */}
@@ -279,19 +306,22 @@ export function About() {
 
                                 {/* Content card */}
                                 <div className={cn(
-                                    "ml-10 md:ml-0 md:w-[calc(50%-2rem)] glass-card glass-card-hover rounded-2xl p-5",
+                                    "ml-10 md:ml-0 md:w-[calc(50%-2rem)] glass-card glass-card-hover rounded-2xl p-5 relative",
                                     i % 2 === 0 ? "md:mr-auto md:text-right" : "md:ml-auto"
                                 )}>
+                                    {isAdmin && (
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <button onClick={() => openEditHist(item)} className="p-1 bg-white/90 rounded-md hover:bg-white shadow-sm"><Edit2 className="w-3 h-3 text-indigo-600" /></button>
+                                            <button onClick={() => handleDeleteHist(item.id)} className="p-1 bg-white/90 rounded-md hover:bg-white shadow-sm"><Trash2 className="w-3 h-3 text-red-500" /></button>
+                                        </div>
+                                    )}
                                     <div className={cn(
                                         "flex items-center gap-3 mb-2",
                                         i % 2 === 0 ? "md:flex-row-reverse" : ""
                                     )}>
                                         <span className="text-2xl">{item.icon}</span>
                                         <div>
-                                            <span className={cn(
-                                                "inline-block px-2.5 py-0.5 text-xs font-bold text-white rounded-full bg-gradient-to-r mb-1",
-                                                item.color
-                                            )}>{item.year}</span>
+                                            <span className="inline-block px-2.5 py-0.5 text-xs font-bold text-white rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 mb-1">{item.year}</span>
                                             <h4 className="text-base font-bold text-slate-900">{item.title}</h4>
                                         </div>
                                     </div>
@@ -500,6 +530,40 @@ export function About() {
                     <div className="flex justify-end gap-2 pt-2">
                         <button onClick={closeFacModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
                         <button onClick={handleSaveFac} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            <Save className="w-4 h-4" /> 저장
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* ─── 히스토리 모달 ─── */}
+            {histModal && editHist && (
+                <Modal title={histModal === 'add' ? '히스토리 추가' : '히스토리 수정'} onClose={closeHistModal}>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className={labelCls}>연도 *</label>
+                            <input className={inputCls} value={editHist.year} onChange={e => setEditHist({ ...editHist, year: e.target.value })} placeholder="2026" />
+                        </div>
+                        <div>
+                            <label className={labelCls}>아이콘 (이모지)</label>
+                            <input className={inputCls} value={editHist.icon} onChange={e => setEditHist({ ...editHist, icon: e.target.value })} placeholder="🏫" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelCls}>제목 *</label>
+                        <input className={inputCls} value={editHist.title} onChange={e => setEditHist({ ...editHist, title: e.target.value })} placeholder="예: 학원 개원" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>설명</label>
+                        <textarea className={inputCls + ' min-h-[80px]'} value={editHist.desc} onChange={e => setEditHist({ ...editHist, desc: e.target.value })} placeholder="상세 내용을 입력하세요" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>순서</label>
+                        <input type="number" className={inputCls} value={editHist.order} onChange={e => setEditHist({ ...editHist, order: Number(e.target.value) })} min={1} />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={closeHistModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+                        <button onClick={handleSaveHist} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
                             <Save className="w-4 h-4" /> 저장
                         </button>
                     </div>

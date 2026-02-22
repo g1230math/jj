@@ -486,6 +486,63 @@ export function getInquiries(): InquiryItem[] {
 }
 export function saveInquiries(items: InquiryItem[]) { localStorage.setItem(INQUIRIES_KEY, JSON.stringify(items)); }
 
+// --- 학원 히스토리 관리 ---
+export interface HistoryItem {
+  id: string;
+  year: string;
+  title: string;
+  desc: string;
+  icon: string;
+  order: number;
+}
+
+const defaultHistoryItems: HistoryItem[] = [
+  { id: 'hi1', year: '2011', title: '학원 개원', desc: '진접읍 해밀예당 1로 171에 "G1230 수학전문학원" 개원. 중등부 2개 반으로 시작.', icon: '🏫', order: 1 },
+  { id: 'hi2', year: '2012', title: '초등부 개설', desc: '초등 3~6학년 대상 기초 연산·사고력 과정 신설. 학생 수 50명 돌파.', icon: '📚', order: 2 },
+  { id: 'hi3', year: '2014', title: '고등부 확장', desc: '고등 내신·수능 전문 과정 개설. 첫 수능 수학 1등급 배출.', icon: '🎓', order: 3 },
+  { id: 'hi4', year: '2015', title: '100명 돌파', desc: '재원생 100명 돌파. 소수정예 시스템으로 학생별 맞춤 관리 체계 확립.', icon: '🎯', order: 4 },
+  { id: 'hi5', year: '2017', title: '셔틀버스 운행 시작', desc: '진접·별내·진건 지역 3개 노선 셔틀버스 운행 개시.', icon: '🚌', order: 5 },
+  { id: 'hi6', year: '2018', title: '첫 SKY 합격자 배출', desc: '서울대학교 합격생 배출. 누적 주요 대학 합격자 30명 돌파.', icon: '🏆', order: 6 },
+  { id: 'hi7', year: '2019', title: '학원 확장 이전', desc: '증가하는 수요에 맞춰 현 위치(제일프라자)로 확장 이전. 자습실·상담실 신설.', icon: '🏢', order: 7 },
+  { id: 'hi8', year: '2020', title: '온라인 강의 시스템 도입', desc: '코로나19 대응 비대면 수업 체계 구축. 동영상 강의실 개설.', icon: '💻', order: 8 },
+  { id: 'hi9', year: '2021', title: '10주년 & 200명 돌파', desc: '개원 10주년 기념. 재원생 200명 돌파, 누적 합격자 150명 달성.', icon: '🎉', order: 9 },
+  { id: 'hi10', year: '2023', title: '학부모 서비스 런칭', desc: '실시간 출결 확인, 성적표 조회, 온라인 상담 신청 시스템 오픈.', icon: '📱', order: 10 },
+  { id: 'hi11', year: '2024', title: '의약학 합격자 다수 배출', desc: '의대·약대·한의대 합격자 15명 돌파. 심화 수학 전문 과정 강화.', icon: '⚕️', order: 11 },
+  { id: 'hi12', year: '2025', title: '15주년, 새로운 도약', desc: '누적 합격자 320명 돌파. AI 기반 학습 분석 시스템 도입 예정.', icon: '🚀', order: 12 },
+];
+
+export function getHistoryItems(): HistoryItem[] {
+  const raw = localStorage.getItem('g1230_historyItems');
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return defaultHistoryItems;
+}
+export function saveHistoryItems(items: HistoryItem[]) {
+  localStorage.setItem('g1230_historyItems', JSON.stringify(items));
+}
+
+// --- 수강안내 부서 배너 관리 ---
+export interface DepartmentInfo {
+  id: 'elementary' | 'middle' | 'high';
+  grades: string;
+  desc: string;
+  highlights: string[];
+}
+
+const defaultDepartmentInfo: DepartmentInfo[] = [
+  { id: 'elementary', grades: '초3 ~ 초6', desc: '수학적 사고력과 연산 능력의 기초를 탄탄히', highlights: ['연산·사고력 강화', '서술형 문제 훈련', '영재원 대비'] },
+  { id: 'middle', grades: '중1 ~ 중3', desc: '내신 완벽 대비, 수학 자신감 UP', highlights: ['교과서·기출 분석', '선행 학습', '월 1회 모의고사'] },
+  { id: 'high', grades: '고1 ~ 고3', desc: '수능·내신 1등급을 향한 체계적 관리', highlights: ['EBS 연계 분석', '킬러 문항 훈련', '1:1 첨삭'] },
+];
+
+export function getDepartmentInfo(): DepartmentInfo[] {
+  const raw = localStorage.getItem('g1230_departmentInfo');
+  if (raw) { try { return JSON.parse(raw); } catch { /* fall through */ } }
+  return defaultDepartmentInfo;
+}
+export function saveDepartmentInfo(items: DepartmentInfo[]) {
+  localStorage.setItem('g1230_departmentInfo', JSON.stringify(items));
+}
+
 // --- 학사일정 관리 ---
 export interface CalendarEvent {
   id: string;

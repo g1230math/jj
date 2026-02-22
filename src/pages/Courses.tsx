@@ -5,7 +5,7 @@ import { BookOpen, Clock, Star, Users, ArrowRight, GraduationCap, Sparkles, Calc
 import { cn } from '../lib/utils';
 import { ScrollReveal, Section, SectionHeader } from '../components/ScrollReveal';
 import { useAuth } from '../context/AuthContext';
-import { getCourseClasses, saveCourseClasses, type CourseClass } from '../data/mockData';
+import { getCourseClasses, saveCourseClasses, type CourseClass, getDepartmentInfo, saveDepartmentInfo, type DepartmentInfo } from '../data/mockData';
 
 /* ─── helpers ─── */
 const genId = (prefix: string) => `${prefix}_${Date.now()}`;
@@ -71,7 +71,19 @@ const departments = [
 export function Courses() {
     const { isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
-    const current = departments[activeTab];
+
+    // ── 부서 배너 state ──
+    const [deptInfoList, setDeptInfoList] = useState<DepartmentInfo[]>(getDepartmentInfo);
+    const [deptModal, setDeptModal] = useState(false);
+    const [editDept, setEditDept] = useState<DepartmentInfo | null>(null);
+    const [editHighlightsText, setEditHighlightsText] = useState('');
+
+    // merge static styling with dynamic content
+    const mergedDepartments = departments.map(d => {
+        const info = deptInfoList.find(i => i.id === d.id);
+        return { ...d, grades: info?.grades ?? d.grades, desc: info?.desc ?? d.desc, highlights: info?.highlights ?? d.highlights };
+    });
+    const current = mergedDepartments[activeTab];
 
     // ── 수강 반 state ──
     const [allClasses, setAllClasses] = useState<CourseClass[]>(getCourseClasses);
@@ -109,6 +121,25 @@ export function Courses() {
         const updated = allClasses.filter(c => c.id !== id);
         setAllClasses(updated);
         saveCourseClasses(updated);
+    };
+
+    /* ─── 부서 배너 수정 ─── */
+    const openEditDept = () => {
+        const info = deptInfoList.find(i => i.id === current.id) ?? { id: current.id as DepartmentInfo['id'], grades: current.grades, desc: current.desc, highlights: current.highlights };
+        setEditDept({ ...info });
+        setEditHighlightsText(info.highlights.join(', '));
+        setDeptModal(true);
+    };
+
+    const handleSaveDept = () => {
+        if (!editDept) return;
+        const updatedInfo: DepartmentInfo = { ...editDept, highlights: editHighlightsText.split(',').map(s => s.trim()).filter(Boolean) };
+        const updated = deptInfoList.map(d => d.id === updatedInfo.id ? updatedInfo : d);
+        if (!updated.find(d => d.id === updatedInfo.id)) updated.push(updatedInfo);
+        setDeptInfoList(updated);
+        saveDepartmentInfo(updated);
+        setDeptModal(false);
+        setEditDept(null);
     };
 
     return (
@@ -192,7 +223,12 @@ export function Courses() {
                         transition={{ duration: 0.2 }}
                     >
                         {/* Summary banner */}
-                        <div className={cn("glass-card rounded-2xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4", current.borderColor)}>
+                        <div className={cn("glass-card rounded-2xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 relative group", current.borderColor)}>
+                            {isAdmin && (
+                                <button onClick={openEditDept} className="absolute top-3 right-3 p-1.5 bg-white/80 rounded-lg hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                    <Edit2 className="w-3.5 h-3.5 text-indigo-600" />
+                                </button>
+                            )}
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-1">{current.name} — {current.grades}</h3>
                                 <p className="text-slate-500">{current.desc}</p>
@@ -343,6 +379,31 @@ export function Courses() {
                     <div className="flex justify-end gap-2 pt-2">
                         <button onClick={closeClassModal} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
                         <button onClick={handleSaveClass} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                            <Save className="w-4 h-4" /> 저장
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* ─── 부서 배너 수정 모달 ─── */}
+            {deptModal && editDept && (
+                <Modal title={`${departments.find(d => d.id === editDept.id)?.name ?? ''} 배너 수정`} onClose={() => { setDeptModal(false); setEditDept(null); }}>
+                    <div>
+                        <label className={labelCls}>대상 학년 *</label>
+                        <input className={inputCls} value={editDept.grades} onChange={e => setEditDept({ ...editDept, grades: e.target.value })} placeholder="예: 초3 ~ 초6" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>설명 *</label>
+                        <input className={inputCls} value={editDept.desc} onChange={e => setEditDept({ ...editDept, desc: e.target.value })} placeholder="예: 수학적 사고력과 연산 능력의 기초를 탄탄히" />
+                    </div>
+                    <div>
+                        <label className={labelCls}>하이라이트 (쉼표로 구분)</label>
+                        <input className={inputCls} value={editHighlightsText} onChange={e => setEditHighlightsText(e.target.value)} placeholder="예: 연산·사고력 강화, 서술형 문제 훈련, 영재원 대비" />
+                        <p className="text-xs text-slate-400 mt-1">배지로 표시됩니다. 쉼표(,)로 구분해주세요.</p>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={() => { setDeptModal(false); setEditDept(null); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+                        <button onClick={handleSaveDept} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
                             <Save className="w-4 h-4" /> 저장
                         </button>
                     </div>
