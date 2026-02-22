@@ -59,7 +59,97 @@ export interface UploadResult {
 }
 
 /**
- * File 객체를 ImgBB에 업로드
+ * 이미지를 WebP 포맷으로 변환 & 용량 최적화
+ * - 해상도와 퀄리티를 최대한 유지하면서 용량만 줄임
+ * - WebP 지원 시 WebP로, 미지원 시 JPEG로 폴백
+ * - 원본보다 커지면 원본을 그대로 사용
+ * - 최대 단변 2048px (웹 용도 충분)
+ */
+const MAX_DIMENSION = 2048;
+const WEBP_QUALITY = 0.88;    // 0.85~0.92 → 육안 차이 없음
+const JPEG_QUALITY = 0.90;
+
+function optimizeImage(file: File): Promise<File> {
+    return new Promise((resolve) => {
+        // 이미 작은 파일은 최적화 불필요 (200KB 이하)
+        if (file.size <= 200 * 1024) {
+            resolve(file);
+            return;
+        }
+
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+
+            let { width, height } = img;
+
+            // 최대 크기 제한 (비율 유지)
+            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { resolve(file); return; }
+
+            // 고품질 리사이즈
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // WebP 먼저 시도, 안 되면 JPEG 폴백
+            const tryFormat = (mime: string, quality: number) => {
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) { resolve(file); return; }
+
+                        // 원본보다 큰 경우 → 원본 유지
+                        if (blob.size >= file.size) {
+                            // WebP가 더 크면 JPEG도 시도
+                            if (mime === 'image/webp') {
+                                tryFormat('image/jpeg', JPEG_QUALITY);
+                                return;
+                            }
+                            resolve(file);
+                            return;
+                        }
+
+                        const ext = mime === 'image/webp' ? '.webp' : '.jpg';
+                        const baseName = file.name.replace(/\.[^.]+$/, '');
+                        const optimized = new File([blob], baseName + ext, { type: mime });
+
+                        console.log(
+                            `[ImgBB] 최적화: ${(file.size / 1024).toFixed(0)}KB → ${(optimized.size / 1024).toFixed(0)}KB ` +
+                            `(${Math.round((1 - optimized.size / file.size) * 100)}% 감소, ${mime})`
+                        );
+
+                        resolve(optimized);
+                    },
+                    mime,
+                    quality
+                );
+            };
+
+            tryFormat('image/webp', WEBP_QUALITY);
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(file); // 실패 시 원본 그대로
+        };
+
+        img.src = url;
+    });
+}
+
+/**
+ * File 객체를 ImgBB에 업로드 (자동 최적화 포함)
  */
 export async function uploadImageToImgBB(file: File): Promise<UploadResult> {
     if (!IMGBB_API_KEY) {
@@ -71,8 +161,11 @@ export async function uploadImageToImgBB(file: File): Promise<UploadResult> {
         };
     }
 
+    // 업로드 전 이미지 최적화
+    const optimizedFile = await optimizeImage(file);
+
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', optimizedFile);
     formData.append('key', IMGBB_API_KEY);
 
     try {
