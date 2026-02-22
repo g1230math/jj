@@ -183,16 +183,23 @@ export function Calendar() {
               </button>
             )}
           </div>
-          {/* Mobile: select dropdown */}
-          <select
-            value={schoolFilter}
-            onChange={e => setSchoolFilter(e.target.value)}
-            className="sm:hidden w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 bg-white focus:ring-2 focus:ring-emerald-200 outline-none"
-          >
+          {/* Mobile: pill grid */}
+          <div className="sm:hidden grid grid-cols-3 gap-1.5 bg-white rounded-xl p-2 border border-slate-200">
             {SCHOOL_LIST.map(school => (
-              <option key={school} value={school}>{school === '전체' ? '전체 보기' : school}</option>
+              <button
+                key={school}
+                onClick={() => setSchoolFilter(school)}
+                className={cn(
+                  "px-2 py-2 rounded-lg text-xs font-semibold transition-all text-center",
+                  schoolFilter === school
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-100"
+                )}
+              >
+                {school === '전체' ? '전체 보기' : school}
+              </button>
             ))}
-          </select>
+          </div>
           {/* Desktop: button row */}
           <div className="hidden sm:flex flex-wrap gap-1 bg-white rounded-xl p-1 border border-slate-200">
             {SCHOOL_LIST.map(school => (
