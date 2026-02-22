@@ -204,7 +204,7 @@ export function Layout() {
       {/* ═══ Floating Contact Buttons ═══ */}
       <div className="fixed bottom-20 md:bottom-8 right-4 z-40 flex flex-col gap-3">
         <a
-          href="https://pf.kakao.com/_xjYourChannel"
+          href="http://pf.kakao.com/_TxoxeIX/chat"
           target="_blank"
           rel="noopener noreferrer"
           className="group relative flex items-center justify-center w-14 h-14 bg-[#FEE500] text-[#3C1E1E] rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200"
@@ -284,7 +284,7 @@ export function Layout() {
                 체계적인 커리큘럼과 꼼꼼한 관리로 학생들의 수학 실력을 책임집니다.
               </p>
               <div className="flex gap-3 mt-6">
-                <a href="https://pf.kakao.com/_xjYourChannel" target="_blank" rel="noopener noreferrer"
+                <a href="http://pf.kakao.com/_TxoxeIX/chat" target="_blank" rel="noopener noreferrer"
                   className="w-10 h-10 bg-slate-800 hover:bg-[#FEE500] hover:text-[#3C1E1E] rounded-xl flex items-center justify-center transition-all">
                   <MessageCircle className="w-5 h-5" />
                 </a>
