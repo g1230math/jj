@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getPopups, savePopups, getPopupSettings, savePopupSettings, type PopupItem, type PopupSettings } from '../data/mockData';
 import { Plus, Trash2, Edit2, Save, X, Image, Eye, EyeOff, ChevronUp, ChevronDown, Monitor, Smartphone } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { ImageUploader } from './ImageUploader';
 
 export function PopupAdmin() {
     const [popups, setPopups] = useState<PopupItem[]>(getPopups());
@@ -264,26 +265,14 @@ export function PopupAdmin() {
                             </button>
                         </div>
 
-                        {/* Image URL + Preview */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="block text-xs font-medium text-slate-600 mb-1">이미지 URL *</label>
-                                <input
-                                    type="text"
-                                    value={form.imageUrl}
-                                    onChange={(e) => setForm(f => ({ ...f, imageUrl: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none"
-                                    placeholder="https://... 또는 /popup_example.webp"
-                                />
-                            </div>
-                            <div className="flex items-end">
-                                {form.imageUrl && (
-                                    <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-200 border border-slate-300">
-                                        <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        {/* Image Upload */}
+                        <ImageUploader
+                            label="팝업 이미지 *"
+                            currentImageUrl={form.imageUrl}
+                            onUpload={(result) => setForm(f => ({ ...f, imageUrl: result.displayUrl }))}
+                            onUrlChange={(url) => setForm(f => ({ ...f, imageUrl: url }))}
+                            allowUrlInput={true}
+                        />
 
                         {/* Click Action */}
                         <div>
