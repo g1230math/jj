@@ -145,8 +145,8 @@ export function Dashboard() {
       {/* Lecture Admin */}
       <LectureAdmin />
 
-      {/* Shuttle Admin */}
-      <ShuttleAdmin />
+      {/* Shuttle Admin — admin only */}
+      {user?.role === 'admin' && <ShuttleAdmin />}
 
       {/* Popup Admin — admin only */}
       {user?.role === 'admin' && <PopupAdmin />}
