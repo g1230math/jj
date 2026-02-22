@@ -80,6 +80,7 @@ export function Community() {
   const [editingFaq, setEditingFaq] = useState<FaqItem | null>(null);
   const [replyingInquiry, setReplyingInquiry] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [editingInquiry, setEditingInquiry] = useState<InquiryItem | null>(null);
   const [isNew, setIsNew] = useState(false);
 
   const tabs = [
@@ -194,6 +195,17 @@ export function Community() {
     if (!confirm('이 문의를 삭제하시겠습니까?')) return;
     const list = inquiryList.filter(i => i.id !== id);
     await saveInquiries(list); setInquiryList(list);
+  };
+
+  /* ── Inquiry write ── */
+  const newInquiry = (): InquiryItem => ({ id: '', title: '', author: '', date: today(), isPrivate: false, category: '일반 문의', content: '', views: 0 });
+  const handleSaveInquiry = async (item: InquiryItem) => {
+    if (!item.title.trim() || !item.content.trim() || !item.author.trim()) {
+      alert('작성자명, 제목, 내용은 필수 입력 항목입니다.');
+      return;
+    }
+    const list = [{ ...item, id: genId('inq') }, ...inquiryList];
+    await saveInquiries(list); setInquiryList(list); setEditingInquiry(null);
   };
 
   /* ═══════════════════════════════════════════
@@ -495,8 +507,14 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <p className="text-sm text-slate-500">총 <span className="font-semibold text-slate-700">{inquiryList.length}</span>개의 문의</p>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <Lock className="w-3.5 h-3.5" /><span>비밀글은 작성자만 확인할 수 있습니다</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <Lock className="w-3.5 h-3.5" /><span>비밀글은 작성자만 확인할 수 있습니다</span>
+                  </div>
+                  <button onClick={() => setEditingInquiry(newInquiry())}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />문의하기
+                  </button>
                 </div>
               </div>
 
@@ -734,6 +752,32 @@ export function Community() {
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingFaq(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
             <button onClick={() => handleSaveFaq(editingFaq)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+          </div>
+        </Modal>
+      )}
+
+      {/* ── Inquiry Write Modal ── */}
+      {editingInquiry && (
+        <Modal title="문의 작성" onClose={() => setEditingInquiry(null)}>
+          <div><label className={labelCls}>작성자명 *</label><input className={inputCls} value={editingInquiry.author} onChange={e => setEditingInquiry({ ...editingInquiry, author: e.target.value })} placeholder="이름을 입력하세요" /></div>
+          <div>
+            <label className={labelCls}>분류</label>
+            <select className={inputCls} value={editingInquiry.category} onChange={e => setEditingInquiry({ ...editingInquiry, category: e.target.value })}>
+              <option>일반 문의</option><option>입학 상담</option><option>수업 및 커리큘럼</option><option>수강료 및 결제</option><option>차량 및 편의</option><option>기타</option>
+            </select>
+          </div>
+          <div><label className={labelCls}>제목 *</label><input className={inputCls} value={editingInquiry.title} onChange={e => setEditingInquiry({ ...editingInquiry, title: e.target.value })} placeholder="문의 제목을 입력하세요" /></div>
+          <div><label className={labelCls}>내용 *</label><textarea className={cn(inputCls, 'resize-none')} rows={5} value={editingInquiry.content} onChange={e => setEditingInquiry({ ...editingInquiry, content: e.target.value })} placeholder="문의 내용을 자세히 작성해주세요" /></div>
+          <div>
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+              <input type="checkbox" checked={editingInquiry.isPrivate} onChange={e => setEditingInquiry({ ...editingInquiry, isPrivate: e.target.checked })} className="rounded" />
+              <Lock className="w-3.5 h-3.5" /> 비밀글로 작성
+            </label>
+            <p className="text-xs text-slate-400 mt-1 ml-6">비밀글은 관리자만 내용을 확인할 수 있습니다</p>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <button onClick={() => setEditingInquiry(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
+            <button onClick={() => handleSaveInquiry(editingInquiry)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Send className="w-4 h-4" />문의 등록</button>
           </div>
         </Modal>
       )}
