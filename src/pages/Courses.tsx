@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Clock, Star, Users, ArrowRight, GraduationCap, Sparkles, Calculator, Phone, CheckCircle, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
@@ -73,7 +73,7 @@ export function Courses() {
     const [activeTab, setActiveTab] = useState(0);
 
     // ── 부서 배너 state ──
-    const [deptInfoList, setDeptInfoList] = useState<DepartmentInfo[]>(getDepartmentInfo);
+    const [deptInfoList, setDeptInfoList] = useState<DepartmentInfo[]>([]);
     const [deptModal, setDeptModal] = useState(false);
     const [editDept, setEditDept] = useState<DepartmentInfo | null>(null);
     const [editHighlightsText, setEditHighlightsText] = useState('');
@@ -86,7 +86,12 @@ export function Courses() {
     const current = mergedDepartments[activeTab];
 
     // ── 수강 반 state ──
-    const [allClasses, setAllClasses] = useState<CourseClass[]>(getCourseClasses);
+    const [allClasses, setAllClasses] = useState<CourseClass[]>([]);
+
+    useEffect(() => {
+        getDepartmentInfo().then(setDeptInfoList);
+        getCourseClasses().then(setAllClasses);
+    }, []);
     const [classModal, setClassModal] = useState<'add' | 'edit' | null>(null);
     const [editClass, setEditClass] = useState<CourseClass | null>(null);
 
