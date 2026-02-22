@@ -93,13 +93,13 @@ export function ParentService() {
                 </motion.div>
 
                 {/* Tabs */}
-                <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mb-8 overflow-x-auto">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 bg-slate-100 p-1 rounded-xl mb-8">
                     {tabs.map(tab => (
                         <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center px-4 py-2.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                            className={`flex items-center justify-center sm:justify-start px-3 sm:px-4 py-2.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                                 }`}
                         >
-                            <tab.icon className="w-4 h-4 mr-2" /> {tab.name}
+                            <tab.icon className="w-4 h-4 mr-1.5 sm:mr-2" /> {tab.name}
                         </button>
                     ))}
                 </div>

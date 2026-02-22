@@ -171,12 +171,30 @@ export function Calendar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
 
         {/* ─── School Filter + Admin Add ─── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-          <div className="flex items-center gap-2">
-            <School className="w-5 h-5 text-emerald-600 shrink-0" />
-            <span className="text-sm font-semibold text-slate-700 shrink-0">학교 필터</span>
+        <div className="flex flex-col gap-3 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <School className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span className="text-sm font-semibold text-slate-700 shrink-0">학교 필터</span>
+            </div>
+            {isAdmin && (
+              <button onClick={openAddEvent} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors shrink-0">
+                <Plus className="w-4 h-4" /> 일정 추가
+              </button>
+            )}
           </div>
-          <div className="flex gap-1 bg-white rounded-xl p-1 border border-slate-200 overflow-x-auto flex-1">
+          {/* Mobile: select dropdown */}
+          <select
+            value={schoolFilter}
+            onChange={e => setSchoolFilter(e.target.value)}
+            className="sm:hidden w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 bg-white focus:ring-2 focus:ring-emerald-200 outline-none"
+          >
+            {SCHOOL_LIST.map(school => (
+              <option key={school} value={school}>{school === '전체' ? '전체 보기' : school}</option>
+            ))}
+          </select>
+          {/* Desktop: button row */}
+          <div className="hidden sm:flex flex-wrap gap-1 bg-white rounded-xl p-1 border border-slate-200">
             {SCHOOL_LIST.map(school => (
               <button
                 key={school}
@@ -192,11 +210,6 @@ export function Calendar() {
               </button>
             ))}
           </div>
-          {isAdmin && (
-            <button onClick={openAddEvent} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors shrink-0">
-              <Plus className="w-4 h-4" /> 일정 추가
-            </button>
-          )}
         </div>
 
         {/* Monthly Highlights */}

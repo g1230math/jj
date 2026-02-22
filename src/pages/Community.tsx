@@ -207,13 +207,13 @@ export function Community() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Tabs */}
-        <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mb-8 overflow-x-auto">
+        <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl mb-8">
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={cn("flex items-center px-4 py-2.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors",
+              className={cn("flex items-center px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors",
                 activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               )}>
-              <tab.icon className="w-4 h-4 mr-2" />{tab.name}
+              <tab.icon className="w-4 h-4 mr-1.5 sm:mr-2" />{tab.name}
             </button>
           ))}
         </div>
