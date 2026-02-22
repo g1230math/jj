@@ -4,7 +4,7 @@ import { Trophy, GraduationCap, Star, TrendingUp, ChevronDown, ChevronUp, Quote,
 import { cn } from '../lib/utils';
 import { ScrollReveal, CountUp, Section, SectionHeader } from '../components/ScrollReveal';
 import { useAuth } from '../context/AuthContext';
-import { getSuccessStories, saveSuccessStories, type SuccessStoryItem } from '../data/mockData';
+import { getSuccessStories, saveSuccessStories, type SuccessStoryItem, getSuccessStats, saveSuccessStats, type SuccessStoryStat } from '../data/mockData';
 
 type YearFilter = '전체' | '2025' | '2024' | '2023';
 type CategoryFilter = '전체' | '서울권' | '경기권' | '의약학' | '교대';
@@ -30,12 +30,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
     );
 }
 
-const stats = [
-    { label: '누적 대입 합격', value: 320, suffix: '+', desc: '명', icon: Trophy, color: 'from-amber-500 to-orange-600' },
-    { label: 'SKY 합격', value: 28, suffix: '', desc: '명', icon: Star, color: 'from-indigo-500 to-blue-600' },
-    { label: '의약학 합격', value: 15, suffix: '', desc: '명', icon: Award, color: 'from-emerald-500 to-teal-600' },
-    { label: '수학 1등급 비율', value: 87, suffix: '', desc: '%', icon: TrendingUp, color: 'from-rose-500 to-pink-600' },
-];
+const statIcons = [Trophy, Star, Award, TrendingUp];
+const statColors = ['from-amber-500 to-orange-600', 'from-indigo-500 to-blue-600', 'from-emerald-500 to-teal-600', 'from-rose-500 to-pink-600'];
 
 const regionColors: Record<string, string> = {
     '서울권': 'bg-indigo-100 text-indigo-700',
@@ -58,6 +54,28 @@ export function SuccessStories() {
     const [yearFilter, setYearFilter] = useState<YearFilter>('전체');
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('전체');
     const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    // ── 합격 통계 state ──
+    const [ssStats, setSsStats] = useState<SuccessStoryStat[]>(() => getSuccessStats().sort((a, b) => a.order - b.order));
+    const [statModal, setStatModal] = useState<'add' | 'edit' | null>(null);
+    const [editStat, setEditStat] = useState<SuccessStoryStat | null>(null);
+
+    const openAddStat = () => { setEditStat({ id: genId('ss'), label: '', value: 0, suffix: '', desc: '명', order: ssStats.length + 1 }); setStatModal('add'); };
+    const openEditStat = (s: SuccessStoryStat) => { setEditStat({ ...s }); setStatModal('edit'); };
+    const closeStat = () => { setStatModal(null); setEditStat(null); };
+    const handleSaveStat = () => {
+        if (!editStat || !editStat.label.trim()) return;
+        let updated: SuccessStoryStat[];
+        if (statModal === 'add') { updated = [...ssStats, editStat]; }
+        else { updated = ssStats.map(s => s.id === editStat.id ? editStat : s); }
+        updated.sort((a, b) => a.order - b.order);
+        setSsStats(updated); saveSuccessStats(updated); closeStat();
+    };
+    const handleDeleteStat = (id: string) => {
+        if (!confirm('이 통계를 삭제하시겠습니까?')) return;
+        const updated = ssStats.filter(s => s.id !== id);
+        setSsStats(updated); saveSuccessStats(updated);
+    };
 
     // ── 합격 스토리 state ──
     const [stories, setStories] = useState<SuccessStoryItem[]>(getSuccessStories);
@@ -175,20 +193,38 @@ export function SuccessStories() {
             {/* Stats */}
             <Section className="bg-white">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    {stats.map((stat, i) => (
-                        <ScrollReveal key={stat.label} delay={0.1 * i}>
-                            <div className="glass-card rounded-2xl p-5 text-center">
-                                <div className={cn("bg-gradient-to-br w-12 h-12 mx-auto rounded-xl flex items-center justify-center text-white mb-3", stat.color)}>
-                                    <stat.icon className="w-6 h-6" />
+                    {ssStats.map((stat, i) => {
+                        const Icon = statIcons[i % statIcons.length];
+                        const color = statColors[i % statColors.length];
+                        return (
+                            <ScrollReveal key={stat.id} delay={0.1 * i}>
+                                <div className="glass-card rounded-2xl p-5 text-center relative group">
+                                    {isAdmin && (
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                            <button onClick={() => openEditStat(stat)} className="p-1 bg-white rounded-md shadow hover:bg-slate-50"><Edit2 className="w-3 h-3 text-indigo-600" /></button>
+                                            <button onClick={() => handleDeleteStat(stat.id)} className="p-1 bg-white rounded-md shadow hover:bg-slate-50"><Trash2 className="w-3 h-3 text-red-500" /></button>
+                                        </div>
+                                    )}
+                                    <div className={cn("bg-gradient-to-br w-12 h-12 mx-auto rounded-xl flex items-center justify-center text-white mb-3", color)}>
+                                        <Icon className="w-6 h-6" />
+                                    </div>
+                                    <div className="text-2xl md:text-3xl font-bold text-slate-900 font-display">
+                                        <CountUp end={stat.value} suffix={stat.suffix} />
+                                        <span className="text-base text-slate-500 ml-1 font-medium">{stat.desc}</span>
+                                    </div>
+                                    <div className="text-xs text-slate-500 mt-1 font-medium">{stat.label}</div>
                                 </div>
-                                <div className="text-2xl md:text-3xl font-bold text-slate-900 font-display">
-                                    <CountUp end={stat.value} suffix={stat.suffix} />
-                                    <span className="text-base text-slate-500 ml-1 font-medium">{stat.desc}</span>
-                                </div>
-                                <div className="text-xs text-slate-500 mt-1 font-medium">{stat.label}</div>
-                            </div>
+                            </ScrollReveal>
+                        );
+                    })}
+                    {isAdmin && (
+                        <ScrollReveal delay={0.4}>
+                            <button onClick={openAddStat} className="glass-card rounded-2xl p-5 text-center border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all flex flex-col items-center justify-center gap-2 min-h-[120px]">
+                                <Plus className="w-6 h-6 text-indigo-400" />
+                                <span className="text-sm font-medium text-indigo-500">통계 추가</span>
+                            </button>
                         </ScrollReveal>
-                    ))}
+                    )}
                 </div>
             </Section>
 
@@ -340,6 +376,22 @@ export function SuccessStories() {
                     </div>
                 )}
             </div>
+
+            {/* ─── 통계 추가/수정 모달 ─── */}
+            {statModal && editStat && (
+                <Modal title={statModal === 'add' ? '통계 추가' : '통계 수정'} onClose={closeStat}>
+                    <div><label className={labelCls}>라벨</label><input className={inputCls} value={editStat.label} onChange={e => setEditStat({ ...editStat, label: e.target.value })} placeholder="예: SKY 합격" /></div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div><label className={labelCls}>숫자 값</label><input type="number" className={inputCls} value={editStat.value} onChange={e => setEditStat({ ...editStat, value: parseFloat(e.target.value) || 0 })} /></div>
+                        <div><label className={labelCls}>접미사 (suffix)</label><input className={inputCls} placeholder="예: +" value={editStat.suffix} onChange={e => setEditStat({ ...editStat, suffix: e.target.value })} /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div><label className={labelCls}>단위 (desc)</label><input className={inputCls} placeholder="예: 명, %" value={editStat.desc} onChange={e => setEditStat({ ...editStat, desc: e.target.value })} /></div>
+                        <div><label className={labelCls}>순서</label><input type="number" className={inputCls} value={editStat.order} onChange={e => setEditStat({ ...editStat, order: parseInt(e.target.value) || 1 })} /></div>
+                    </div>
+                    <button onClick={handleSaveStat} className="w-full py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2"><Save className="w-4 h-4" /> 저장</button>
+                </Modal>
+            )}
 
             {/* ─── 스토리 추가/수정 모달 ─── */}
             {storyModal && editStory && (

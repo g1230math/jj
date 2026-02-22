@@ -927,6 +927,31 @@ export function getSuccessStories(): SuccessStoryItem[] {
 }
 export function saveSuccessStories(items: SuccessStoryItem[]) { localStorage.setItem(SUCCESS_KEY, JSON.stringify(items)); }
 
+// ── 합격 스토리 통계 ──
+export interface SuccessStoryStat {
+  id: string;
+  label: string;
+  value: number;
+  suffix: string;
+  desc: string;
+  order: number;
+}
+
+const SS_STAT_KEY = 'g1230_success_stats';
+const defaultSuccessStats: SuccessStoryStat[] = [
+  { id: 'ss1', label: '누적 대입 합격', value: 320, suffix: '+', desc: '명', order: 1 },
+  { id: 'ss2', label: 'SKY 합격', value: 28, suffix: '', desc: '명', order: 2 },
+  { id: 'ss3', label: '의약학 합격', value: 15, suffix: '', desc: '명', order: 3 },
+  { id: 'ss4', label: '수학 1등급 비율', value: 87, suffix: '', desc: '%', order: 4 },
+];
+
+export function getSuccessStats(): SuccessStoryStat[] {
+  const saved = localStorage.getItem(SS_STAT_KEY);
+  if (saved) { try { return JSON.parse(saved); } catch { /* fallback */ } }
+  return defaultSuccessStats;
+}
+export function saveSuccessStats(items: SuccessStoryStat[]) { localStorage.setItem(SS_STAT_KEY, JSON.stringify(items)); }
+
 /* ═══════ HOME: Stats ═══════ */
 export interface HomeStat {
   id: string;
