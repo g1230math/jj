@@ -105,7 +105,7 @@ export const defaultRoutes: ShuttleRoute[] = [
 export async function getShuttleRoutes(): Promise<ShuttleRoute[]> {
     if (!supabase) return defaultRoutes;
     try {
-        const { data, error } = await supabase.from('site_data').select('value').eq('key', 'shuttle_routes').single();
+        const { data, error } = await supabase.from('site_data').select('value').eq('key', 'shuttle_routes').maybeSingle();
         if (error || !data) return defaultRoutes;
         return data.value as ShuttleRoute[];
     } catch { return defaultRoutes; }

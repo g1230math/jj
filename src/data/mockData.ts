@@ -216,7 +216,7 @@ import { supabase } from '../lib/supabase';
 async function getData<T>(key: string, defaults: T): Promise<T> {
   if (!supabase) return defaults;
   try {
-    const { data, error } = await supabase.from('site_data').select('value').eq('key', key).single();
+    const { data, error } = await supabase.from('site_data').select('value').eq('key', key).maybeSingle();
     if (error || !data) return defaults;
     return data.value as T;
   } catch { return defaults; }
