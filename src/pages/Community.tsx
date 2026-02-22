@@ -20,6 +20,26 @@ import { motion } from 'motion/react';
 /* ─────────── helpers ─────────── */
 const today = () => new Date().toISOString().split('T')[0];
 const genId = (prefix: string) => `${prefix}_${Date.now()}`;
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none";
+const labelCls = "block text-xs font-medium text-slate-600 mb-1";
+
+/* ═══════════════════════════════════════════
+   Top-level sub-components (won't remount on parent state change)
+═══════════════════════════════════════════ */
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
+          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="p-5 space-y-4">{children}</div>
+      </div>
+    </div>
+  );
+}
 
 /* ─────────── COMPONENT ─────────── */
 export function Community() {
@@ -63,7 +83,7 @@ export function Community() {
 
   /* ── Notice CRUD ── */
   const newNotice = (): NoticeItem => ({ id: '', title: '', content: '', date: today(), isNew: true, isPinned: false });
-  const saveNotice = (item: NoticeItem) => {
+  const handleSaveNotice = (item: NoticeItem) => {
     let list: NoticeItem[];
     if (isNew) {
       list = [{ ...item, id: genId('n') }, ...noticeList];
@@ -80,7 +100,7 @@ export function Community() {
 
   /* ── Blog CRUD ── */
   const newBlog = (): BlogPost => ({ id: '', title: '', excerpt: '', content: '', author: user?.name || '', date: today(), readTime: '5분', tags: [], image: '' });
-  const saveBlog = (item: BlogPost) => {
+  const handleSaveBlog = (item: BlogPost) => {
     let list: BlogPost[];
     if (isNew) {
       list = [{ ...item, id: genId('blog') }, ...blogList];
@@ -97,7 +117,7 @@ export function Community() {
 
   /* ── Gallery CRUD ── */
   const newGalleryItem = (): GalleryItem => ({ id: '', title: '', description: '', imageUrl: '', date: today() });
-  const saveGalleryItem = (item: GalleryItem) => {
+  const handleSaveGallery = (item: GalleryItem) => {
     let list: GalleryItem[];
     if (isNew) {
       list = [{ ...item, id: genId('gal') }, ...galleryList];
@@ -114,7 +134,7 @@ export function Community() {
 
   /* ── Resource CRUD ── */
   const newResource = (): ResourceItem => ({ id: '', title: '', category: '학습자료', date: today(), downloads: 0, type: 'PDF', size: '', fileUrl: '' });
-  const saveResourceItem = (item: ResourceItem) => {
+  const handleSaveResource = (item: ResourceItem) => {
     let list: ResourceItem[];
     if (isNew) {
       list = [{ ...item, id: genId('res') }, ...resourceList];
@@ -131,7 +151,7 @@ export function Community() {
 
   /* ── FAQ CRUD ── */
   const newFaqItem = (): FaqItem => ({ id: '', category: '일반', question: '', answer: '', order: faqList.length + 1 });
-  const saveFaqItem = (item: FaqItem) => {
+  const handleSaveFaq = (item: FaqItem) => {
     let list: FaqItem[];
     if (isNew) {
       list = [...faqList, { ...item, id: genId('faq') }];
@@ -165,44 +185,6 @@ export function Community() {
     const list = inquiryList.filter(i => i.id !== id);
     saveInquiries(list); setInquiryList(list);
   };
-
-  /* ─────────── Admin "Add" button ─────────── */
-  const AdminAddButton = ({ onClick, label }: { onClick: () => void; label: string }) => (
-    isAdmin ? (
-      <button onClick={onClick}
-        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
-        <Plus className="w-4 h-4" />{label}
-      </button>
-    ) : null
-  );
-
-  /* ─────────── Edit/Delete icon buttons ─────────── */
-  const AdminActions = ({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) => (
-    isAdmin ? (
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-1.5 rounded-lg hover:bg-indigo-100 text-indigo-600"><Edit2 className="w-3.5 h-3.5" /></button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
-      </div>
-    ) : null
-  );
-
-  /* ═══════════════════════════════════════════
-     MODAL — Generic modal wrapper
-  ═══════════════════════════════════════════ */
-  const Modal = ({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
-          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5" /></button>
-        </div>
-        <div className="p-5 space-y-4">{children}</div>
-      </div>
-    </div>
-  );
-
-  const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none";
-  const labelCls = "block text-xs font-medium text-slate-600 mb-1";
 
   /* ═══════════════════════════════════════════
      RENDER
@@ -243,7 +225,12 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-800">공지사항</h2>
-                <AdminAddButton onClick={() => { setEditingNotice(newNotice()); setIsNew(true); }} label="글쓰기" />
+                {isAdmin && (
+                  <button onClick={() => { setEditingNotice(newNotice()); setIsNew(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />글쓰기
+                  </button>
+                )}
               </div>
               <div className="divide-y divide-slate-100">
                 {noticeList.map(notice => (
@@ -257,7 +244,12 @@ export function Community() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <span className="text-sm text-slate-400">{notice.date}</span>
-                        <AdminActions onEdit={() => { setEditingNotice(notice); setIsNew(false); }} onDelete={() => deleteNotice(notice.id)} />
+                        {isAdmin && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={(e) => { e.stopPropagation(); setEditingNotice(notice); setIsNew(false); }} className="p-1.5 rounded-lg hover:bg-indigo-100 text-indigo-600"><Edit2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={(e) => { e.stopPropagation(); deleteNotice(notice.id); }} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        )}
                         {openNotice === notice.id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                       </div>
                     </div>
@@ -279,7 +271,12 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-slate-800">블로그</h2>
-                <AdminAddButton onClick={() => { setEditingBlog(newBlog()); setIsNew(true); }} label="새 글 작성" />
+                {isAdmin && (
+                  <button onClick={() => { setEditingBlog(newBlog()); setIsNew(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />새 글 작성
+                  </button>
+                )}
               </div>
               <div className="space-y-8">
                 {blogList.map(post => (
@@ -343,7 +340,12 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-slate-800">학원 갤러리</h2>
-                <AdminAddButton onClick={() => { setEditingGallery(newGalleryItem()); setIsNew(true); }} label="사진 추가" />
+                {isAdmin && (
+                  <button onClick={() => { setEditingGallery(newGalleryItem()); setIsNew(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />사진 추가
+                  </button>
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {galleryList.map(gal => (
@@ -373,7 +375,12 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-slate-800">자료실</h2>
-                <AdminAddButton onClick={() => { setEditingResource(newResource()); setIsNew(true); }} label="자료 추가" />
+                {isAdmin && (
+                  <button onClick={() => { setEditingResource(newResource()); setIsNew(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />자료 추가
+                  </button>
+                )}
               </div>
               <div className="space-y-8">
                 {Array.from(new Set(resourceList.map(r => r.category))).map(category => {
@@ -424,7 +431,12 @@ export function Community() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-slate-800">자주 묻는 질문</h2>
-                <AdminAddButton onClick={() => { setEditingFaq(newFaqItem()); setIsNew(true); }} label="FAQ 추가" />
+                {isAdmin && (
+                  <button onClick={() => { setEditingFaq(newFaqItem()); setIsNew(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />FAQ 추가
+                  </button>
+                )}
               </div>
               <div className="space-y-8">
                 {Array.from(new Set(faqList.map(f => f.category))).map(category => (
@@ -540,7 +552,7 @@ export function Community() {
                         </div>
                       </button>
 
-                      {/* Expanded content — admin can see all including private, normal users cannot see private */}
+                      {/* Expanded content */}
                       {isOpen && (isAdmin || !post.isPrivate) && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-4 pb-4">
                           <div className="bg-slate-50 rounded-xl p-4 space-y-4">
@@ -619,7 +631,7 @@ export function Community() {
       </div>
 
       {/* ═══════════════════════════════════════════
-         EDIT MODALS
+         EDIT MODALS (using top-level Modal component)
       ═══════════════════════════════════════════ */}
 
       {/* ── Notice Modal ── */}
@@ -636,7 +648,7 @@ export function Community() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingNotice(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
-            <button onClick={() => saveNotice(editingNotice)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+            <button onClick={() => handleSaveNotice(editingNotice)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
           </div>
         </Modal>
       )}
@@ -656,7 +668,7 @@ export function Community() {
           <div><label className={labelCls}>태그 (쉼표로 구분)</label><input className={inputCls} value={editingBlog.tags.join(', ')} onChange={e => setEditingBlog({ ...editingBlog, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} /></div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingBlog(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
-            <button onClick={() => saveBlog(editingBlog)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+            <button onClick={() => handleSaveBlog(editingBlog)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
           </div>
         </Modal>
       )}
@@ -670,7 +682,7 @@ export function Community() {
           <div><label className={labelCls}>날짜</label><input type="date" className={inputCls} value={editingGallery.date} onChange={e => setEditingGallery({ ...editingGallery, date: e.target.value })} /></div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingGallery(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
-            <button onClick={() => saveGalleryItem(editingGallery)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+            <button onClick={() => handleSaveGallery(editingGallery)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
           </div>
         </Modal>
       )}
@@ -693,7 +705,7 @@ export function Community() {
           <div><label className={labelCls}>날짜</label><input type="date" className={inputCls} value={editingResource.date} onChange={e => setEditingResource({ ...editingResource, date: e.target.value })} /></div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingResource(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
-            <button onClick={() => saveResourceItem(editingResource)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+            <button onClick={() => handleSaveResource(editingResource)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
           </div>
         </Modal>
       )}
@@ -711,7 +723,7 @@ export function Community() {
           <div><label className={labelCls}>답변 *</label><textarea className={cn(inputCls, 'resize-none')} rows={4} value={editingFaq.answer} onChange={e => setEditingFaq({ ...editingFaq, answer: e.target.value })} /></div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => { setEditingFaq(null); setIsNew(false); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
-            <button onClick={() => saveFaqItem(editingFaq)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
+            <button onClick={() => handleSaveFaq(editingFaq)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Save className="w-4 h-4" />저장</button>
           </div>
         </Modal>
       )}
