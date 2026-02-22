@@ -108,10 +108,10 @@ export function PopupAdmin() {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                     <Image className="w-5 h-5 text-indigo-600" />
-                    <h2 className="text-lg font-bold text-slate-900">팝업(POPUP) 관리</h2>
+                    <h2 className="text-lg font-bold text-slate-900">팝업 관리</h2>
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-sm text-slate-500">팝업 사용</span>
@@ -130,7 +130,7 @@ export function PopupAdmin() {
                 </div>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 sm:p-5 space-y-4">
                 {/* Popup List Header */}
                 <div className="flex items-center justify-between">
                     <p className="text-sm text-slate-600 font-medium">
@@ -162,72 +162,72 @@ export function PopupAdmin() {
                     <div
                         key={popup.id}
                         className={cn(
-                            "flex items-start gap-4 p-4 rounded-xl border transition-colors",
+                            "flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-colors",
                             popup.isActive && isDateActive(popup)
                                 ? "bg-white border-slate-200"
                                 : "bg-slate-50 border-slate-200 opacity-60"
                         )}
                     >
-                        {/* Order controls */}
-                        <div className="flex flex-col items-center gap-0.5 pt-2">
-                            <button
-                                onClick={() => handleMoveOrder(popup.id, 'up')}
-                                disabled={idx === 0}
-                                className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
-                            >
-                                <ChevronUp className="w-4 h-4 text-slate-400" />
-                            </button>
-                            <span className="text-xs text-slate-400 font-mono">{idx + 1}</span>
-                            <button
-                                onClick={() => handleMoveOrder(popup.id, 'down')}
-                                disabled={idx === sortedPopups.length - 1}
-                                className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
-                            >
-                                <ChevronDown className="w-4 h-4 text-slate-400" />
-                            </button>
-                        </div>
-
-                        {/* Image preview */}
-                        <div className="w-20 h-24 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                            {popup.imageUrl ? (
-                                <img src={popup.imageUrl} alt="popup" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    <Image className="w-6 h-6" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1.5">
-                                <span className={cn(
-                                    "text-[10px] px-2 py-0.5 rounded-full font-medium",
-                                    popup.isActive && isDateActive(popup)
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-slate-200 text-slate-500"
-                                )}>
-                                    {popup.isActive && isDateActive(popup) ? '게시중' : popup.isActive ? '기간외' : '비활성'}
-                                </span>
-                                <span className={cn(
-                                    "text-[10px] px-2 py-0.5 rounded-full font-medium",
-                                    popup.clickAction === 'link' ? "bg-blue-100 text-blue-700"
-                                        : popup.clickAction === 'page' ? "bg-purple-100 text-purple-700"
-                                            : "bg-slate-100 text-slate-500"
-                                )}>
-                                    {popup.clickAction === 'link' ? '링크 이동' : popup.clickAction === 'page' ? '페이지 이동' : '동작 없음'}
-                                </span>
+                        {/* Top row: order + image + info (mobile: stacked) */}
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                            {/* Order controls */}
+                            <div className="flex flex-col items-center gap-0.5 pt-1 shrink-0">
+                                <button
+                                    onClick={() => handleMoveOrder(popup.id, 'up')}
+                                    disabled={idx === 0}
+                                    className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
+                                >
+                                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                                </button>
+                                <span className="text-xs text-slate-400 font-mono">{idx + 1}</span>
+                                <button
+                                    onClick={() => handleMoveOrder(popup.id, 'down')}
+                                    disabled={idx === sortedPopups.length - 1}
+                                    className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
+                                >
+                                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                                </button>
                             </div>
-                            <p className="text-sm text-slate-700 font-medium truncate mb-1">
-                                {popup.imageUrl || '(이미지 미설정)'}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                                {popup.startDate} ~ {popup.endDate} · PC {popup.pcWidth}px · 모바일 {popup.mobileWidth}px
-                            </p>
+
+                            {/* Image preview */}
+                            <div className="w-16 h-20 sm:w-20 sm:h-24 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                                {popup.imageUrl ? (
+                                    <img src={popup.imageUrl} alt="popup" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                        <Image className="w-6 h-6" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                    <span className={cn(
+                                        "text-[10px] px-2 py-0.5 rounded-full font-medium",
+                                        popup.isActive && isDateActive(popup)
+                                            ? "bg-emerald-100 text-emerald-700"
+                                            : "bg-slate-200 text-slate-500"
+                                    )}>
+                                        {popup.isActive && isDateActive(popup) ? '게시중' : popup.isActive ? '기간외' : '비활성'}
+                                    </span>
+                                    <span className={cn(
+                                        "text-[10px] px-2 py-0.5 rounded-full font-medium",
+                                        popup.clickAction === 'link' ? "bg-blue-100 text-blue-700"
+                                            : popup.clickAction === 'page' ? "bg-purple-100 text-purple-700"
+                                                : "bg-slate-100 text-slate-500"
+                                    )}>
+                                        {popup.clickAction === 'link' ? '링크' : popup.clickAction === 'page' ? '페이지' : '없음'}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 truncate">
+                                    {popup.startDate} ~ {popup.endDate}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0 self-end sm:self-start">
                             <button
                                 onClick={() => handleToggleActive(popup.id)}
                                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -255,7 +255,7 @@ export function PopupAdmin() {
 
                 {/* Form */}
                 {showForm && (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-5">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 space-y-5">
                         <div className="flex items-center justify-between">
                             <h3 className="font-bold text-slate-900">
                                 {editingId ? '팝업 수정' : '새 팝업 등록'}

@@ -107,15 +107,15 @@ export function ShuttleAdmin() {
                     {label}
                 </h4>
                 <button onClick={() => addStop(activeRoute.id, direction)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors shrink-0"
                 >
-                    <Plus className="w-3.5 h-3.5" /> 정류장 추가
+                    <Plus className="w-3.5 h-3.5" /> 추가
                 </button>
             </div>
             <div className="space-y-2">
                 {activeRoute[direction].map((stop, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100 group">
-                        <div className="flex flex-col gap-0.5">
+                    <div key={i} className="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 rounded-xl p-3 border border-slate-100 group">
+                        <div className="flex sm:flex-col gap-0.5 shrink-0">
                             <button onClick={() => moveStop(activeRoute.id, direction, i, -1)} disabled={i === 0}
                                 className="p-0.5 text-slate-400 hover:text-slate-600 disabled:opacity-30"
                             ><ArrowUp className="w-3.5 h-3.5" /></button>
@@ -129,19 +129,19 @@ export function ShuttleAdmin() {
                         <input
                             type="text" value={stop.name}
                             onChange={e => updateStop(activeRoute.id, direction, i, { name: e.target.value })}
-                            className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="flex-1 min-w-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="정류장 이름"
                         />
-                        <div className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1 shrink-0">
+                            <Clock className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
                             <input
                                 type="time" value={stop.time}
                                 onChange={e => updateStop(activeRoute.id, direction, i, { time: e.target.value })}
-                                className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm font-mono w-24 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm font-mono w-[5.5rem] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
                         <button onClick={() => removeStop(activeRoute.id, direction, i)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                         ><Trash2 className="w-4 h-4" /></button>
                     </div>
                 ))}
@@ -151,7 +151,7 @@ export function ShuttleAdmin() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <Bus className="w-5 h-5 text-indigo-600" /> 차량 운행 관리
                 </h3>
@@ -197,7 +197,7 @@ export function ShuttleAdmin() {
             </div>
 
             {/* Route Settings */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
                 <h4 className="font-bold text-slate-900 mb-4">기본 정보</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

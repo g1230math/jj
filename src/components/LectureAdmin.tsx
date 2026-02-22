@@ -186,7 +186,7 @@ export function LectureAdmin() {
 
             {/* Form */}
             {showForm && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="font-bold text-slate-900">
                             {editingId ? '강의 수정' : '새 강의 등록'} — {gradeLabel[gradeTab]}
@@ -312,41 +312,42 @@ export function LectureAdmin() {
                         <div
                             key={lecture.id}
                             className={cn(
-                                "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+                                "flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-colors",
                                 lecture.isPublished ? "bg-white border-slate-200" : "bg-slate-50 border-slate-200 opacity-60"
                             )}
                         >
-                            <div className="flex flex-col items-center gap-0.5">
-                                <button
-                                    onClick={() => handleMoveOrder(lecture.id, 'up')}
-                                    disabled={idx === 0}
-                                    className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
-                                >
-                                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                                </button>
-                                <span className="text-xs text-slate-400 font-mono">{idx + 1}</span>
-                                <button
-                                    onClick={() => handleMoveOrder(lecture.id, 'down')}
-                                    disabled={idx === filteredLectures.length - 1}
-                                    className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
-                                >
-                                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-medium text-slate-900 text-sm truncate">{lecture.title}</h4>
-                                    {!lecture.isPublished && (
-                                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded-full">비공개</span>
-                                    )}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="flex sm:flex-col items-center gap-0.5 shrink-0">
+                                    <button
+                                        onClick={() => handleMoveOrder(lecture.id, 'up')}
+                                        disabled={idx === 0}
+                                        className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
+                                    >
+                                        <ChevronUp className="w-4 h-4 text-slate-400" />
+                                    </button>
+                                    <span className="text-xs text-slate-400 font-mono">{idx + 1}</span>
+                                    <button
+                                        onClick={() => handleMoveOrder(lecture.id, 'down')}
+                                        disabled={idx === filteredLectures.length - 1}
+                                        className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30"
+                                    >
+                                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                                    </button>
                                 </div>
-                                <p className="text-xs text-slate-500">
-                                    {lecture.instructor} · {lecture.subject} · {lecture.duration} · {lecture.date}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h4 className="font-medium text-slate-900 text-sm truncate">{lecture.title}</h4>
+                                        {!lecture.isPublished && (
+                                            <span className="text-[10px] px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded-full">비공개</span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-slate-500">
+                                        {lecture.instructor} · {lecture.subject} · {lecture.duration} · {lecture.date}
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-1 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0 self-end sm:self-center">
                                 <button
                                     onClick={() => handleTogglePublish(lecture.id)}
                                     className="p-2 hover:bg-slate-100 rounded-lg transition-colors"

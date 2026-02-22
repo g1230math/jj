@@ -128,20 +128,20 @@ export function Dashboard() {
           { title: '미납 원비', value: '3건', icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-100' },
           { title: '신규 상담', value: `${pendingConsults}건`, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
-                <stat.icon className="w-6 h-6" />
+          <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center shrink-0`}>
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">{stat.title}</p>
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-slate-500 font-medium">{stat.title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-900">{stat.value}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-64 flex items-center justify-center text-slate-500">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 h-64 flex items-center justify-center text-slate-500">
         관리자 상세 통계 대시보드 영역
       </div>
 
