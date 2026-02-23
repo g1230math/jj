@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getMembers, saveMembers, getCourseClasses, type Member, type CourseClass } from '../data/mockData';
-import { Users, UserPlus, Search, Filter, Edit3, Trash2, X, Save, ChevronDown, UserCheck, UserX, Pause } from 'lucide-react';
+import { Users, UserPlus, Search, Filter, Edit3, Trash2, X, Save, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Pause } from 'lucide-react';
 
 const STATUS_LABELS: Record<Member['status'], string> = {
     active: '재원',
@@ -40,6 +40,8 @@ export function MemberAdmin() {
     const [editingMember, setEditingMember] = useState<Member | null>(null);
     const [form, setForm] = useState(emptyMember);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 10;
 
     useEffect(() => {
         Promise.all([getMembers(), getCourseClasses()]).then(([m, c]) => {
@@ -70,6 +72,14 @@ export function MemberAdmin() {
             return true;
         });
     }, [members, search, gradeFilter, statusFilter]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, gradeFilter, statusFilter]);
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const paginatedMembers = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
     const stats = useMemo(() => ({
         total: members.length,
@@ -217,7 +227,7 @@ export function MemberAdmin() {
                                 </td>
                             </tr>
                         ) : (
-                            filtered.map(m => (
+                            paginatedMembers.map(m => (
                                 <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
                                     <td className="px-4 sm:px-6 py-3 font-medium text-slate-900 whitespace-nowrap">{m.name}</td>
                                     <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{m.school}</td>
@@ -256,9 +266,41 @@ export function MemberAdmin() {
                 </table>
             </div>
 
-            {/* Result count footer */}
-            <div className="px-4 sm:px-6 py-3 bg-slate-50/50 border-t border-slate-100 text-xs text-slate-500">
-                총 {filtered.length}명 {filtered.length !== members.length && `(전체 ${members.length}명 중)`}
+            {/* Pagination footer */}
+            <div className="px-4 sm:px-6 py-3 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2">
+                <span className="text-xs text-slate-500">
+                    총 {filtered.length}명 {filtered.length !== members.length && `(전체 ${members.length}명 중)`}
+                </span>
+                {totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-[32px] h-8 rounded-lg text-xs font-medium transition-colors ${page === currentPage
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-slate-600 hover:bg-slate-200'
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Add / Edit Modal */}
