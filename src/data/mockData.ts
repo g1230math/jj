@@ -977,8 +977,44 @@ export interface ConsultRequest {
 
 const CONSULT_KEY = 'g1230_consultRequests';
 
+const defaultConsultRequests: ConsultRequest[] = [
+  {
+    id: 'consult_001',
+    studentSchool: '진접중학교',
+    studentGrade: '중2',
+    phone: '010-1234-5678',
+    preferredDate: '2026-02-25',
+    preferredTime: '오후 3시~5시',
+    message: '수학 내신 점수가 많이 떨어져서 집중 관리가 필요할 것 같습니다. 상담 부탁드립니다.',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+  },
+  {
+    id: 'consult_002',
+    studentSchool: '별내고등학교',
+    studentGrade: '고1',
+    phone: '010-9876-5432',
+    preferredDate: '2026-02-26',
+    preferredTime: '오전 10시~12시',
+    message: '고등학교 올라와서 수학이 너무 어려워졌어요. 기초부터 다시 잡고 싶습니다.',
+    status: 'confirmed',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+  },
+  {
+    id: 'consult_003',
+    studentSchool: '진접초등학교',
+    studentGrade: '초5',
+    phone: '010-5555-7777',
+    preferredDate: '2026-02-28',
+    preferredTime: '주말 오전',
+    message: '영재원 준비반 수업 가능한지 알고 싶습니다.',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+];
+
 export async function getConsultRequests(): Promise<ConsultRequest[]> {
-  return getData('consult_requests', []);
+  return getData('consult_requests', defaultConsultRequests);
 }
 
 export async function saveConsultRequests(items: ConsultRequest[]) { await saveData('consult_requests', items); }
