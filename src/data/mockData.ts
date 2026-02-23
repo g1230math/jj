@@ -1017,12 +1017,20 @@ export interface Member {
   name: string;
   phone: string;
   parentPhone: string;
+  parentRelation?: string;  // '모' | '부' | '조부모' | '기타'
   school: string;
   grade: string;
   classId: string;
   status: 'active' | 'paused' | 'withdrawn';
   enrollDate: string;
   memo: string;
+  // 확장 필드 (Phase 2)
+  birthDate?: string;
+  gender?: 'M' | 'F';
+  address?: string;
+  email?: string;
+  smsConsent?: boolean;
+  studentNo?: number;
 }
 
 const defaultMembers: Member[] = [
@@ -1060,3 +1068,111 @@ export async function getMembers(): Promise<Member[]> {
 }
 
 export async function saveMembers(items: Member[]) { await saveData('members', items); }
+
+/* ═══════════════════════════════════════════
+   ATTENDANCE (출결 관리)
+═══════════════════════════════════════════ */
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'early_leave';
+
+export interface AttendanceRecord {
+  id: string;
+  memberId: string;
+  date: string;        // 'YYYY-MM-DD'
+  status: AttendanceStatus;
+  note?: string;
+  recordedBy?: string; // 기록자 이름
+}
+
+const ATTENDANCE_KEY = 'g1230_attendance';
+
+export async function getAttendance(): Promise<AttendanceRecord[]> {
+  return getData(ATTENDANCE_KEY, []);
+}
+
+export async function saveAttendance(items: AttendanceRecord[]) {
+  await saveData(ATTENDANCE_KEY, items);
+}
+
+export async function upsertAttendance(record: AttendanceRecord) {
+  const all = await getAttendance();
+  const idx = all.findIndex(r => r.memberId === record.memberId && r.date === record.date);
+  if (idx >= 0) all[idx] = record;
+  else all.push(record);
+  await saveAttendance(all);
+}
+
+/* ═══════════════════════════════════════════
+   SCHEDULES (수강 스케줄)
+═══════════════════════════════════════════ */
+export type ScheduleStatus = 'active' | 'pending' | 'completed' | 'cancelled';
+
+export interface MemberSchedule {
+  id: string;
+  memberId: string;
+  classId: string;
+  startDate: string;
+  endDate: string;
+  status: ScheduleStatus;
+  note?: string;
+}
+
+const SCHEDULES_KEY = 'g1230_schedules';
+
+export async function getMemberSchedules(): Promise<MemberSchedule[]> {
+  return getData(SCHEDULES_KEY, []);
+}
+
+export async function saveMemberSchedules(items: MemberSchedule[]) {
+  await saveData(SCHEDULES_KEY, items);
+}
+
+/* ═══════════════════════════════════════════
+   PAYMENTS (수납/학원비)
+═══════════════════════════════════════════ */
+export type PaymentMethod = 'cash' | 'transfer' | 'card' | 'pg';
+export type PaymentStatus = 'paid' | 'unpaid' | 'partial';
+
+export interface PaymentRecord {
+  id: string;
+  memberId: string;
+  scheduleId?: string;
+  scheduleName: string;  // 스케줄명 직접 저장 (denormalized)
+  amount: number;
+  paidAt?: string;       // 수납일자
+  method?: PaymentMethod;
+  status: PaymentStatus;
+  note?: string;
+  createdBy?: string;    // 원장 이름
+  createdAt: string;
+}
+
+const PAYMENTS_KEY = 'g1230_payments';
+
+export async function getPayments(): Promise<PaymentRecord[]> {
+  return getData(PAYMENTS_KEY, []);
+}
+
+export async function savePayments(items: PaymentRecord[]) {
+  await saveData(PAYMENTS_KEY, items);
+}
+
+/* ═══════════════════════════════════════════
+   MEMBER MEMOS (메모 이력)
+═══════════════════════════════════════════ */
+export interface MemoEntry {
+  id: string;
+  memberId: string;
+  content: string;
+  authorName: string;
+  createdAt: string;
+}
+
+const MEMOS_KEY = 'g1230_member_memos';
+
+export async function getMemberMemos(): Promise<MemoEntry[]> {
+  return getData(MEMOS_KEY, []);
+}
+
+export async function saveMemberMemos(items: MemoEntry[]) {
+  await saveData(MEMOS_KEY, items);
+}

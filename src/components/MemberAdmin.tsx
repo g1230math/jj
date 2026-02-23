@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getMembers, saveMembers, getCourseClasses, type Member, type CourseClass } from '../data/mockData';
-import { Users, UserPlus, Search, Filter, Edit3, Trash2, X, Save, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Pause } from 'lucide-react';
+import { Users, UserPlus, Search, Edit3, Trash2, X, Save, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Pause, Eye } from 'lucide-react';
+import { MemberDetailModal } from './MemberDetailModal';
 
 const STATUS_LABELS: Record<Member['status'], string> = {
     active: '재원',
@@ -42,6 +43,7 @@ export function MemberAdmin() {
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_SIZE = 10;
+    const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
     useEffect(() => {
         Promise.all([getMembers(), getCourseClasses()]).then(([m, c]) => {
@@ -244,6 +246,9 @@ export function MemberAdmin() {
                                     <td className="px-3 py-3 text-slate-400 max-w-[150px] truncate hidden xl:table-cell" title={m.memo}>{m.memo || '-'}</td>
                                     <td className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">
                                         <div className="flex items-center justify-end gap-1.5">
+                                            <button onClick={() => setSelectedMember(m)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="상세보기">
+                                                <Eye className="w-4 h-4" />
+                                            </button>
                                             <button onClick={() => openEdit(m)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="수정">
                                                 <Edit3 className="w-4 h-4" />
                                             </button>
@@ -285,8 +290,8 @@ export function MemberAdmin() {
                                 key={page}
                                 onClick={() => setCurrentPage(page)}
                                 className={`min-w-[32px] h-8 rounded-lg text-xs font-medium transition-colors ${page === currentPage
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'text-slate-600 hover:bg-slate-200'
+                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    : 'text-slate-600 hover:bg-slate-200'
                                     }`}
                             >
                                 {page}
@@ -405,6 +410,21 @@ export function MemberAdmin() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* 학생 상세 모달 */}
+            {selectedMember && (
+                <MemberDetailModal
+                    member={selectedMember}
+                    courses={courses}
+                    onClose={() => setSelectedMember(null)}
+                    onSave={async (updated) => {
+                        const updatedList = members.map(m => m.id === updated.id ? updated : m);
+                        await saveMembers(updatedList);
+                        setMembers(updatedList);
+                        setSelectedMember(updated);
+                    }}
+                />
             )}
         </div>
     );
