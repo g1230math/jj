@@ -6,6 +6,8 @@ import { PopupAdmin } from '../components/PopupAdmin';
 import { LectureAdmin } from '../components/LectureAdmin';
 import { ConsultAdmin } from '../components/ConsultAdmin';
 import { MemberAdmin } from '../components/MemberAdmin';
+import { TeacherAdmin } from '../components/TeacherAdmin';
+import { TaxDashboard } from '../components/TaxDashboard';
 import { studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers, Lecture, LectureProgress, ConsultRequest } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -169,6 +171,12 @@ export function Dashboard() {
 
       {/* Shuttle Admin — admin only */}
       {user?.role === 'admin' && <ShuttleAdmin />}
+
+      {/* Teacher Admin — admin only */}
+      {user?.role === 'admin' && <TeacherAdmin />}
+
+      {/* Tax Dashboard — admin only */}
+      {user?.role === 'admin' && <TaxDashboard />}
 
       {/* Popup Admin — admin only */}
       {user?.role === 'admin' && <PopupAdmin />}

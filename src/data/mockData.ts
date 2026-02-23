@@ -820,30 +820,17 @@ export interface CourseClass {
   enrolled: number;
   level: string;
   order: number;
+  // 강사 관리 / 수납 연동용 (optional)
+  grade?: string;        // '초등' | '중등' | '고등'
+  subject?: string;
+  teacherId?: string;
+  days?: string[];
+  maxStudents?: number;
+  fee?: number;          // 월 수강료(숫자)
 }
 
-const COURSES_KEY = 'g1230_courses';
-const defaultCourseClasses: CourseClass[] = [
-  // 초등부
-  { id: 'cc1', departmentId: 'elementary', name: '기초 연산반', time: '월/수/금 15:00-16:30', price: '180,000원', students: 8, enrolled: 6, level: '초3~4', order: 1 },
-  { id: 'cc2', departmentId: 'elementary', name: '사고력 수학반', time: '화/목 15:00-16:30', price: '160,000원', students: 10, enrolled: 7, level: '초4~5', order: 2 },
-  { id: 'cc3', departmentId: 'elementary', name: '중등 준비반', time: '월/수/금 16:30-18:00', price: '200,000원', students: 8, enrolled: 5, level: '초5~6', order: 3 },
-  // 중등부
-  { id: 'cc4', departmentId: 'middle', name: '기본 개념반', time: '월/수/금 17:00-19:00', price: '220,000원', students: 12, enrolled: 9, level: '중1~2', order: 1 },
-  { id: 'cc5', departmentId: 'middle', name: '심화 응용반', time: '화/목/토 17:00-19:00', price: '240,000원', students: 10, enrolled: 8, level: '중2~3', order: 2 },
-  { id: 'cc6', departmentId: 'middle', name: '내신 대비 특강', time: '시험 2주 전 집중', price: '120,000원', students: 8, enrolled: 4, level: '중1~3', order: 3 },
-  { id: 'cc7', departmentId: 'middle', name: '고등 선행반', time: '월/수/금 19:00-21:00', price: '260,000원', students: 8, enrolled: 6, level: '중3', order: 4 },
-  // 고등부
-  { id: 'cc8', departmentId: 'high', name: '수학(상)·(하) 반', time: '월/수/금 18:00-20:00', price: '280,000원', students: 10, enrolled: 7, level: '고1', order: 1 },
-  { id: 'cc9', departmentId: 'high', name: '수학Ⅰ·Ⅱ 반', time: '화/목/토 18:00-20:00', price: '300,000원', students: 8, enrolled: 6, level: '고2', order: 2 },
-  { id: 'cc10', departmentId: 'high', name: '미적분·기하 반', time: '월/수/금 20:00-22:00', price: '320,000원', students: 8, enrolled: 5, level: '고2~3', order: 3 },
-  { id: 'cc11', departmentId: 'high', name: '수능 집중반', time: '화/목/토 20:00-22:00', price: '350,000원', students: 6, enrolled: 4, level: '고3', order: 4 },
-];
+// (수강반 데이터 및 함수는 아래 COURSE CLASSES 섹션에서 통합 관리)
 
-export async function getCourseClasses(): Promise<CourseClass[]> {
-  return getData('courses', defaultCourseClasses);
-}
-export async function saveCourseClasses(items: CourseClass[]) { await saveData('courses', items); }
 
 // ── 합격 스토리 ──
 export interface SuccessStoryItem {
@@ -1008,6 +995,28 @@ export async function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status
   await saveConsultRequests(list);
   return newReq;
 }
+
+const COURSE_CLASSES_KEY = 'g1230_course_classes';
+
+const defaultCourseClasses: CourseClass[] = [
+  { id: 'cc1', name: '초등 기초반', departmentId: 'elementary', grade: '초등', subject: '수학', teacherId: 'tc3', days: ['화', '목'], time: '15:00~16:30', maxStudents: 12, fee: 220000, price: '220,000원', students: 12, enrolled: 8, level: '초3~4', order: 1 },
+  { id: 'cc2', name: '초등 심화반', departmentId: 'elementary', grade: '초등', subject: '수학', teacherId: 'tc3', days: ['월', '수'], time: '16:30~18:00', maxStudents: 10, fee: 260000, price: '260,000원', students: 10, enrolled: 7, level: '초4~5', order: 2 },
+  { id: 'cc3', name: '초등 영재반', departmentId: 'elementary', grade: '초등', subject: '수학', teacherId: 'tc3', days: ['토'], time: '10:00~12:00', maxStudents: 8, fee: 300000, price: '300,000원', students: 8, enrolled: 5, level: '초5~6', order: 3 },
+  { id: 'cc4', name: '중1 기초반', departmentId: 'middle', grade: '중등', subject: '수학', teacherId: 'tc1', days: ['월', '수', '금'], time: '16:00~18:00', maxStudents: 15, fee: 280000, price: '280,000원', students: 15, enrolled: 10, level: '중1', order: 1 },
+  { id: 'cc5', name: '중2 일반반', departmentId: 'middle', grade: '중등', subject: '수학', teacherId: 'tc1', days: ['화', '목'], time: '18:00~20:00', maxStudents: 15, fee: 280000, price: '280,000원', students: 15, enrolled: 11, level: '중2', order: 2 },
+  { id: 'cc6', name: '중3 심화반', departmentId: 'middle', grade: '중등', subject: '수학', teacherId: 'tc1', days: ['월', '수', '금'], time: '18:00~20:00', maxStudents: 12, fee: 320000, price: '320,000원', students: 12, enrolled: 9, level: '중3', order: 3 },
+  { id: 'cc7', name: '중등 선행반', departmentId: 'middle', grade: '중등', subject: '수학', teacherId: 'tc4', days: ['토'], time: '10:00~13:00', maxStudents: 10, fee: 280000, price: '280,000원', students: 10, enrolled: 6, level: '중3', order: 4 },
+  { id: 'cc8', name: '고1 기초반', departmentId: 'high', grade: '고등', subject: '수학', teacherId: 'tc2', days: ['화', '목'], time: '19:00~21:30', maxStudents: 12, fee: 350000, price: '350,000원', students: 12, enrolled: 8, level: '고1', order: 1 },
+  { id: 'cc9', name: '고1 심화반', departmentId: 'high', grade: '고등', subject: '수학', teacherId: 'tc2', days: ['월', '수', '금'], time: '19:00~21:30', maxStudents: 10, fee: 390000, price: '390,000원', students: 10, enrolled: 7, level: '고1', order: 2 },
+  { id: 'cc10', name: '고2 수학I·II반', departmentId: 'high', grade: '고등', subject: '수학', teacherId: 'tc2', days: ['월', '수', '금'], time: '19:30~22:00', maxStudents: 10, fee: 390000, price: '390,000원', students: 10, enrolled: 8, level: '고2', order: 3 },
+  { id: 'cc11', name: '고3 수능반', departmentId: 'high', grade: '고등', subject: '수학', teacherId: 'tc2', days: ['월', '화', '목'], time: '20:00~22:30', maxStudents: 8, fee: 450000, price: '450,000원', students: 8, enrolled: 6, level: '고3', order: 4 },
+];
+
+export async function getCourseClasses(): Promise<CourseClass[]> {
+  return getData(COURSE_CLASSES_KEY, defaultCourseClasses);
+}
+export async function saveCourseClasses(items: CourseClass[]) { await saveData(COURSE_CLASSES_KEY, items); }
+
 
 /* ═══════════════════════════════════════════
    MEMBERS (회원 관리)
@@ -1175,4 +1184,246 @@ export async function getMemberMemos(): Promise<MemoEntry[]> {
 
 export async function saveMemberMemos(items: MemoEntry[]) {
   await saveData(MEMOS_KEY, items);
+}
+
+/* ═══════════════════════════════════════════
+   TEACHERS (강사 관리)
+═══════════════════════════════════════════ */
+export type PayType = 'freelance' | 'employee_full' | 'employee_extra' | 'parttime';
+export type TeacherStatus = 'active' | 'leave' | 'resigned';
+
+export interface Teacher {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  subject: string;           // 담당 과목
+  classIds: string[];        // 담당 반 ID 목록
+  hireDate: string;
+  status: TeacherStatus;
+  payType: PayType;
+  basePay: number;           // 월급(freelance/employee) or 시급(parttime/extra)
+  extraHourlyRate?: number;  // employee_extra: 수당 시급
+  bankName?: string;
+  bankAccount?: string;
+  residentNoMasked?: string; // '901010-1******' 형태
+  note?: string;
+}
+
+const TEACHERS_KEY = 'g1230_teachers';
+
+const defaultTeachers: Teacher[] = [
+  {
+    id: 'tc1', name: '박지수', phone: '010-3333-0001', email: 'jisoo@g1230.kr',
+    subject: '수학', classIds: ['cc4', 'cc5', 'cc6'], hireDate: '2023-03-01',
+    status: 'active', payType: 'employee_full', basePay: 2800000,
+    bankName: '국민은행', bankAccount: '123-456-789012',
+    residentNoMasked: '890515-2******', note: '중등부 전담',
+  },
+  {
+    id: 'tc2', name: '김현우', phone: '010-3333-0002', email: 'hyunwoo@g1230.kr',
+    subject: '수학', classIds: ['cc8', 'cc9', 'cc10', 'cc11'], hireDate: '2022-09-01',
+    status: 'active', payType: 'employee_extra', basePay: 3200000, extraHourlyRate: 30000,
+    bankName: '신한은행', bankAccount: '234-567-890123',
+    residentNoMasked: '870320-1******', note: '고등부 전담',
+  },
+  {
+    id: 'tc3', name: '이소연', phone: '010-3333-0003', email: 'soyeon@g1230.kr',
+    subject: '수학', classIds: ['cc1', 'cc2', 'cc3'], hireDate: '2024-03-01',
+    status: 'active', payType: 'freelance', basePay: 2500000,
+    bankName: '카카오뱅크', bankAccount: '345-678-901234',
+    residentNoMasked: '951205-2******', note: '초등부 전담',
+  },
+  {
+    id: 'tc4', name: '최준혁', phone: '010-3333-0004', email: 'junhyuk@g1230.kr',
+    subject: '수학', classIds: ['cc7'], hireDate: '2025-09-01',
+    status: 'active', payType: 'parttime', basePay: 15000,
+    residentNoMasked: '010830-3******', note: '주말 알바, 중등 고등선행반',
+  },
+];
+
+export async function getTeachers(): Promise<Teacher[]> {
+  return getData(TEACHERS_KEY, defaultTeachers);
+}
+export async function saveTeachers(items: Teacher[]) { await saveData(TEACHERS_KEY, items); }
+
+/* ═══════════════════════════════════════════
+   WORK RECORDS (근무 기록)
+═══════════════════════════════════════════ */
+export type WorkType = 'regular' | 'extra' | 'consult';
+
+export interface WorkRecord {
+  id: string;
+  teacherId: string;
+  date: string;         // 'YYYY-MM-DD'
+  startTime: string;    // 'HH:MM'
+  endTime: string;      // 'HH:MM'
+  breakMinutes: number; // 휴게시간(분)
+  type: WorkType;
+  note?: string;
+}
+
+const WORK_RECORDS_KEY = 'g1230_work_records';
+
+export async function getWorkRecords(): Promise<WorkRecord[]> {
+  return getData(WORK_RECORDS_KEY, []);
+}
+export async function saveWorkRecords(items: WorkRecord[]) { await saveData(WORK_RECORDS_KEY, items); }
+
+/** 근무 시간(분) 계산 헬퍼 */
+export function calcWorkMinutes(rec: WorkRecord): number {
+  const [sh, sm] = rec.startTime.split(':').map(Number);
+  const [eh, em] = rec.endTime.split(':').map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm) - rec.breakMinutes;
+}
+
+/* ═══════════════════════════════════════════
+   PAY SLIPS (급여 명세)
+═══════════════════════════════════════════ */
+export interface PaySlip {
+  id: string;
+  teacherId: string;
+  year: number;
+  month: number;
+  basePay: number;
+  extraPay: number;          // 추가 강의·수당
+  grossPay: number;          // 지급 총액
+  insuranceEmployee: number; // 4대보험 근로자 부담분
+  withholdingTax: number;    // 원천세
+  localIncomeTax: number;    // 지방소득세
+  netPay: number;            // 실 지급액
+  createdAt: string;
+  note?: string;
+}
+
+const PAY_SLIPS_KEY = 'g1230_pay_slips';
+
+export async function getPaySlips(): Promise<PaySlip[]> {
+  return getData(PAY_SLIPS_KEY, []);
+}
+export async function savePaySlips(items: PaySlip[]) { await saveData(PAY_SLIPS_KEY, items); }
+
+/**
+ * 급여 자동 계산 (2025년 기준 근사치)
+ * payType별 세금 산식:
+ *   freelance       → 징수세 = grossPay × 3.3%, 4대보험 없음
+ *   employee_full   → 4대보험 근로자분 + 간이세액(basePay 기준 약 15만 공제 후 세율)
+ *   employee_extra  → basePay는 employee_full 방식 + extraPay는 3.3%
+ *   parttime        → 월 급여 1,690,000 이하 비과세, 초과분에만 원천세
+ */
+export function calcPaySlip(
+  teacher: Teacher,
+  basePay: number,
+  extraPay: number,
+  year: number,
+  month: number,
+): Omit<PaySlip, 'id' | 'teacherId' | 'createdAt'> {
+  const gross = basePay + extraPay;
+  let insurance = 0;
+  let wht = 0; // withholding tax
+  let local = 0;
+
+  if (teacher.payType === 'freelance') {
+    wht = Math.floor(gross * 0.033);
+    local = Math.floor(wht * 0.1);
+  } else if (teacher.payType === 'employee_full') {
+    // 4대보험 근로자분 (2025 기준): 국민 4.5% + 건강 3.545% + 장기요양(건강×12.95%) + 고용 0.9%
+    const healthRate = 0.03545;
+    insurance = Math.floor(gross * (0.045 + healthRate + healthRate * 0.1295 + 0.009));
+    // 간이세액 (단순화: 공제 후 6% → 15만 이하 거의 0~수만원)
+    const taxable = Math.max(0, gross - insurance - 150000);
+    wht = taxable < 1400000 ? Math.floor(taxable * 0.06) : Math.floor(taxable * 0.15 - 126000);
+    local = Math.floor(wht * 0.1);
+  } else if (teacher.payType === 'employee_extra') {
+    const healthRate = 0.03545;
+    insurance = Math.floor(basePay * (0.045 + healthRate + healthRate * 0.1295 + 0.009));
+    const taxable = Math.max(0, basePay - insurance - 150000);
+    const whtBase = taxable < 1400000 ? Math.floor(taxable * 0.06) : Math.floor(taxable * 0.15 - 126000);
+    const whtExtra = Math.floor(extraPay * 0.033);
+    wht = whtBase + whtExtra;
+    local = Math.floor(wht * 0.1);
+  } else if (teacher.payType === 'parttime') {
+    // 월 169만 초과분만 과세
+    const taxable = Math.max(0, gross - 1690000);
+    wht = Math.floor(taxable * 0.033);
+    local = Math.floor(wht * 0.1);
+  }
+
+  return {
+    year, month,
+    basePay, extraPay, grossPay: gross,
+    insuranceEmployee: insurance,
+    withholdingTax: wht,
+    localIncomeTax: local,
+    netPay: gross - insurance - wht - local,
+  };
+}
+
+/* ═══════════════════════════════════════════
+   TAX MEMOS (세무 체크리스트)
+═══════════════════════════════════════════ */
+export type TaxType =
+  | 'withholding'     // 원천세
+  | 'vat'             // 부가가치세
+  | 'income_tax'      // 종합소득세
+  | 'local_income'    // 지방소득세
+  | 'business_status'; // 사업장현황신고
+
+export type TaxStatus = 'pending' | 'filed' | 'paid';
+
+export interface TaxMemo {
+  id: string;
+  year: number;
+  month?: number;        // 원천세는 매월 → 월 지정
+  taxType: TaxType;
+  dueDate: string;       // 'YYYY-MM-DD'
+  status: TaxStatus;
+  amount?: number;       // 납부 금액 (입력 후)
+  note?: string;
+}
+
+const TAX_MEMOS_KEY = 'g1230_tax_memos';
+
+/** 연도별 기본 세무 일정 생성 */
+export function generateTaxSchedule(year: number): TaxMemo[] {
+  const items: TaxMemo[] = [];
+  // 원천세: 매월 10일
+  for (let m = 1; m <= 12; m++) {
+    const nextM = m === 12 ? 1 : m + 1;
+    const nextY = m === 12 ? year + 1 : year;
+    items.push({
+      id: `tax_wht_${year}_${m}`,
+      year, month: m,
+      taxType: 'withholding',
+      dueDate: `${nextY}-${String(nextM).padStart(2, '0')}-10`,
+      status: 'pending',
+    });
+  }
+  // 부가세 (반기)
+  items.push({ id: `tax_vat_${year}_1`, year, taxType: 'vat', dueDate: `${year}-01-25`, status: 'pending', note: '1기 예정신고' });
+  items.push({ id: `tax_vat_${year}_2`, year, taxType: 'vat', dueDate: `${year}-07-25`, status: 'pending', note: '2기 예정신고' });
+  // 종합소득세 + 지방소득세
+  items.push({ id: `tax_income_${year}`, year, taxType: 'income_tax', dueDate: `${year}-05-31`, status: 'pending' });
+  items.push({ id: `tax_local_${year}`, year, taxType: 'local_income', dueDate: `${year}-05-31`, status: 'pending' });
+  // 사업장 현황 신고
+  items.push({ id: `tax_biz_${year}`, year, taxType: 'business_status', dueDate: `${year}-02-10`, status: 'pending' });
+  return items;
+}
+
+export async function getTaxMemos(year: number): Promise<TaxMemo[]> {
+  const all: TaxMemo[] = await getData(TAX_MEMOS_KEY, []);
+  const forYear = all.filter(t => t.year === year);
+  if (forYear.length === 0) {
+    const generated = generateTaxSchedule(year);
+    await saveData(TAX_MEMOS_KEY, [...all, ...generated]);
+    return generated;
+  }
+  return forYear;
+}
+
+export async function saveTaxMemo(item: TaxMemo) {
+  const all: TaxMemo[] = await getData(TAX_MEMOS_KEY, []);
+  const idx = all.findIndex(t => t.id === item.id);
+  if (idx >= 0) all[idx] = item; else all.push(item);
+  await saveData(TAX_MEMOS_KEY, all);
 }
