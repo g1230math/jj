@@ -1007,3 +1007,55 @@ export async function addConsultRequest(req: Omit<ConsultRequest, 'id' | 'status
   await saveConsultRequests(list);
   return newReq;
 }
+
+/* ═══════════════════════════════════════════
+   MEMBERS (회원 관리)
+═══════════════════════════════════════════ */
+export interface Member {
+  id: string;
+  name: string;
+  phone: string;
+  parentPhone: string;
+  school: string;
+  grade: string;
+  classId: string;
+  status: 'active' | 'paused' | 'withdrawn';
+  enrollDate: string;
+  memo: string;
+}
+
+const defaultMembers: Member[] = [
+  // 초등부
+  { id: 'm1', name: '김민준', phone: '010-1111-0001', parentPhone: '010-2222-0001', school: '해밀초', grade: '초3', classId: 'cc1', status: 'active', enrollDate: '2025-03-05', memo: '연산 능력 우수' },
+  { id: 'm2', name: '이서연', phone: '010-1111-0002', parentPhone: '010-2222-0002', school: '진접초', grade: '초4', classId: 'cc1', status: 'active', enrollDate: '2025-04-10', memo: '' },
+  { id: 'm3', name: '박지호', phone: '010-1111-0003', parentPhone: '010-2222-0003', school: '주곡초', grade: '초4', classId: 'cc2', status: 'active', enrollDate: '2025-05-02', memo: '사고력 심화 필요' },
+  { id: 'm4', name: '최수아', phone: '010-1111-0004', parentPhone: '010-2222-0004', school: '해밀초', grade: '초5', classId: 'cc2', status: 'paused', enrollDate: '2025-03-12', memo: '가정 사유 휴원' },
+  { id: 'm5', name: '정하윤', phone: '010-1111-0005', parentPhone: '010-2222-0005', school: '진접초', grade: '초5', classId: 'cc3', status: 'active', enrollDate: '2025-06-01', memo: '' },
+  { id: 'm6', name: '강도현', phone: '010-1111-0006', parentPhone: '010-2222-0006', school: '해밀초', grade: '초6', classId: 'cc3', status: 'active', enrollDate: '2025-03-08', memo: '중등 진학 준비' },
+  // 중등부
+  { id: 'm7', name: '윤서준', phone: '010-1111-0007', parentPhone: '010-2222-0007', school: '진접중', grade: '중1', classId: 'cc4', status: 'active', enrollDate: '2025-03-05', memo: '' },
+  { id: 'm8', name: '장예은', phone: '010-1111-0008', parentPhone: '010-2222-0008', school: '풍양중', grade: '중1', classId: 'cc4', status: 'active', enrollDate: '2025-04-15', memo: '기초 보충 진행 중' },
+  { id: 'm9', name: '임주원', phone: '010-1111-0009', parentPhone: '010-2222-0009', school: '주곡중', grade: '중2', classId: 'cc4', status: 'active', enrollDate: '2025-03-10', memo: '' },
+  { id: 'm10', name: '한시우', phone: '010-1111-0010', parentPhone: '010-2222-0010', school: '진접중', grade: '중2', classId: 'cc5', status: 'active', enrollDate: '2025-05-20', memo: '심화 응용 실력 양호' },
+  { id: 'm11', name: '오지유', phone: '010-1111-0011', parentPhone: '010-2222-0011', school: '광동중', grade: '중2', classId: 'cc5', status: 'withdrawn', enrollDate: '2025-03-05', memo: '이사로 인한 퇴원 (2025-08)' },
+  { id: 'm12', name: '송현서', phone: '010-1111-0012', parentPhone: '010-2222-0012', school: '풍양중', grade: '중3', classId: 'cc5', status: 'active', enrollDate: '2025-03-05', memo: '' },
+  { id: 'm13', name: '배건우', phone: '010-1111-0013', parentPhone: '010-2222-0013', school: '주곡중', grade: '중3', classId: 'cc6', status: 'active', enrollDate: '2025-07-01', memo: '내신 대비 특강 수강' },
+  { id: 'm14', name: '류지아', phone: '010-1111-0014', parentPhone: '010-2222-0014', school: '진접중', grade: '중3', classId: 'cc7', status: 'active', enrollDate: '2025-03-12', memo: '고등 선행 우수' },
+  { id: 'm15', name: '남시현', phone: '010-1111-0015', parentPhone: '010-2222-0015', school: '광동중', grade: '중3', classId: 'cc7', status: 'paused', enrollDate: '2025-04-01', memo: '건강 사유 휴원' },
+  { id: 'm16', name: '진수빈', phone: '010-1111-0016', parentPhone: '010-2222-0016', school: '풍양중', grade: '중1', classId: 'cc4', status: 'active', enrollDate: '2025-09-01', memo: '' },
+  // 고등부
+  { id: 'm17', name: '백승현', phone: '010-1111-0017', parentPhone: '010-2222-0017', school: '진접고', grade: '고1', classId: 'cc8', status: 'active', enrollDate: '2025-03-05', memo: '' },
+  { id: 'm18', name: '홍유나', phone: '010-1111-0018', parentPhone: '010-2222-0018', school: '별내고', grade: '고1', classId: 'cc8', status: 'active', enrollDate: '2025-03-10', memo: '수학(상) 보충 필요' },
+  { id: 'm19', name: '문태영', phone: '010-1111-0019', parentPhone: '010-2222-0019', school: '진접고', grade: '고2', classId: 'cc9', status: 'active', enrollDate: '2025-03-05', memo: '' },
+  { id: 'm20', name: '양하은', phone: '010-1111-0020', parentPhone: '010-2222-0020', school: '별내고', grade: '고2', classId: 'cc9', status: 'active', enrollDate: '2025-05-15', memo: '수Ⅱ 심화 진행' },
+  { id: 'm21', name: '서지환', phone: '010-1111-0021', parentPhone: '010-2222-0021', school: '진접고', grade: '고2', classId: 'cc10', status: 'withdrawn', enrollDate: '2025-03-05', memo: '타 학원 이동 (2025-09)' },
+  { id: 'm22', name: '권민서', phone: '010-1111-0022', parentPhone: '010-2222-0022', school: '별내고', grade: '고3', classId: 'cc11', status: 'active', enrollDate: '2025-03-05', memo: '수능 1등급 목표' },
+  { id: 'm23', name: '조현우', phone: '010-1111-0023', parentPhone: '010-2222-0023', school: '진접고', grade: '고3', classId: 'cc11', status: 'active', enrollDate: '2025-03-10', memo: '미적분 집중' },
+  { id: 'm24', name: '황서영', phone: '010-1111-0024', parentPhone: '010-2222-0024', school: '진접고', grade: '고3', classId: 'cc10', status: 'paused', enrollDate: '2025-04-01', memo: '수능 직전 집중 대비 중 휴원' },
+];
+
+export async function getMembers(): Promise<Member[]> {
+  return getData('members', defaultMembers);
+}
+
+export async function saveMembers(items: Member[]) { await saveData('members', items); }

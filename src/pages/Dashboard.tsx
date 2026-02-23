@@ -5,7 +5,8 @@ import { ShuttleAdmin } from '../components/ShuttleAdmin';
 import { PopupAdmin } from '../components/PopupAdmin';
 import { LectureAdmin } from '../components/LectureAdmin';
 import { ConsultAdmin } from '../components/ConsultAdmin';
-import { studentGrades, getLectures, getAllProgress, getConsultRequests, Lecture, LectureProgress, ConsultRequest } from '../data/mockData';
+import { MemberAdmin } from '../components/MemberAdmin';
+import { studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers, Lecture, LectureProgress, ConsultRequest } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function Dashboard() {
@@ -14,11 +15,17 @@ export function Dashboard() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [progress, setProgress] = useState<Record<string, LectureProgress>>({});
   const [pendingConsults, setPendingConsults] = useState(0);
+  const [memberCount, setMemberCount] = useState(0);
+  const [activeMemberCount, setActiveMemberCount] = useState(0);
 
   useEffect(() => {
     getLectures().then(setLectures);
     getAllProgress().then(setProgress);
     getConsultRequests().then(list => setPendingConsults(list.filter(r => r.status === 'pending').length));
+    getMembers().then(list => {
+      setMemberCount(list.length);
+      setActiveMemberCount(list.filter(m => m.status === 'active').length);
+    });
   }, []);
 
   if (!user) return null;
@@ -133,7 +140,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
-          { title: '전체 원생', value: '128명', icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
+          { title: '전체 원생', value: `${activeMemberCount}명`, icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
           { title: '오늘 출석률', value: '96%', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
           { title: '미납 원비', value: '3건', icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-100' },
           { title: '신규 상담', value: `${pendingConsults}건`, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' },
@@ -151,9 +158,8 @@ export function Dashboard() {
           </div>
         ))}
       </div>
-      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 h-64 flex items-center justify-center text-slate-500">
-        관리자 상세 통계 대시보드 영역
-      </div>
+      {/* 회원 관리 — admin only */}
+      {user?.role === 'admin' && <MemberAdmin />}
 
       {/* Consult Admin — admin only */}
       {user?.role === 'admin' && <ConsultAdmin />}
