@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getMembers, saveMembers, getCourseClasses, type Member, type CourseClass } from '../data/mockData';
+import { getMembers, saveMembers, getCourseClasses, addStatusHistory, type Member, type CourseClass } from '../data/mockData';
 import { Users, UserPlus, Search, Edit3, Trash2, X, Save, ChevronDown, ChevronLeft, ChevronRight, UserCheck, UserX, Pause, Eye } from 'lucide-react';
 import { MemberDetailModal } from './MemberDetailModal';
 
@@ -107,6 +107,18 @@ export function MemberAdmin() {
         let updated: Member[];
         if (editingMember) {
             updated = members.map(m => m.id === editingMember.id ? { ...m, ...form } : m);
+            // 상태 변화 이력 자동 기록
+            if (editingMember.status !== form.status) {
+                await addStatusHistory({
+                    memberId: editingMember.id,
+                    memberName: editingMember.name,
+                    fromStatus: editingMember.status,
+                    toStatus: form.status,
+                    reason: form.memo || '',
+                    changedBy: '원장',
+                    changedAt: new Date().toISOString(),
+                });
+            }
         } else {
             const newM: Member = { ...form, id: `m_${Date.now()}` };
             updated = [...members, newM];

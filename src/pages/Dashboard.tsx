@@ -8,6 +8,7 @@ import { ConsultAdmin } from '../components/ConsultAdmin';
 import { MemberAdmin } from '../components/MemberAdmin';
 import { TeacherAdmin } from '../components/TeacherAdmin';
 import { TaxDashboard } from '../components/TaxDashboard';
+import { AdminTodayPanel } from '../components/AdminTodayPanel';
 import { studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers, Lecture, LectureProgress, ConsultRequest } from '../data/mockData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -140,6 +141,10 @@ export function Dashboard() {
 
   const renderAdminDashboard = () => (
     <div className="space-y-6">
+      {/* 오늘 운영 현황 패널 — admin only */}
+      {user?.role === 'admin' && <AdminTodayPanel />}
+
+      {/* 요약 통계 카드 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
           { title: '전체 원생', value: `${activeMemberCount}명`, icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -160,6 +165,7 @@ export function Dashboard() {
           </div>
         ))}
       </div>
+
       {/* 회원 관리 — admin only */}
       {user?.role === 'admin' && <MemberAdmin />}
 
@@ -182,6 +188,7 @@ export function Dashboard() {
       {user?.role === 'admin' && <PopupAdmin />}
     </div>
   );
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

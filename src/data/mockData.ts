@@ -1078,6 +1078,32 @@ export interface Member {
   studentNo?: number;
 }
 
+/* ── 학생 상태 변화 이력 ── */
+export interface StudentStatusHistory {
+  id: string;
+  memberId: string;
+  memberName: string;
+  fromStatus: Member['status'];
+  toStatus: Member['status'];
+  reason: string;        // 사유
+  changedBy: string;     // 변경자 이름 (원장/직원)
+  changedAt: string;     // ISO 날짜
+}
+
+const STATUS_HISTORY_KEY = 'g1230_status_history';
+
+export async function getStatusHistory(): Promise<StudentStatusHistory[]> {
+  return getData(STATUS_HISTORY_KEY, []);
+}
+export async function saveStatusHistory(items: StudentStatusHistory[]) {
+  await saveData(STATUS_HISTORY_KEY, items);
+}
+export async function addStatusHistory(entry: Omit<StudentStatusHistory, 'id'>) {
+  const list = await getStatusHistory();
+  list.unshift({ ...entry, id: `sh_${Date.now()}` });
+  await saveStatusHistory(list.slice(0, 200)); // 최근 200건 유지
+}
+
 const defaultMembers: Member[] = [
   // 초등부
   { id: 'm1', name: '김민준', phone: '010-1111-0001', parentPhone: '010-2222-0001', school: '해밀초', grade: '초3', classId: 'cc1', status: 'active', enrollDate: '2025-03-05', memo: '연산 능력 우수' },
