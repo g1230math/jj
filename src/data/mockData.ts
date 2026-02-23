@@ -1264,8 +1264,12 @@ export interface Teacher {
   hireDate: string;
   status: TeacherStatus;
   payType: PayType;
-  basePay: number;           // 월급(freelance/employee) or 시급(parttime/extra)
+  basePay: number;           // 월급(freelance/employee) or 시급(parttime)
   extraHourlyRate?: number;  // employee_extra: 수당 시급
+  // ── 수당 유형 (신규) ──
+  allowanceType?: 'per_student' | 'hourly'; // 학생 1명당 수당 or 단순 시급
+  perStudentRate?: number;   // 학생 1명당 수당(원)
+  hourlyRate?: number;       // 시급 수당(원) — allowanceType=hourly 시 사용
   bankName?: string;
   bankAccount?: string;
   residentNoMasked?: string; // '901010-1******' 형태
@@ -1349,6 +1353,8 @@ export interface PaySlip {
   month: number;
   basePay: number;
   extraPay: number;          // 추가 강의·수당
+  allowanceAmount: number;   // 수당 계산액 (per_student or hourly)
+  allowanceDetail: string;   // 수당 계산 내역 문자열 (예: '15명 × 5,000원')
   grossPay: number;          // 지급 총액
   insuranceEmployee: number; // 4대보험 근로자 부담분
   withholdingTax: number;    // 원천세
@@ -1379,8 +1385,21 @@ export function calcPaySlip(
   extraPay: number,
   year: number,
   month: number,
+  /** 수당: 학생 수 (allowanceType=per_student) or 시간 (allowanceType=hourly) */
+  allowanceInput: number = 0,
 ): Omit<PaySlip, 'id' | 'teacherId' | 'createdAt'> {
-  const gross = basePay + extraPay;
+  // ── 수당 계산 ──
+  let allowanceAmount = 0;
+  let allowanceDetail = '';
+  if (teacher.allowanceType === 'per_student' && teacher.perStudentRate) {
+    allowanceAmount = allowanceInput * teacher.perStudentRate;
+    allowanceDetail = `${allowanceInput}명 × ${teacher.perStudentRate.toLocaleString()}원`;
+  } else if (teacher.allowanceType === 'hourly' && teacher.hourlyRate) {
+    allowanceAmount = Math.round(allowanceInput * teacher.hourlyRate);
+    allowanceDetail = `${allowanceInput}시간 × ${teacher.hourlyRate.toLocaleString()}원`;
+  }
+
+  const gross = basePay + extraPay + allowanceAmount;
   let insurance = 0;
   let wht = 0; // withholding tax
   let local = 0;
@@ -1413,7 +1432,8 @@ export function calcPaySlip(
 
   return {
     year, month,
-    basePay, extraPay, grossPay: gross,
+    basePay, extraPay, allowanceAmount, allowanceDetail,
+    grossPay: gross,
     insuranceEmployee: insurance,
     withholdingTax: wht,
     localIncomeTax: local,

@@ -76,6 +76,7 @@ export function TeacherAdmin() {
     const [payYear, setPayYear] = useState(new Date().getFullYear());
     const [payMonth, setPayMonth] = useState(new Date().getMonth() + 1);
     const [extraPayInput, setExtraPayInput] = useState('0');
+    const [allowanceInput, setAllowanceInput] = useState('0'); // 학생수 or 시간
     const [preview, setPreview] = useState<ReturnType<typeof calcPaySlip> | null>(null);
 
     useEffect(() => {
@@ -94,8 +95,9 @@ export function TeacherAdmin() {
     useEffect(() => {
         if (!selected) return;
         const extra = parseInt(extraPayInput.replace(/,/g, ''), 10) || 0;
-        setPreview(calcPaySlip(selected, selected.basePay, extra, payYear, payMonth));
-    }, [selected, extraPayInput, payYear, payMonth]);
+        const allowance = parseFloat(allowanceInput) || 0;
+        setPreview(calcPaySlip(selected, selected.basePay, extra, payYear, payMonth, allowance));
+    }, [selected, extraPayInput, allowanceInput, payYear, payMonth]);
 
     /* ── 현재 월 근무 데이터 ── */
     const pfx = `${workYear}-${String(workMonth).padStart(2, '0')}`;
@@ -153,6 +155,8 @@ export function TeacherAdmin() {
         const all = await getPaySlips();
         await savePaySlips([...all, slip]);
         setPaySlips(prev => [slip, ...prev]);
+        setAllowanceInput('0');
+        setExtraPayInput('0');
     };
 
     const courseMap: Record<string, string> = {};
@@ -402,10 +406,55 @@ export function TeacherAdmin() {
                                     </div>
 
                                     {/* 수당 입력 */}
-                                    <div className="mb-4">
-                                        <label className="block text-xs font-medium text-slate-600 mb-1">이번 달 추가수당 / 시급×시간 (원)</label>
-                                        <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            value={extraPayInput} onChange={e => setExtraPayInput(e.target.value)} placeholder="0" />
+                                    <div className="mb-4 space-y-2">
+                                        {/* 수당 유형별 입력 */}
+                                        {selected.allowanceType === 'per_student' && (
+                                            <div className="bg-violet-50 border border-violet-100 rounded-xl p-3">
+                                                <label className="block text-xs font-semibold text-violet-800 mb-1">
+                                                    👤 학생 1명당 수당 — 이번 달 담당 학생 수 입력
+                                                </label>
+                                                <p className="text-xs text-violet-600 mb-2">
+                                                    단가: {(selected.perStudentRate || 0).toLocaleString()}원/명
+                                                </p>
+                                                <input type="number" min="0"
+                                                    className="w-full px-3 py-2 border border-violet-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-400"
+                                                    value={allowanceInput}
+                                                    onChange={e => setAllowanceInput(e.target.value)}
+                                                    placeholder="학생 수 입력" />
+                                                <p className="text-xs text-violet-500 mt-1">
+                                                    예상 수당: {((parseFloat(allowanceInput) || 0) * (selected.perStudentRate || 0)).toLocaleString()}원
+                                                </p>
+                                            </div>
+                                        )}
+                                        {selected.allowanceType === 'hourly' && (
+                                            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                                                <label className="block text-xs font-semibold text-amber-800 mb-1">
+                                                    ⏱ 시급 수당 — 이번 달 수당 시간 입력
+                                                </label>
+                                                <p className="text-xs text-amber-600 mb-2">
+                                                    시급: {(selected.hourlyRate || 0).toLocaleString()}원/시간
+                                                </p>
+                                                <input type="number" min="0" step="0.5"
+                                                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-400"
+                                                    value={allowanceInput}
+                                                    onChange={e => setAllowanceInput(e.target.value)}
+                                                    placeholder="수당 시간 입력 (예: 4.5)" />
+                                                <p className="text-xs text-amber-500 mt-1">
+                                                    예상 수당: {Math.round((parseFloat(allowanceInput) || 0) * (selected.hourlyRate || 0)).toLocaleString()}원
+                                                </p>
+                                            </div>
+                                        )}
+                                        {!selected.allowanceType && (
+                                            <div className="text-xs text-slate-400 bg-slate-50 p-2.5 rounded-xl">
+                                                수당 유형이 설정되지 않았습니다. 강사 정보에서 수당 유형을 설정하세요.
+                                            </div>
+                                        )}
+                                        <div>
+                                            <label className="block text-xs font-medium text-slate-600 mb-1">기타 추가금액 (직접 입력, 원)</label>
+                                            <input type="number"
+                                                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                value={extraPayInput} onChange={e => setExtraPayInput(e.target.value)} placeholder="0" />
+                                        </div>
                                     </div>
 
                                     {/* 미리보기 */}
@@ -418,7 +467,8 @@ export function TeacherAdmin() {
                                             <div className="space-y-2">
                                                 {[
                                                     { label: '기본급', value: preview.basePay, color: '' },
-                                                    { label: '추가수당', value: preview.extraPay, color: '' },
+                                                    { label: '기타 추가금액', value: preview.extraPay, color: '' },
+                                                    ...(preview.allowanceAmount > 0 ? [{ label: `수당 (${preview.allowanceDetail})`, value: preview.allowanceAmount, color: 'text-violet-700' }] : []),
                                                     { label: '지급 총액', value: preview.grossPay, color: 'font-bold' },
                                                     { label: '4대보험 (근로자)', value: -preview.insuranceEmployee, color: 'text-rose-600' },
                                                     { label: '원천세', value: -preview.withholdingTax, color: 'text-rose-600' },
@@ -451,13 +501,31 @@ export function TeacherAdmin() {
                                     {paySlips.length > 0 && (
                                         <div>
                                             <h4 className="text-xs font-semibold text-slate-500 mb-2">발행 이력</h4>
-                                            <div className="space-y-1.5">
-                                                {paySlips.sort((a, b) => `${b.year}${b.month}`.localeCompare(`${a.year}${a.month}`)).map(p => (
-                                                    <div key={p.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                                                        <span className="text-sm font-medium text-slate-700">{p.year}년 {p.month}월</span>
-                                                        <div className="flex items-center gap-3 text-sm">
-                                                            <span className="text-slate-500">총 {fmtMoney(p.grossPay)}</span>
-                                                            <span className="font-bold text-indigo-700">지급 {fmtMoney(p.netPay)}</span>
+                                            <div className="space-y-2">
+                                                {paySlips.sort((a, b) => `${b.year}${String(b.month).padStart(2, '0')}`.localeCompare(`${a.year}${String(a.month).padStart(2, '0')}`)).map(p => (
+                                                    <div key={p.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm font-semibold text-slate-800">{p.year}년 {p.month}월</span>
+                                                            <span className="font-bold text-indigo-700 text-sm">지급 {fmtMoney(p.netPay)}</span>
+                                                        </div>
+                                                        <div className="text-xs text-slate-500 space-y-0.5">
+                                                            <div className="flex justify-between">
+                                                                <span>기본급</span><span>{fmtMoney(p.basePay)}</span>
+                                                            </div>
+                                                            {(p.allowanceAmount ?? 0) > 0 && (
+                                                                <div className="flex justify-between text-violet-600">
+                                                                    <span>수당 ({p.allowanceDetail})</span>
+                                                                    <span>{fmtMoney(p.allowanceAmount)}</span>
+                                                                </div>
+                                                            )}
+                                                            {p.extraPay > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span>기타 추가금</span><span>{fmtMoney(p.extraPay)}</span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between text-rose-500">
+                                                                <span>공제 합계</span><span>−{fmtMoney(p.insuranceEmployee + p.withholdingTax + p.localIncomeTax)}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -512,6 +580,36 @@ export function TeacherAdmin() {
                                         value={form.extraHourlyRate || ''} onChange={e => setForm(f => ({ ...f, extraHourlyRate: parseInt(e.target.value) || 0 }))} />
                                 </div>
                             )}
+                            {/* 수당 유형 설정 (신규) */}
+                            <div className="border-t border-slate-100 pt-3">
+                                <p className="text-xs font-semibold text-slate-600 mb-2">수당 설정</p>
+                                <div className="grid grid-cols-3 gap-2 mb-2">
+                                    {(['none', 'per_student', 'hourly'] as const).map(t => (
+                                        <button key={t} type="button"
+                                            onClick={() => setForm(f => ({ ...f, allowanceType: t === 'none' ? undefined : t }))}
+                                            className={`px-2 py-1.5 text-xs rounded-lg border font-medium transition-colors ${(form.allowanceType ?? 'none') === t
+                                                    ? 'bg-violet-600 text-white border-violet-600'
+                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                                                }`}>
+                                            {t === 'none' ? '수당 없음' : t === 'per_student' ? '1인당 수당' : '시급 수당'}
+                                        </button>
+                                    ))}
+                                </div>
+                                {form.allowanceType === 'per_student' && (
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 mb-1">학생 1명당 수당 (원)</label>
+                                        <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500"
+                                            value={form.perStudentRate || ''} onChange={e => setForm(f => ({ ...f, perStudentRate: parseInt(e.target.value) || 0 }))} placeholder="예: 5000" />
+                                    </div>
+                                )}
+                                {form.allowanceType === 'hourly' && (
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500 mb-1">시급 (원)</label>
+                                        <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500"
+                                            value={form.hourlyRate || ''} onChange={e => setForm(f => ({ ...f, hourlyRate: parseInt(e.target.value) || 0 }))} placeholder="예: 15000" />
+                                    </div>
+                                )}
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-slate-500 mb-1">입사일</label>
