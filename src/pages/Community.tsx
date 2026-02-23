@@ -12,7 +12,7 @@ import { ImageUploader } from '../components/ImageUploader';
 import {
   Image as ImageIcon, FileText, MessageCircle, Info, Download, ChevronDown, ChevronUp,
   Eye, Calendar, Tag, BookOpen, Clock, User, Lock, HelpCircle, CheckCircle2,
-  Plus, Edit2, Trash2, Save, X, Pin, Send,
+  Plus, Edit2, Trash2, Save, X, Pin, Send, KeyRound, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -37,6 +37,64 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 space-y-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── Password Modal ─────────── */
+function PasswordModal({ title, description, onSubmit, onClose }: {
+  title: string;
+  description: string;
+  onSubmit: (pw: string) => void;
+  onClose: () => void;
+}) {
+  const [pw, setPw] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  const handleSubmit = () => {
+    if (pw.length !== 4) {
+      setError('4자리 숫자를 입력해주세요');
+      return;
+    }
+    onSubmit(pw);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <KeyRound className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">{title}</h3>
+              <p className="text-xs text-slate-500">{description}</p>
+            </div>
+          </div>
+          <div>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={pw}
+              onChange={(e) => { setPw(e.target.value.replace(/[^0-9]/g, '').slice(0, 4)); setError(''); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
+              placeholder="●●●●"
+              className="w-full text-center text-2xl tracking-[0.5em] px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-200 outline-none font-mono"
+              autoFocus
+            />
+            {error && <p className="text-xs text-red-500 mt-1.5 text-center">{error}</p>}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">취소</button>
+            <button onClick={handleSubmit} className="flex-1 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" />확인
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -82,6 +140,12 @@ export function Community() {
   const [replyText, setReplyText] = useState('');
   const [editingInquiry, setEditingInquiry] = useState<InquiryItem | null>(null);
   const [isNew, setIsNew] = useState(false);
+
+  /* ── Password system ── */
+  const [inquiryPassword, setInquiryPassword] = useState('');
+  const [passwordModal, setPasswordModal] = useState<{ type: 'view' | 'delete'; postId: string } | null>(null);
+  const [passwordError, setPasswordError] = useState('');
+  const [unlockedInquiries, setUnlockedInquiries] = useState<Set<string>>(new Set());
 
   const tabs = [
     { id: 'notice', name: '공지사항', icon: Info },
@@ -197,15 +261,82 @@ export function Community() {
     await saveInquiries(list); setInquiryList(list);
   };
 
+  /* ── Password verification ── */
+  const handlePasswordSubmit = (pw: string) => {
+    if (!passwordModal) return;
+    const post = inquiryList.find(i => i.id === passwordModal.postId);
+    if (!post) return;
+
+    if (post.password !== pw) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    if (passwordModal.type === 'view') {
+      setUnlockedInquiries(prev => new Set(prev).add(passwordModal.postId));
+      setOpenInquiry(passwordModal.postId);
+    } else if (passwordModal.type === 'delete') {
+      const list = inquiryList.filter(i => i.id !== passwordModal.postId);
+      saveInquiries(list); setInquiryList(list);
+    }
+    setPasswordModal(null);
+  };
+
+  const handleInquiryClick = (post: InquiryItem) => {
+    if (openInquiry === post.id) {
+      setOpenInquiry(null);
+      return;
+    }
+    // Admin can always open
+    if (isAdmin) {
+      setOpenInquiry(post.id);
+      return;
+    }
+    // Non-private posts can be opened freely
+    if (!post.isPrivate) {
+      setOpenInquiry(post.id);
+      return;
+    }
+    // Already unlocked
+    if (unlockedInquiries.has(post.id)) {
+      setOpenInquiry(post.id);
+      return;
+    }
+    // Private post with password — show password modal
+    if (post.password) {
+      setPasswordModal({ type: 'view', postId: post.id });
+    }
+  };
+
+  const handleInquiryDelete = (post: InquiryItem) => {
+    if (isAdmin) {
+      deleteInquiry(post.id);
+      return;
+    }
+    if (post.password) {
+      setPasswordModal({ type: 'delete', postId: post.id });
+    }
+  };
+
   /* ── Inquiry write ── */
-  const newInquiry = (): InquiryItem => ({ id: '', title: '', author: '', date: today(), isPrivate: false, category: '일반 문의', content: '', views: 0 });
+  const newInquiry = (): InquiryItem => ({ id: '', title: '', author: user?.name || '', date: today(), isPrivate: false, category: '일반 문의', content: '', views: 0, password: '' });
   const handleSaveInquiry = async (item: InquiryItem) => {
     if (!item.title.trim() || !item.content.trim() || !item.author.trim()) {
       alert('작성자명, 제목, 내용은 필수 입력 항목입니다.');
       return;
     }
-    const list = [{ ...item, id: genId('inq') }, ...inquiryList];
-    await saveInquiries(list); setInquiryList(list); setEditingInquiry(null);
+    // Non-logged-in users must set a password
+    if (!user && (!item.password || item.password.length !== 4)) {
+      alert('비밀번호 4자리를 입력해주세요.');
+      return;
+    }
+    const saved: InquiryItem = { ...item, id: genId('inq') };
+    // If logged in, no password needed
+    if (user) {
+      delete (saved as any).password;
+    }
+    const list = [saved, ...inquiryList];
+    await saveInquiries(list); setInquiryList(list); setEditingInquiry(null); setInquiryPassword('');
   };
 
   /* ═══════════════════════════════════════════
@@ -534,7 +665,7 @@ export function Community() {
                   const isOpen = openInquiry === post.id;
                   return (
                     <div key={post.id}>
-                      <button onClick={() => setOpenInquiry(isOpen ? null : post.id)}
+                      <button onClick={() => handleInquiryClick(post)}
                         className="w-full text-left px-4 py-3.5 hover:bg-slate-50 transition-colors group">
                         {/* Desktop row */}
                         <div className="hidden sm:grid grid-cols-12 gap-2 items-center">
@@ -542,8 +673,8 @@ export function Community() {
                           <div className="col-span-2"><span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{post.category}</span></div>
                           <div className="col-span-4 flex items-center gap-2">
                             {post.isPrivate && <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
-                            <span className={cn("text-sm font-medium truncate", post.isPrivate && !isAdmin ? "text-slate-500" : "text-slate-900 group-hover:text-indigo-600")}>
-                              {post.isPrivate && !isAdmin ? '비밀글입니다' : post.title}
+                            <span className={cn("text-sm font-medium truncate", post.isPrivate && !isAdmin && !unlockedInquiries.has(post.id) ? "text-slate-500" : "text-slate-900 group-hover:text-indigo-600")}>
+                              {post.isPrivate && !isAdmin && !unlockedInquiries.has(post.id) ? '비밀글입니다' : post.title}
                             </span>
                           </div>
                           <div className="col-span-1 text-xs text-slate-500 truncate">{post.author}</div>
@@ -555,9 +686,9 @@ export function Community() {
                               <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">대기중</span>
                             )}
                           </div>
-                          {isAdmin && (
+                          {(isAdmin || post.password) && (
                             <div className="col-span-1 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <span onClick={(e) => { e.stopPropagation(); deleteInquiry(post.id); }} className="p-1 rounded hover:bg-red-100 cursor-pointer"><Trash2 className="w-3.5 h-3.5 text-red-500" /></span>
+                              <span onClick={(e) => { e.stopPropagation(); handleInquiryDelete(post); }} className="p-1 rounded hover:bg-red-100 cursor-pointer"><Trash2 className="w-3.5 h-3.5 text-red-500" /></span>
                             </div>
                           )}
                         </div>
@@ -573,15 +704,15 @@ export function Community() {
                               <span className="text-[10px] font-bold text-amber-600">대기중</span>
                             )}
                           </div>
-                          <p className={cn("text-sm font-medium", post.isPrivate && !isAdmin ? "text-slate-500" : "text-slate-900")}>
-                            {post.isPrivate && !isAdmin ? '비밀글입니다' : post.title}
+                          <p className={cn("text-sm font-medium", post.isPrivate && !isAdmin && !unlockedInquiries.has(post.id) ? "text-slate-500" : "text-slate-900")}>
+                            {post.isPrivate && !isAdmin && !unlockedInquiries.has(post.id) ? '비밀글입니다' : post.title}
                           </p>
                           <p className="text-xs text-slate-400 mt-1">{post.author} · {post.date}</p>
                         </div>
                       </button>
 
                       {/* Expanded content */}
-                      {isOpen && (isAdmin || !post.isPrivate) && (
+                      {isOpen && (isAdmin || !post.isPrivate || unlockedInquiries.has(post.id)) && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-4 pb-4">
                           <div className="bg-slate-50 rounded-xl p-4 space-y-4">
                             <div>
@@ -637,13 +768,19 @@ export function Community() {
                       )}
 
                       {/* Private post message for non-admin */}
-                      {isOpen && !isAdmin && post.isPrivate && (
+                      {isOpen && !isAdmin && post.isPrivate && !unlockedInquiries.has(post.id) && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-4 pb-4">
                           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
                             <Lock className="w-5 h-5 text-amber-500 shrink-0" />
                             <div>
                               <p className="text-sm font-medium text-amber-800">비밀글입니다</p>
-                              <p className="text-xs text-amber-600">작성자 본인만 내용을 확인할 수 있습니다.</p>
+                              <p className="text-xs text-amber-600">{post.password ? '비밀번호를 입력하면 내용을 확인할 수 있습니다.' : '작성자 본인만 내용을 확인할 수 있습니다.'}</p>
+                              {post.password && (
+                                <button onClick={() => setPasswordModal({ type: 'view', postId: post.id })}
+                                  className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition-colors">
+                                  <KeyRound className="w-3.5 h-3.5" />비밀번호 입력
+                                </button>
+                              )}
                             </div>
                           </div>
                         </motion.div>
@@ -760,6 +897,21 @@ export function Community() {
       {editingInquiry && (
         <Modal title="문의 작성" onClose={() => setEditingInquiry(null)}>
           <div><label className={labelCls}>작성자명 *</label><input className={inputCls} value={editingInquiry.author} onChange={e => setEditingInquiry({ ...editingInquiry, author: e.target.value })} placeholder="이름을 입력하세요" /></div>
+          {!user && (
+            <div>
+              <label className={labelCls}>비밀번호 * (숫자 4자리)</label>
+              <p className="text-xs text-slate-400 mb-1.5">글 확인·삭제 시 필요합니다. 꼭 기억해주세요!</p>
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                className={cn(inputCls, 'tracking-[0.3em] font-mono')}
+                value={editingInquiry.password || ''}
+                onChange={e => setEditingInquiry({ ...editingInquiry, password: e.target.value.replace(/[^0-9]/g, '').slice(0, 4) })}
+                placeholder="●●●●"
+              />
+            </div>
+          )}
           <div>
             <label className={labelCls}>분류</label>
             <select className={inputCls} value={editingInquiry.category} onChange={e => setEditingInquiry({ ...editingInquiry, category: e.target.value })}>
@@ -773,13 +925,23 @@ export function Community() {
               <input type="checkbox" checked={editingInquiry.isPrivate} onChange={e => setEditingInquiry({ ...editingInquiry, isPrivate: e.target.checked })} className="rounded" />
               <Lock className="w-3.5 h-3.5" /> 비밀글로 작성
             </label>
-            <p className="text-xs text-slate-400 mt-1 ml-6">비밀글은 관리자만 내용을 확인할 수 있습니다</p>
+            <p className="text-xs text-slate-400 mt-1 ml-6">{user ? '비밀글은 관리자만 내용을 확인할 수 있습니다' : '비밀글은 비밀번호를 입력해야 내용을 확인할 수 있습니다'}</p>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setEditingInquiry(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">취소</button>
             <button onClick={() => handleSaveInquiry(editingInquiry)} className="flex items-center gap-1.5 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700"><Send className="w-4 h-4" />문의 등록</button>
           </div>
         </Modal>
+      )}
+
+      {/* ── Password Modal ── */}
+      {passwordModal && (
+        <PasswordModal
+          title={passwordModal.type === 'view' ? '비밀글 확인' : '글 삭제'}
+          description={passwordModal.type === 'view' ? '비밀번호를 입력하면 내용을 확인할 수 있습니다' : '삭제하려면 작성 시 설정한 비밀번호를 입력해주세요'}
+          onSubmit={handlePasswordSubmit}
+          onClose={() => setPasswordModal(null)}
+        />
       )}
 
     </div>

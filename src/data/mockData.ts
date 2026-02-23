@@ -460,6 +460,7 @@ export interface InquiryItem {
   answer?: string;
   answerDate?: string;
   views: number;
+  password?: string;
 }
 
 const INQUIRIES_KEY = 'g1230_inquiries';
