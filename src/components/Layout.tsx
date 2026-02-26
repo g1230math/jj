@@ -121,19 +121,19 @@ export function Layout() {
               })()}
               {user && <NotificationCenter />}
               {user ? (
-                <div className="flex items-center gap-3">
-                  <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors">
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors shrink-0">
                     {user.avatar ? (
-                      <img src={user.avatar} alt="avatar" className="w-8 h-8 rounded-full border-2 border-indigo-100" />
+                      <img src={user.avatar} alt="avatar" className="w-8 h-8 rounded-full border-2 border-indigo-100 shrink-0" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-sm font-bold">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-sm font-bold shrink-0">
                         {user.name[0]}
                       </div>
                     )}
                     <span className="hidden sm:inline font-semibold whitespace-nowrap">{user.name} 님</span>
                   </Link>
-                  <button onClick={() => logout()} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
-                    <LogOut className="w-5 h-5" />
+                  <button onClick={() => logout()} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors shrink-0" title="로그아웃">
+                    <LogOut className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
