@@ -35,8 +35,8 @@ export function Layout() {
     { name: '홈', path: '/', icon: Home },
     { name: '학원소개', path: '/about', icon: Info },
     { name: '수강안내', path: '/courses', icon: BookOpen },
-    { name: '학습', path: '/study', icon: PenTool, requiresAuth: true },
-    { name: '동영상강의', path: '/lectures', icon: Video, requiresAuth: true },
+    { name: '학습', path: '/study', icon: PenTool },
+    { name: '동영상강의', path: '/lectures', icon: Video },
     { name: '학사일정', path: '/calendar', icon: Calendar },
     { name: '차량운행', path: '/shuttle', icon: Bus },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
@@ -47,8 +47,8 @@ export function Layout() {
 
   const bottomNavItems = [
     { name: '홈', path: '/', icon: Home },
-    { name: '학습', path: '/study', icon: PenTool, requiresAuth: true },
-    { name: '강의', path: '/lectures', icon: Video, requiresAuth: true },
+    { name: '학습', path: '/study', icon: PenTool },
+    { name: '강의', path: '/lectures', icon: Video },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
     { name: '전체메뉴', path: '__menu__', icon: Menu },
   ];
@@ -224,14 +224,6 @@ export function Layout() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="flex justify-around items-center h-16 px-1">
           {bottomNavItems.map((item) => {
-            if (item.requiresAuth && !user) {
-              return (
-                <Link key="login-nav" to="/login" className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-slate-400">
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-[10px] font-semibold">로그인</span>
-                </Link>
-              );
-            }
 
             if (item.path === '__menu__') {
               return (

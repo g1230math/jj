@@ -11,6 +11,7 @@ import {
     getExams, getAttempts, getQuestions, getWrongNotes,
     type Exam, type ExamAttempt, type Question, type WrongNote, SCHOOL_LIST
 } from '../data/studyData';
+import { seedSampleData } from '../data/sampleStudyData';
 import { MathRenderer } from '../components/MathRenderer';
 
 export function StudyHub() {
@@ -23,7 +24,10 @@ export function StudyHub() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        Promise.all([getExams(), getAttempts(), getQuestions(), getWrongNotes()])
+        // 예시 데이터 시딩 후 로드
+        seedSampleData().then(() =>
+            Promise.all([getExams(), getAttempts(), getQuestions(), getWrongNotes()])
+        )
             .then(([e, a, q, w]) => { setExams(e); setAttempts(a); setQuestions(q); setWrongNotes(w); })
             .finally(() => setLoading(false));
     }, []);
