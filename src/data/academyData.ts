@@ -217,8 +217,9 @@ export const saveTrialBookings = (items: TrialBooking[]) => saveData(TRIAL_KEY, 
 // ═══ 레벨 테스트 ═══
 export interface LevelTestQuestion {
     id: string;
-    grade: string; // 중1, 중2, 중3
+    grade: string; // 초3~고3
     content: string; // supports LaTeX
+    image_url?: string; // optional image for charts/formulas
     options: string[]; // 5 options
     answer: number; // 0-indexed correct option
     topic: string; // e.g. '일차방정식', '정수의 사칙연산'

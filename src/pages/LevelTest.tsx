@@ -8,7 +8,7 @@ export function LevelTest() {
     const [step, setStep] = useState<'intro' | 'test' | 'result'>('intro');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [grade, setGrade] = useState('중2');
+    const [grade, setGrade] = useState('중1');
     const [currentQ, setCurrentQ] = useState(0);
     const [answers, setAnswers] = useState<(number | null)[]>([]);
     const [result, setResult] = useState<LevelTestResult | null>(null);
@@ -79,14 +79,25 @@ export function LevelTest() {
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-slate-600 mb-1">학년 선택 *</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {['중1', '중2', '중3'].map(g => (
-                                    <button key={g} onClick={() => setGrade(g)}
-                                        className={cn("py-2.5 rounded-lg text-sm font-bold transition-all border-2",
-                                            grade === g ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-500 hover:border-indigo-200"
-                                        )}>{g}</button>
-                                ))}
-                            </div>
+                            {[{ label: '초등', grades: ['초3', '초4', '초5', '초6'], color: 'emerald' },
+                            { label: '중등', grades: ['중1', '중2', '중3'], color: 'indigo' },
+                            { label: '고등', grades: ['고1', '고2', '고3'], color: 'rose' }].map(group => (
+                                <div key={group.label} className="mb-2">
+                                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full mr-1",
+                                        group.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' :
+                                            group.color === 'indigo' ? 'bg-indigo-100 text-indigo-600' :
+                                                'bg-rose-100 text-rose-600'
+                                    )}>{group.label}</span>
+                                    <div className="inline-flex gap-1 flex-wrap mt-1">
+                                        {group.grades.map(g => (
+                                            <button key={g} onClick={() => setGrade(g)}
+                                                className={cn("px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                                                    grade === g ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-500 hover:border-indigo-200"
+                                                )}>{g}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
@@ -113,6 +124,9 @@ export function LevelTest() {
                     <div className="mb-6">
                         <p className="text-xs text-slate-400 mb-2">문제 {currentQ + 1}</p>
                         <MathRenderer content={questions[currentQ].content} className="text-base text-slate-800 font-medium leading-relaxed" />
+                        {questions[currentQ].image_url && (
+                            <img src={questions[currentQ].image_url} alt="문제 이미지" className="mt-3 max-w-full max-h-[200px] rounded-lg border border-slate-200 object-contain" />
+                        )}
                     </div>
 
                     {/* Options */}
