@@ -3,6 +3,7 @@ import {
     X, UserCircle, CalendarDays, BookOpen, CreditCard, MessageSquare, Bell,
     ChevronLeft, ChevronRight, Plus, Trash2, Save, Phone, School,
     MapPin, Mail, CheckCircle, XCircle, Clock, AlertTriangle,
+    BarChart3, Video,
 } from 'lucide-react';
 import {
     Member, CourseClass,
@@ -10,14 +11,21 @@ import {
     MemberSchedule, ScheduleStatus, getMemberSchedules, saveMemberSchedules,
     PaymentRecord, PaymentStatus, PaymentMethod, getPayments, savePayments,
     MemoEntry, getMemberMemos, saveMemberMemos,
+    getLectures, getAllProgress, type Lecture, type LectureProgress,
 } from '../data/mockData';
+import {
+    getExams, getAttempts, getWrongNotes,
+    type Exam, type ExamAttempt, type WrongNote,
+} from '../data/studyData';
+import { seedSampleData } from '../data/sampleStudyData';
 import { useAuth } from '../context/AuthContext';
 
 /* ─── 타입 ─── */
-type Tab = 'info' | 'attendance' | 'schedule' | 'payment' | 'memo' | 'notification';
+type Tab = 'info' | 'attendance' | 'schedule' | 'payment' | 'memo' | 'notification' | 'study';
 
 const TABS: { id: Tab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'info', label: '기본정보', icon: UserCircle },
+    { id: 'study', label: '학습', icon: BarChart3 },
     { id: 'attendance', label: '출결', icon: CalendarDays },
     { id: 'schedule', label: '스케줄', icon: BookOpen },
     { id: 'payment', label: '수납', icon: CreditCard },
@@ -115,13 +123,30 @@ export function MemberDetailModal({ member, courses, onClose, onSave }: Props) {
     const [memos, setMemos] = useState<MemoEntry[]>([]);
     const [newMemo, setNewMemo] = useState('');
 
+    /* ── 학습 상태 ── */
+    const [studyAttempts, setStudyAttempts] = useState<ExamAttempt[]>([]);
+    const [studyExams, setStudyExams] = useState<Exam[]>([]);
+    const [studyWrongNotes, setStudyWrongNotes] = useState<WrongNote[]>([]);
+    const [studyLectures, setStudyLectures] = useState<Lecture[]>([]);
+    const [studyProgress, setStudyProgress] = useState<Record<string, LectureProgress>>({});
+
     /* 데이터 로드 */
     useEffect(() => {
         getAttendance().then(all => setAttendances(all.filter(r => r.memberId === member.id)));
         getMemberSchedules().then(all => setSchedules(all.filter(s => s.memberId === member.id)));
         getPayments().then(all => setPayments(all.filter(p => p.memberId === member.id)));
         getMemberMemos().then(all => setMemos(all.filter(m => m.memberId === member.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))));
-    }, [member.id]);
+        // 학습 데이터 로드
+        seedSampleData().then(() =>
+            Promise.all([getAttempts(), getExams() as Promise<Exam[]>, getWrongNotes(), getLectures(), getAllProgress()])
+        ).then(([atts, exs, wns, lecs, prog]) => {
+            setStudyAttempts(atts.filter(a => a.student_name === member.name));
+            setStudyExams(exs);
+            setStudyWrongNotes(wns.filter(w => w.student_id === member.id));
+            setStudyLectures(lecs);
+            setStudyProgress(prog);
+        });
+    }, [member.id, member.name]);
 
     /* ── 출결 달력 로직 ── */
     const attMap: Record<string, AttendanceRecord> = {};
@@ -255,8 +280,8 @@ export function MemberDetailModal({ member, courses, onClose, onSave }: Props) {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${activeTab === tab.id
-                                    ? 'border-blue-600 text-blue-600 bg-white'
-                                    : 'border-transparent text-slate-500 hover:text-slate-700'
+                                ? 'border-blue-600 text-blue-600 bg-white'
+                                : 'border-transparent text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4 shrink-0" />
@@ -686,6 +711,88 @@ export function MemberDetailModal({ member, courses, onClose, onSave }: Props) {
                             )}
                         </div>
                     )}
+
+                    {/* ── Tab: 학습 ── */}
+                    {activeTab === 'study' && (() => {
+                        const completedAtts = studyAttempts.filter(a => a.status === 'submitted' || a.status === 'graded');
+                        const avgScore = completedAtts.length > 0
+                            ? Math.round(completedAtts.reduce((s, a) => s + (a.score ?? 0), 0) / completedAtts.length) : 0;
+                        const avgPct = completedAtts.length > 0
+                            ? Math.round(completedAtts.reduce((s, a) => s + ((a.score ?? 0) / (a.total_points || 1) * 100), 0) / completedAtts.length) : 0;
+                        return (
+                            <div className="space-y-5">
+                                {/* 학습 요약 */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    {[
+                                        { label: '응시 시험', value: `${studyAttempts.length}회`, color: 'bg-blue-50 text-blue-700 border-blue-200' },
+                                        { label: '평균 점수', value: `${avgScore}점`, color: 'bg-amber-50 text-amber-700 border-amber-200' },
+                                        { label: '평균 정답률', value: `${avgPct}%`, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                                        { label: '오답 복습 대기', value: `${studyWrongNotes.length}개`, color: 'bg-rose-50 text-rose-700 border-rose-200' },
+                                    ].map(s => (
+                                        <div key={s.label} className={`rounded-xl border p-3 text-center ${s.color}`}>
+                                            <p className="text-[10px] font-medium opacity-70">{s.label}</p>
+                                            <p className="text-lg font-bold">{s.value}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* 시험 결과 */}
+                                <div>
+                                    <h4 className="font-semibold text-slate-800 text-sm mb-2">📝 시험 응시 이력</h4>
+                                    {completedAtts.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {completedAtts.map(att => {
+                                                const exam = studyExams.find(e => e.id === att.exam_id);
+                                                const pct = Math.round((att.score ?? 0) / (att.total_points || 1) * 100);
+                                                return (
+                                                    <div key={att.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${pct >= 80 ? 'bg-emerald-100 text-emerald-700' : pct >= 60 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                                                            }`}>
+                                                            {pct}%
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium text-slate-800 truncate">{exam?.title || '시험'}</p>
+                                                            <p className="text-[10px] text-slate-400">{att.score}/{att.total_points}점 • {new Date(att.submitted_at || '').toLocaleDateString('ko-KR')}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-400 text-center py-4">아직 응시한 시험이 없습니다</p>
+                                    )}
+                                </div>
+
+                                {/* 동영상 강의 수강 */}
+                                <div>
+                                    <h4 className="font-semibold text-slate-800 text-sm mb-2">🎬 동영상 강의 수강 현황</h4>
+                                    {studyLectures.filter(l => l.isPublished).length > 0 ? (
+                                        <div className="space-y-2">
+                                            {studyLectures.filter(l => l.isPublished).slice(0, 5).map(lec => {
+                                                const prog = studyProgress[lec.id];
+                                                const done = prog?.status === 'completed';
+                                                return (
+                                                    <div key={lec.id} className="flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                                        <img src={lec.thumbnail} alt="" className="w-16 h-10 object-cover rounded-lg" referrerPolicy="no-referrer" />
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-xs font-medium text-slate-800 truncate">{lec.title}</p>
+                                                            <p className="text-[10px] text-slate-400">{lec.instructor}</p>
+                                                        </div>
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                                                            }`}>
+                                                            {done ? '수강완료' : '미수강'}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-400 text-center py-4">강의 데이터가 없습니다</p>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     {/* ── Tab: 알림 설정 ── */}
                     {activeTab === 'notification' && (

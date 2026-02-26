@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email?: string;
   role: UserRole;
+  school?: string;    // 학생 소속 학교 (관리자가 변경 가능)
   avatar?: string;
   studentId?: string;
 }
@@ -27,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const mockUsers: Record<UserRole, User> = {
   guest: { id: '0', name: 'Guest', role: 'guest' },
-  student: { id: '1', name: '김지훈', role: 'student', avatar: 'https://i.pravatar.cc/150?u=1' },
+  student: { id: '1', name: '김지훈', role: 'student', school: '진접중', avatar: 'https://i.pravatar.cc/150?u=1' },
   parent: { id: '2', name: '이영희', role: 'parent', studentId: '1', avatar: 'https://i.pravatar.cc/150?u=2' },
   teacher: { id: '3', name: '박선생', role: 'teacher', avatar: 'https://i.pravatar.cc/150?u=3' },
   admin: { id: '4', name: '원장님', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=4' },

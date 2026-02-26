@@ -21,6 +21,11 @@ import {
   studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers,
   Lecture, LectureProgress, ConsultRequest
 } from '../data/mockData';
+import {
+  getExams, getAttempts, getWrongNotes,
+  type Exam, type ExamAttempt, type WrongNote
+} from '../data/studyData';
+import { seedSampleData } from '../data/sampleStudyData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /* ─── 관리자 탭 정의 ─── */
@@ -46,83 +51,158 @@ export function Dashboard() {
   const [progress, setProgress] = useState<Record<string, LectureProgress>>({});
   const [pendingConsults, setPendingConsults] = useState(0);
   const [activeMemberCount, setActiveMemberCount] = useState(0);
+  // Study data for student dashboard
+  const [myAttempts, setMyAttempts] = useState<ExamAttempt[]>([]);
+  const [myExams, setMyExams] = useState<Exam[]>([]);
+  const [myWrongNotes, setMyWrongNotes] = useState<WrongNote[]>([]);
 
   useEffect(() => {
     getLectures().then(setLectures);
     getAllProgress().then(setProgress);
     getConsultRequests().then(list => setPendingConsults(list.filter(r => r.status === 'pending').length));
     getMembers().then(list => setActiveMemberCount(list.filter(m => m.status === 'active').length));
-  }, []);
+    // Load study data for student
+    if (user?.role === 'student') {
+      seedSampleData().then(() =>
+        Promise.all([getAttempts(), getExams(), getWrongNotes()])
+      ).then(([atts, exs, wns]) => {
+        setMyAttempts(atts.filter(a => a.student_id === user.id));
+        setMyExams(exs);
+        setMyWrongNotes(wns.filter(w => w.student_id === user.id && !w.reviewed));
+      });
+    }
+  }, [user]);
 
   if (!user) return null;
 
   /* ─── 학생 대시보드 ─── */
-  const renderStudentDashboard = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: '수강 중인 강의', value: '3개', icon: BookOpen, color: 'indigo' },
-          { label: '이번 주 출석률', value: '100%', icon: CheckCircle, color: 'emerald' },
-          { label: '미완료 과제', value: '1건', icon: Clock, color: 'rose' },
-        ].map((s, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`w-12 h-12 bg-${s.color}-100 text-${s.color}-600 rounded-xl flex items-center justify-center`}>
-                <s.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium">{s.label}</p>
-                <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+  const renderStudentDashboard = () => {
+    const completedAtts = myAttempts.filter(a => a.status === 'submitted' || a.status === 'graded');
+    const avgScore = completedAtts.length > 0
+      ? Math.round(completedAtts.reduce((s, a) => s + (a.score ?? 0), 0) / completedAtts.length)
+      : 0;
+    const avgPercent = completedAtts.length > 0
+      ? Math.round(completedAtts.reduce((s, a) => s + ((a.score ?? 0) / (a.total_points || 1) * 100), 0) / completedAtts.length)
+      : 0;
+
+    return (
+      <div className="space-y-6">
+        {/* 기본 정보 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { label: '수강 중인 강의', value: '3개', icon: BookOpen, color: 'indigo' },
+            { label: '이번 주 출석률', value: '100%', icon: CheckCircle, color: 'emerald' },
+            { label: '미완료 과제', value: '1건', icon: Clock, color: 'rose' },
+          ].map((s, i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`w-12 h-12 bg-${s.color}-100 text-${s.color}-600 rounded-xl flex items-center justify-center`}>
+                  <s.icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium">{s.label}</p>
+                  <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-indigo-600" /> 성적 추이
-          </h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={studentGrades}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="subject" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Line type="monotone" dataKey="score" stroke="#4f46e5" strokeWidth={3}
-                  dot={{ r: 6, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          ))}
         </div>
 
+        {/* ═══ 학습 현황 ═══ */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-600" /> 최근 수강 강의
-          </h3>
-          <div className="space-y-4">
-            {lectures.filter(l => l.isPublished).slice(0, 3).map(lecture => {
-              const prog = progress[lecture.id];
-              const isCompleted = prog?.status === 'completed';
-              return (
-                <div key={lecture.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-                  <img src={lecture.thumbnail} alt={lecture.title} className="w-24 h-16 object-cover rounded-lg" referrerPolicy="no-referrer" />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-slate-900 text-sm mb-1">{lecture.title}</h4>
-                    <p className="text-xs text-slate-500">{lecture.instructor} • {lecture.date}</p>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-violet-600" /> 나의 학습 현황
+            </h3>
+            <a href="/jj/study" className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+              학습 허브 →
+            </a>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            {[
+              { label: '응시 시험', value: `${myAttempts.length}회`, color: 'bg-blue-50 text-blue-700 border-blue-200' },
+              { label: '평균 점수', value: `${avgScore}점`, color: 'bg-amber-50 text-amber-700 border-amber-200' },
+              { label: '평균 정답률', value: `${avgPercent}%`, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+              { label: '오답 복습 대기', value: `${myWrongNotes.length}개`, color: 'bg-rose-50 text-rose-700 border-rose-200' },
+            ].map(s => (
+              <div key={s.label} className={`rounded-xl border p-3 text-center ${s.color}`}>
+                <p className="text-xs font-medium opacity-70">{s.label}</p>
+                <p className="text-xl font-bold mt-0.5">{s.value}</p>
+              </div>
+            ))}
+          </div>
+          {/* 최근 시험 결과 */}
+          {completedAtts.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-slate-500 uppercase">최근 시험 결과</p>
+              {completedAtts.slice(0, 3).map(att => {
+                const exam = myExams.find(e => e.id === att.exam_id);
+                const pct = Math.round((att.score ?? 0) / (att.total_points || 1) * 100);
+                return (
+                  <div key={att.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold ${pct >= 80 ? 'bg-emerald-100 text-emerald-700' : pct >= 60 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                      {pct}%
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{exam?.title || '시험'}</p>
+                      <p className="text-[10px] text-slate-400">{att.score}/{att.total_points}점 • {new Date(att.submitted_at || '').toLocaleDateString('ko-KR')}</p>
+                    </div>
+                    <a href={`/jj/study/result/${att.id}`} className="text-[10px] text-indigo-600 font-medium hover:underline shrink-0">상세보기</a>
                   </div>
-                  <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                    }`}>{isCompleted ? '수강완료' : '미수강'}</span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400 text-center py-4">아직 응시한 시험이 없습니다</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-indigo-600" /> 성적 추이
+            </h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={studentGrades}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="subject" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Line type="monotone" dataKey="score" stroke="#4f46e5" strokeWidth={3}
+                    dot={{ r: 6, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-600" /> 최근 수강 강의
+            </h3>
+            <div className="space-y-4">
+              {lectures.filter(l => l.isPublished).slice(0, 3).map(lecture => {
+                const prog = progress[lecture.id];
+                const isCompleted = prog?.status === 'completed';
+                return (
+                  <div key={lecture.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                    <img src={lecture.thumbnail} alt={lecture.title} className="w-24 h-16 object-cover rounded-lg" referrerPolicy="no-referrer" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-slate-900 text-sm mb-1">{lecture.title}</h4>
+                      <p className="text-xs text-slate-500">{lecture.instructor} • {lecture.date}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                      }`}>{isCompleted ? '수강완료' : '미수강'}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   /* ─── 학부모 대시보드 ─── */
   const renderParentDashboard = () => (

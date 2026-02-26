@@ -20,7 +20,8 @@ export function StudyHub() {
     const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [wrongNotes, setWrongNotes] = useState<WrongNote[]>([]);
-    const [schoolFilter, setSchoolFilter] = useState<string>('전체');
+    const isStudent = user?.role === 'student';
+    const [schoolFilter, setSchoolFilter] = useState<string>(isStudent && user?.school ? user.school : '전체');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -109,28 +110,39 @@ export function StudyHub() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
 
                 {/* ═══ School Filter ═══ */}
-                <div className="flex flex-col gap-3 mb-8">
-                    <div className="flex items-center gap-2">
-                        <School className="w-5 h-5 text-indigo-600 shrink-0" />
-                        <span className="text-sm font-semibold text-slate-700">학교 선택</span>
+                {isStudent ? (
+                    /* 학생은 자기 학교만 보입니다 */
+                    <div className="flex items-center gap-2 mb-6 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+                        <School className="w-4 h-4 text-indigo-600" />
+                        <span className="text-sm font-medium text-indigo-700">
+                            내 학교: <strong>{user?.school || '미설정'}</strong>
+                        </span>
+                        <span className="text-[10px] text-indigo-400 ml-auto">학교 변경은 원장님께 문의하세요</span>
                     </div>
-                    <div className="flex flex-wrap gap-1 bg-white rounded-xl p-1 border border-slate-200">
-                        {SCHOOL_LIST.map(school => (
-                            <button
-                                key={school}
-                                onClick={() => setSchoolFilter(school)}
-                                className={cn(
-                                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap",
-                                    schoolFilter === school
-                                        ? "bg-indigo-600 text-white"
-                                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                                )}
-                            >
-                                {school === '전체' ? '전체 보기' : school}
-                            </button>
-                        ))}
+                ) : (
+                    <div className="flex flex-col gap-3 mb-8">
+                        <div className="flex items-center gap-2">
+                            <School className="w-5 h-5 text-indigo-600 shrink-0" />
+                            <span className="text-sm font-semibold text-slate-700">학교 선택</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1 bg-white rounded-xl p-1 border border-slate-200">
+                            {SCHOOL_LIST.map(school => (
+                                <button
+                                    key={school}
+                                    onClick={() => setSchoolFilter(school)}
+                                    className={cn(
+                                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap",
+                                        schoolFilter === school
+                                            ? "bg-indigo-600 text-white"
+                                            : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                                    )}
+                                >
+                                    {school === '전체' ? '전체 보기' : school}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* ═══ Stats Cards ═══ */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
