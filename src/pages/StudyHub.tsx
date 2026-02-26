@@ -79,7 +79,7 @@ export function StudyHub() {
                 <section className="relative bg-gradient-to-br from-blue-800 via-indigo-800 to-violet-900 text-white py-20 overflow-hidden wave-divider wave-divider-white">
                     <div className="max-w-7xl mx-auto px-4 text-center">
                         <div className="h-8 bg-white/20 rounded-lg w-48 mx-auto mb-4 animate-pulse" />
-                        <div className="h-12 bg-white/20 rounded-lg w-96 mx-auto mb-4 animate-pulse" />
+                        <div className="h-12 bg-white/20 rounded-lg w-64 sm:w-96 mx-auto mb-4 animate-pulse" />
                     </div>
                 </section>
             </div>
@@ -100,7 +100,7 @@ export function StudyHub() {
                             STUDY HUB
                         </span>
                         <h1 className="text-hero text-white mb-4">📐 나의 학습</h1>
-                        <p className="text-xl text-blue-200 max-w-2xl mx-auto font-light">
+                        <p className="text-base sm:text-xl text-blue-200 max-w-2xl mx-auto font-light">
                             시험 대비 문제풀이, 오답 복습, 학습 분석을 한 곳에서
                         </p>
                     </motion.div>
@@ -112,12 +112,12 @@ export function StudyHub() {
                 {/* ═══ School Filter ═══ */}
                 {isStudent ? (
                     /* 학생은 자기 학교만 보입니다 */
-                    <div className="flex items-center gap-2 mb-6 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-6 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
                         <School className="w-4 h-4 text-indigo-600" />
                         <span className="text-sm font-medium text-indigo-700">
                             내 학교: <strong>{user?.school || '미설정'}</strong>
                         </span>
-                        <span className="text-[10px] text-indigo-400 ml-auto">학교 변경은 원장님께 문의하세요</span>
+                        <span className="text-[10px] text-indigo-400 sm:ml-auto mt-1 sm:mt-0">학교 변경은 원장님께 문의하세요</span>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-3 mb-8">
@@ -225,7 +225,7 @@ export function StudyHub() {
                                                 <h3 className="font-semibold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors truncate">
                                                     {exam.title}
                                                 </h3>
-                                                <div className="flex items-center gap-3 mt-1">
+                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                                                     <span className="text-xs text-slate-500">{qCount}문제</span>
                                                     {exam.time_limit_minutes && (
                                                         <span className="text-xs text-slate-500 flex items-center gap-1">

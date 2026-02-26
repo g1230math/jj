@@ -427,7 +427,7 @@ export function AIQuestionGenerator() {
 
                 {/* ═══ Seed question — 텍스트 OR 파일 업로드 ═══ */}
                 <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                         <label className={labelCls + ' mb-0'}>참고 문제 (선택 — 유사 문제 생성 시)</label>
                         <div className="flex bg-slate-100 rounded-lg p-0.5">
                             <button

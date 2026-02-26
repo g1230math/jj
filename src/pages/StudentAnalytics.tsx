@@ -151,7 +151,7 @@ export function StudentAnalytics() {
                         <span className="inline-block px-4 py-1.5 bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-300 mb-4 backdrop-blur-sm text-sm">
                             ANALYTICS
                         </span>
-                        <h1 className="text-3xl font-bold mb-3">📊 학습 분석</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-3">📊 학습 분석</h1>
                         <p className="text-lg text-blue-200 max-w-xl mx-auto font-light">
                             나의 학습 현황과 취약점을 분석합니다
                         </p>
@@ -203,7 +203,7 @@ export function StudentAnalytics() {
                                 <TrendingUp className="w-4 h-4 text-indigo-600" />
                                 시험 성적 추이
                             </h3>
-                            <div className="flex items-end gap-2 h-40">
+                            <div className="flex items-end gap-2 h-40 overflow-x-auto pb-1" style={{ minWidth: 0 }}>
                                 {scoreHistory.map((entry, i) => (
                                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
                                         <span className={cn(

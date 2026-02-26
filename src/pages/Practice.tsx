@@ -125,12 +125,12 @@ export function Practice() {
                         <span className="inline-block px-4 py-1.5 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-emerald-300 mb-4 backdrop-blur-sm text-sm">
                             FREE PRACTICE
                         </span>
-                        <h1 className="text-3xl font-bold mb-3">🏃 자유 연습</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-3">🏃 자유 연습</h1>
                         <p className="text-lg text-emerald-200 max-w-xl mx-auto font-light">
                             단원별 문제를 자유롭게 풀어보세요
                         </p>
                         {(score.correct > 0 || score.wrong > 0) && (
-                            <div className="flex items-center justify-center gap-6 mt-4">
+                            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4">
                                 <span className="text-sm text-emerald-200">✅ 정답: <strong className="text-white">{score.correct}</strong></span>
                                 <span className="text-sm text-emerald-200">❌ 오답: <strong className="text-white">{score.wrong}</strong></span>
                                 <span className="text-sm text-emerald-200">정답률: <strong className="text-white">
@@ -351,7 +351,7 @@ export function Practice() {
                                 <Filter className="w-4 h-4 text-slate-500" />
                                 <span className="text-xs font-semibold text-slate-600">단원/유형 필터</span>
                             </div>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <select
                                     value={filterChapter}
                                     onChange={e => setFilterChapter(e.target.value)}

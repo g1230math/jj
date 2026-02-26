@@ -109,7 +109,7 @@ export function WrongNotes() {
                         <span className="inline-block px-4 py-1.5 bg-rose-500/20 border border-rose-400/30 rounded-full text-rose-300 mb-4 backdrop-blur-sm text-sm">
                             WRONG NOTES
                         </span>
-                        <h1 className="text-3xl font-bold mb-3">📝 오답 노트</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold mb-3">📝 오답 노트</h1>
                         <p className="text-lg text-rose-200 max-w-xl mx-auto font-light">
                             틀린 문제를 다시 풀고 약점을 극복하세요
                         </p>
@@ -128,7 +128,7 @@ export function WrongNotes() {
                 </Link>
 
                 {/* Filters */}
-                <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mb-6">
                     <div className="flex bg-white rounded-xl border border-slate-200 p-0.5">
                         {([
                             { key: 'pending', label: '복습 대기', count: pendingCount },
@@ -164,7 +164,7 @@ export function WrongNotes() {
                     {pendingCount > 0 && (
                         <button
                             onClick={markAllReviewed}
-                            className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-lg hover:bg-emerald-100 transition-colors"
+                            className="sm:ml-auto flex items-center justify-center gap-1 px-3 py-2 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-lg hover:bg-emerald-100 transition-colors"
                         >
                             <CheckCircle className="w-3 h-3" /> 전체 복습 완료
                         </button>
