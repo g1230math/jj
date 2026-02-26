@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../lib/utils';
 import {
     Sparkles, Send, Loader2, CheckCircle, XCircle, Eye, Plus,
-    AlertTriangle, Copy, Settings2, RefreshCw
+    AlertTriangle, Copy, Settings2, RefreshCw, Upload, X, FileImage, FileText as FileTextIcon, Image as ImageIcon
 } from 'lucide-react';
 import {
     addQuestion, genId, type Question, type QuestionType, type Difficulty,
@@ -24,9 +24,39 @@ interface GeneratedQuestion {
     approved: boolean | null; // null = pending
 }
 
-async function callGemini(prompt: string): Promise<string> {
-    // API 키는 vite.config.ts의 define에서 빌드 시 주입됨
-    // .env 파일은 .gitignore에 포함되어 절대 git에 올라가지 않음
+// ─── 이미지 유틸리티 ───
+interface ImageData { base64: string; mimeType: string; }
+
+async function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function fileToImageDataList(file: File): Promise<ImageData[]> {
+    const mimeType = file.type;
+
+    // 이미지 파일: 직접 base64 변환
+    if (mimeType.startsWith('image/')) {
+        const base64 = await fileToBase64(file);
+        return [{ base64, mimeType }];
+    }
+
+    // PDF: 텍스트 안내 (브라우저에서 PDF 렌더링은 무거우므로 스크린샷/이미지로 안내)
+    if (mimeType === 'application/pdf') {
+        // PDF를 직접 Gemini에 전송 (Gemini는 PDF inline_data 지원)
+        const base64 = await fileToBase64(file);
+        return [{ base64, mimeType: 'application/pdf' }];
+    }
+
+    throw new Error('지원하지 않는 파일 형식입니다. 이미지(PNG, JPG) 또는 PDF를 업로드하세요.');
+}
+
+// ─── Gemini API 호출 (텍스트 + 이미지 멀티모달) ───
+async function callGemini(prompt: string, images?: ImageData[]): Promise<string> {
     const apiKey = typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY ?? '' : '';
 
     if (!apiKey || apiKey === 'undefined') {
@@ -36,18 +66,32 @@ async function callGemini(prompt: string): Promise<string> {
         );
     }
 
+    // parts 구성: 이미지 + 텍스트
+    const parts: any[] = [];
+    if (images && images.length > 0) {
+        for (const img of images) {
+            parts.push({
+                inline_data: { mime_type: img.mimeType, data: img.base64 }
+            });
+        }
+    }
+    parts.push({ text: prompt });
+
+    // 이미지가 포함된 경우 vision 지원 모델 사용
+    const model = images && images.length > 0 ? 'gemini-2.0-flash-lite' : 'gemini-2.0-flash-lite';
+
     const maxRetries = 3;
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts }],
                     generationConfig: {
                         temperature: 0.8,
-                        maxOutputTokens: 4096,
+                        maxOutputTokens: 8192,
                         responseMimeType: 'application/json',
                     },
                 }),
@@ -55,9 +99,8 @@ async function callGemini(prompt: string): Promise<string> {
         );
 
         if (res.status === 429) {
-            // 무료 요금제 속도 제한 — 잠시 후 재시도
             if (attempt < maxRetries - 1) {
-                const waitMs = (attempt + 1) * 5000; // 5초, 10초, 15초...
+                const waitMs = (attempt + 1) * 5000;
                 await new Promise(r => setTimeout(r, waitMs));
                 continue;
             }
@@ -160,14 +203,71 @@ export function AIQuestionGenerator() {
     const [saving, setSaving] = useState(false);
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
+    // ─── File upload state ───
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [filePreviews, setFilePreviews] = useState<string[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [seedInputMode, setSeedInputMode] = useState<'text' | 'file'>('text');
+
+    const handleFileSelect = useCallback((files: FileList | null) => {
+        if (!files) return;
+        const fileArr = Array.from(files).filter(f =>
+            f.type.startsWith('image/') || f.type === 'application/pdf'
+        );
+        if (fileArr.length === 0) {
+            setError('이미지(PNG, JPG, WEBP) 또는 PDF 파일만 업로드 가능합니다.');
+            return;
+        }
+        setUploadedFiles(prev => [...prev, ...fileArr]);
+        // Generate previews
+        fileArr.forEach(f => {
+            if (f.type.startsWith('image/')) {
+                const url = URL.createObjectURL(f);
+                setFilePreviews(prev => [...prev, url]);
+            } else {
+                setFilePreviews(prev => [...prev, '']);
+            }
+        });
+    }, []);
+
+    const removeFile = (idx: number) => {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== idx));
+        setFilePreviews(prev => {
+            const url = prev[idx];
+            if (url) URL.revokeObjectURL(url);
+            return prev.filter((_, i) => i !== idx);
+        });
+    };
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        handleFileSelect(e.dataTransfer.files);
+    }, [handleFileSelect]);
+
     const handleGenerate = async () => {
         setError('');
         setGenerating(true);
         setGenerated([]);
 
         try {
-            const prompt = buildPrompt(config);
-            const raw = await callGemini(prompt);
+            // 파일 업로드 시 이미지 데이터 변환
+            let imageDataList: ImageData[] = [];
+            if (seedInputMode === 'file' && uploadedFiles.length > 0) {
+                for (const file of uploadedFiles) {
+                    const images = await fileToImageDataList(file);
+                    imageDataList.push(...images);
+                }
+            }
+
+            const prompt = buildPrompt({
+                ...config,
+                seedQuestion: seedInputMode === 'file' && uploadedFiles.length > 0
+                    ? '첨부된 이미지/PDF의 문제를 분석하여 유사한 유형의 새로운 문제를 만들어주세요.'
+                    : config.seedQuestion,
+            });
+            const raw = await callGemini(prompt, imageDataList.length > 0 ? imageDataList : undefined);
 
             let parsed: any[];
             try {
@@ -320,21 +420,114 @@ export function AIQuestionGenerator() {
                     <div>
                         <label className={labelCls}>생성 개수</label>
                         <select className={inputCls} value={config.count} onChange={e => setConfig({ ...config, count: Number(e.target.value) })}>
-                            {[1, 2, 3, 5, 10].map(n => <option key={n} value={n}>{n}개</option>)}
+                            {[1, 2, 3, 5, 10, 15, 20].map(n => <option key={n} value={n}>{n}개</option>)}
                         </select>
                     </div>
                 </div>
 
-                {/* Seed question (optional) */}
+                {/* ═══ Seed question — 텍스트 OR 파일 업로드 ═══ */}
                 <div>
-                    <label className={labelCls}>참고 문제 (선택 — 유사 문제 생성 시)</label>
-                    <textarea
-                        className={inputCls + " h-20 font-mono"}
-                        value={config.seedQuestion}
-                        onChange={e => setConfig({ ...config, seedQuestion: e.target.value })}
-                        placeholder="기존 문제를 입력하면 유사한 유형으로 새 문제를 생성합니다 (LaTeX 지원)"
-                    />
-                    {config.seedQuestion && <MathPreview content={config.seedQuestion} label="참고 문제 미리보기" />}
+                    <div className="flex items-center justify-between mb-1.5">
+                        <label className={labelCls + ' mb-0'}>참고 문제 (선택 — 유사 문제 생성 시)</label>
+                        <div className="flex bg-slate-100 rounded-lg p-0.5">
+                            <button
+                                onClick={() => setSeedInputMode('text')}
+                                className={cn(
+                                    'px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors',
+                                    seedInputMode === 'text' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                )}
+                            >
+                                ✏️ 텍스트 입력
+                            </button>
+                            <button
+                                onClick={() => setSeedInputMode('file')}
+                                className={cn(
+                                    'px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors',
+                                    seedInputMode === 'file' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                )}
+                            >
+                                📎 파일 업로드
+                            </button>
+                        </div>
+                    </div>
+
+                    {seedInputMode === 'text' ? (
+                        <>
+                            <textarea
+                                className={inputCls + ' h-20 font-mono'}
+                                value={config.seedQuestion}
+                                onChange={e => setConfig({ ...config, seedQuestion: e.target.value })}
+                                placeholder="기존 문제를 입력하면 유사한 유형으로 새 문제를 생성합니다 (LaTeX 지원)"
+                            />
+                            {config.seedQuestion && <MathPreview content={config.seedQuestion} label="참고 문제 미리보기" />}
+                        </>
+                    ) : (
+                        <>
+                            {/* 파일 드래그 앤 드롭 영역 */}
+                            <div
+                                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={handleDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                                className={cn(
+                                    'relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all',
+                                    isDragging
+                                        ? 'border-violet-400 bg-violet-50'
+                                        : 'border-slate-300 bg-slate-50 hover:border-violet-300 hover:bg-violet-50/50'
+                                )}
+                            >
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    multiple
+                                    accept="image/*,.pdf"
+                                    onChange={e => { handleFileSelect(e.target.files); e.target.value = ''; }}
+                                    className="hidden"
+                                />
+                                <Upload className={cn('w-8 h-8 mx-auto mb-2', isDragging ? 'text-violet-500' : 'text-slate-400')} />
+                                <p className="text-sm font-medium text-slate-600">
+                                    {isDragging ? '여기에 놓으세요!' : '클릭하거나 파일을 드래그하세요'}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-1">
+                                    이미지 (PNG, JPG, WEBP) 또는 PDF 파일 • 최대 10MB
+                                </p>
+                            </div>
+
+                            {/* 업로드된 파일 미리보기 */}
+                            {uploadedFiles.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                    <p className="text-[10px] font-semibold text-slate-500">
+                                        📎 업로드된 파일 ({uploadedFiles.length}개)
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {uploadedFiles.map((f, i) => (
+                                            <div key={i} className="relative group">
+                                                {filePreviews[i] ? (
+                                                    <img
+                                                        src={filePreviews[i]}
+                                                        alt={f.name}
+                                                        className="w-24 h-24 object-cover rounded-lg border border-slate-200 shadow-sm"
+                                                    />
+                                                ) : (
+                                                    <div className="w-24 h-24 rounded-lg border border-slate-200 bg-red-50 flex flex-col items-center justify-center shadow-sm">
+                                                        <FileTextIcon className="w-6 h-6 text-red-500 mb-1" />
+                                                        <span className="text-[8px] text-red-600 font-bold">PDF</span>
+                                                    </div>
+                                                )}
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                                                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                                <p className="text-[8px] text-slate-500 truncate w-24 mt-0.5 text-center">{f.name}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
 
                 <button
