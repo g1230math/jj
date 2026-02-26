@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame } from 'lucide-react';
+import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame, PenTool } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { ConsultModal } from './ConsultModal';
@@ -35,6 +35,7 @@ export function Layout() {
     { name: '홈', path: '/', icon: Home },
     { name: '학원소개', path: '/about', icon: Info },
     { name: '수강안내', path: '/courses', icon: BookOpen },
+    { name: '학습', path: '/study', icon: PenTool, requiresAuth: true },
     { name: '동영상강의', path: '/lectures', icon: Video, requiresAuth: true },
     { name: '학사일정', path: '/calendar', icon: Calendar },
     { name: '차량운행', path: '/shuttle', icon: Bus },
@@ -46,7 +47,7 @@ export function Layout() {
 
   const bottomNavItems = [
     { name: '홈', path: '/', icon: Home },
-    { name: '수강안내', path: '/courses', icon: BookOpen },
+    { name: '학습', path: '/study', icon: PenTool, requiresAuth: true },
     { name: '강의', path: '/lectures', icon: Video, requiresAuth: true },
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
     { name: '전체메뉴', path: '__menu__', icon: Menu },

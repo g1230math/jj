@@ -16,6 +16,11 @@ import { ParentService } from './pages/ParentService';
 import { Shuttle } from './pages/Shuttle';
 import { SuccessStories } from './pages/SuccessStories';
 import { PageSkeleton } from './components/Skeleton';
+import { StudyHub } from './pages/StudyHub';
+import { ExamTaking } from './pages/ExamTaking';
+import { ExamResult } from './pages/ExamResult';
+import { WrongNotes } from './pages/WrongNotes';
+import { StudentAnalytics } from './pages/StudentAnalytics';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -57,6 +62,31 @@ function AppRoutes() {
         <Route path="parent-service" element={
           <ProtectedRoute>
             <ParentService />
+          </ProtectedRoute>
+        } />
+        <Route path="study" element={
+          <ProtectedRoute>
+            <StudyHub />
+          </ProtectedRoute>
+        } />
+        <Route path="study/exam/:examId" element={
+          <ProtectedRoute>
+            <ExamTaking />
+          </ProtectedRoute>
+        } />
+        <Route path="study/result/:attemptId" element={
+          <ProtectedRoute>
+            <ExamResult />
+          </ProtectedRoute>
+        } />
+        <Route path="study/wrong-notes" element={
+          <ProtectedRoute>
+            <WrongNotes />
+          </ProtectedRoute>
+        } />
+        <Route path="study/analytics" element={
+          <ProtectedRoute>
+            <StudentAnalytics />
           </ProtectedRoute>
         } />
       </Route>

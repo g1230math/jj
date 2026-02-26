@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   BookOpen, CheckCircle, Clock, TrendingUp, Users, CreditCard,
-  LayoutDashboard, UserCog, Receipt, Settings, BusFront, MessageSquare
+  LayoutDashboard, UserCog, Receipt, Settings, BusFront, MessageSquare,
+  PenTool, FileCheck, Sparkles, BarChart3
 } from 'lucide-react';
 import { ShuttleAdmin } from '../components/ShuttleAdmin';
 import { PopupAdmin } from '../components/PopupAdmin';
@@ -12,6 +13,10 @@ import { MemberAdmin } from '../components/MemberAdmin';
 import { TeacherAdmin } from '../components/TeacherAdmin';
 import { TaxDashboard } from '../components/TaxDashboard';
 import { AdminTodayPanel } from '../components/AdminTodayPanel';
+import { QuestionBankAdmin } from '../components/QuestionBankAdmin';
+import { ExamBuilderAdmin } from '../components/ExamBuilderAdmin';
+import { AIQuestionGenerator } from '../components/AIQuestionGenerator';
+import { AdminAnalytics } from '../components/AdminAnalytics';
 import {
   studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers,
   Lecture, LectureProgress, ConsultRequest
@@ -19,11 +24,15 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /* ─── 관리자 탭 정의 ─── */
-type AdminTab = 'overview' | 'members' | 'lecture' | 'teacher' | 'tax' | 'site';
+type AdminTab = 'overview' | 'members' | 'lecture' | 'questions' | 'ai_gen' | 'exams' | 'analytics' | 'teacher' | 'tax' | 'site';
 
 const ADMIN_TABS: { key: AdminTab; label: string; icon: React.ElementType; desc: string }[] = [
   { key: 'overview', label: '운영 현황', icon: LayoutDashboard, desc: '오늘 일정·미납·반 정원' },
   { key: 'members', label: '회원·상담', icon: Users, desc: '회원 목록 및 상담 신청' },
+  { key: 'questions', label: '문제 은행', icon: PenTool, desc: '문제 등록·수정·AI 생성' },
+  { key: 'ai_gen', label: 'AI 생성', icon: Sparkles, desc: 'Gemini AI 문제 자동 생성' },
+  { key: 'exams', label: '시험 관리', icon: FileCheck, desc: '시험 생성·게시·결과' },
+  { key: 'analytics', label: '학습 분석', icon: BarChart3, desc: '전체 학생 성적·순위·취약점' },
   { key: 'lecture', label: '강의·셔틀', icon: BookOpen, desc: '강의 및 셔틀 관리' },
   { key: 'teacher', label: '강사·급여', icon: UserCog, desc: '강사 정보 및 급여 명세' },
   { key: 'tax', label: '세금·정산', icon: Receipt, desc: '원천세·부가세·인건비' },
@@ -163,8 +172,8 @@ export function Dashboard() {
               key={tab.key}
               onClick={() => setAdminTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-all border-b-2 min-w-0 ${adminTab === tab.key
-                  ? 'border-indigo-600 text-indigo-700 bg-white'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-white/60'
+                ? 'border-indigo-600 text-indigo-700 bg-white'
+                : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-white/60'
                 }`}
             >
               <tab.icon className="w-4 h-4 shrink-0" />
@@ -206,6 +215,14 @@ export function Dashboard() {
           )}
 
           {adminTab === 'teacher' && <TeacherAdmin />}
+
+          {adminTab === 'questions' && <QuestionBankAdmin />}
+
+          {adminTab === 'ai_gen' && <AIQuestionGenerator />}
+
+          {adminTab === 'exams' && <ExamBuilderAdmin />}
+
+          {adminTab === 'analytics' && <AdminAnalytics />}
 
           {adminTab === 'tax' && <TaxDashboard />}
 
