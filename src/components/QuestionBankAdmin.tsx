@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import {
     Plus, Search, Trash2, Edit2, Save, X, Eye, Sparkles, Filter,
-    ChevronDown, BookOpen, FileText, Link2, Video
+    ChevronDown, BookOpen, FileText, Link2, Video, Upload, Image as ImageIcon
 } from 'lucide-react';
 import {
     getQuestions, addQuestion, updateQuestion, deleteQuestion,
@@ -11,6 +11,8 @@ import {
     SCHOOL_LEVEL_GRADES, TEXTBOOK_PRESETS, SCHOOL_LIST, LINK_TYPE_LABELS
 } from '../data/studyData';
 import { MathRenderer, MathPreview } from './MathRenderer';
+import { ImageUploader } from './ImageUploader';
+import { BulkQuestionImport } from './BulkQuestionImport';
 
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-200 outline-none";
 const labelCls = "block text-xs font-medium text-slate-600 mb-1";
@@ -27,6 +29,7 @@ export function QuestionBankAdmin() {
     const [filterType, setFilterType] = useState('');
     const [filterDifficulty, setFilterDifficulty] = useState('');
     const [showPreview, setShowPreview] = useState(false);
+    const [showBulkImport, setShowBulkImport] = useState(false);
     const [page, setPage] = useState(0);
     const PAGE_SIZE = 10;
 
@@ -134,9 +137,14 @@ export function QuestionBankAdmin() {
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">등록된 문제: {questions.length}개</p>
                 </div>
-                <button onClick={openAddModal} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
-                    <Plus className="w-4 h-4" /> 문제 추가
-                </button>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => setShowBulkImport(true)} className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors">
+                        <Upload className="w-4 h-4" /> 대량 가져오기
+                    </button>
+                    <button onClick={openAddModal} className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                        <Plus className="w-4 h-4" /> 문제 추가
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -191,6 +199,9 @@ export function QuestionBankAdmin() {
                                 {QUESTION_TYPE_LABELS[q.type]?.[0]}
                             </div>
                             <div className="flex-1 min-w-0">
+                                {q.content_image_url && (
+                                    <img src={q.content_image_url} alt="" className="max-h-16 rounded border border-slate-200 mb-1.5" />
+                                )}
                                 <MathRenderer content={q.content.length > 100 ? q.content.slice(0, 100) + '...' : q.content} className="text-sm text-slate-800" />
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                     {q.school !== '전체' && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-medium">{q.school}</span>}
@@ -201,6 +212,7 @@ export function QuestionBankAdmin() {
                                     )}>
                                         난이도: {q.difficulty === 3 ? '상' : q.difficulty === 2 ? '중' : '하'}
                                     </span>
+                                    {q.content_image_url && <span className="text-[10px] bg-sky-50 text-sky-600 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5"><ImageIcon className="w-2.5 h-2.5" /> 이미지</span>}
                                     {q.source === 'ai_generated' && <span className="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">🤖 AI 생성</span>}
                                     {q.related_links && q.related_links.length > 0 && (
                                         <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">
@@ -344,6 +356,15 @@ export function QuestionBankAdmin() {
                                 {showPreview && <MathPreview content={editQ.content} label="문제 미리보기" />}
                             </div>
 
+                            {/* Question content image */}
+                            <ImageUploader
+                                label="문제 이미지 (도표/그래프/수식)"
+                                currentImageUrl={editQ.content_image_url}
+                                onUpload={(result) => updateField('content_image_url', result.url)}
+                                onUrlChange={(url) => updateField('content_image_url', url)}
+                                compact
+                            />
+
                             {/* MC Options */}
                             {editQ.type === 'mc' && editQ.options && (
                                 <div>
@@ -414,6 +435,15 @@ export function QuestionBankAdmin() {
                                 />
                                 {showPreview && editQ.explanation && <MathPreview content={editQ.explanation} label="해설 미리보기" />}
                             </div>
+
+                            {/* Explanation image */}
+                            <ImageUploader
+                                label="해설 이미지"
+                                currentImageUrl={editQ.explanation_image_url}
+                                onUpload={(result) => updateField('explanation_image_url', result.url)}
+                                onUrlChange={(url) => updateField('explanation_image_url', url)}
+                                compact
+                            />
 
                             {/* Tags */}
                             <div>
@@ -510,6 +540,14 @@ export function QuestionBankAdmin() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* ═══ Bulk Import Modal ═══ */}
+            {showBulkImport && (
+                <BulkQuestionImport
+                    onClose={() => setShowBulkImport(false)}
+                    onImportComplete={() => { setShowBulkImport(false); loadQuestions(); }}
+                />
             )}
         </div>
     );
