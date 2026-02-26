@@ -98,7 +98,6 @@ export function GlobalSearch() {
                 className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-400 transition-colors">
                 <Search className="w-3.5 h-3.5" />
                 <span className="text-xs">검색</span>
-                <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono">⌘K</kbd>
             </button>
 
             {/* Mobile trigger */}

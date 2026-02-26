@@ -215,6 +215,17 @@ export const getTrialBookings = (): TrialBooking[] => getData(TRIAL_KEY, []);
 export const saveTrialBookings = (items: TrialBooking[]) => saveData(TRIAL_KEY, items);
 
 // ═══ 레벨 테스트 ═══
+export interface LevelTestQuestion {
+    id: string;
+    grade: string; // 중1, 중2, 중3
+    content: string; // supports LaTeX
+    options: string[]; // 5 options
+    answer: number; // 0-indexed correct option
+    topic: string; // e.g. '일차방정식', '정수의 사칙연산'
+    difficulty: 'easy' | 'medium' | 'hard';
+    order: number;
+    active: boolean;
+}
 export interface LevelTestResult {
     id: string;
     taker_name: string;
@@ -227,8 +238,13 @@ export interface LevelTestResult {
     created_at: string;
 }
 const LEVELTEST_KEY = 'academy_level_tests';
+const LT_Q_KEY = 'academy_level_test_questions';
 export const getLevelTestResults = (): LevelTestResult[] => getData(LEVELTEST_KEY, []);
 export const saveLevelTestResults = (items: LevelTestResult[]) => saveData(LEVELTEST_KEY, items);
+export const getLevelTestQuestions = (): LevelTestQuestion[] => getData(LT_Q_KEY, []);
+export const saveLevelTestQuestions = (items: LevelTestQuestion[]) => saveData(LT_Q_KEY, items);
+export const getLevelTestQuestionsByGrade = (grade: string): LevelTestQuestion[] =>
+    getLevelTestQuestions().filter(q => q.grade === grade && q.active).sort((a, b) => a.order - b.order);
 
 // ═══ 이벤트/프로모션 ═══
 export interface EventBanner {
@@ -351,6 +367,26 @@ export function seedAcademyData() {
         saveEvents([
             { id: 'ev1', title: '🌸 봄방학 특강 수강생 모집!', description: '3월 봄방학 기간 특별 강좌. 기초부터 심화까지!', start_date: '2026-02-20', end_date: '2026-03-15', active: true, created_at: new Date().toISOString() },
             { id: 'ev2', title: '📝 중간고사 대비 무료 모의고사', description: '3월 말 중간고사 대비 무료 모의고사를 실시합니다.', start_date: '2026-03-10', end_date: '2026-03-25', active: true, created_at: new Date().toISOString() },
+        ]);
+    }
+    // Level Test Questions
+    if (getLevelTestQuestions().length === 0) {
+        saveLevelTestQuestions([
+            { id: 'ltq1', grade: '중1', content: '다음 중 음수가 아닌 정수를 모두 고르면? ①−3 ②0 ③$\\frac{1}{2}$ ④5 ⑤−0.7', options: ['①,②', '②,④', '②,③,④', '①,②,④', '②,④,⑤'], answer: 1, topic: '정수와 유리수', difficulty: 'easy', order: 1, active: true },
+            { id: 'ltq2', grade: '중1', content: '$(-3) \\times (-2) + 4 \\div (-2)$의 값은?', options: ['4', '8', '-4', '2', '-8'], answer: 0, topic: '정수의 사칙연산', difficulty: 'medium', order: 2, active: true },
+            { id: 'ltq3', grade: '중1', content: '일차방정식 $2x - 5 = 3$의 해는?', options: ['$x=1$', '$x=2$', '$x=3$', '$x=4$', '$x=-1$'], answer: 3, topic: '일차방정식', difficulty: 'medium', order: 3, active: true },
+            { id: 'ltq4', grade: '중1', content: '좌표평면에서 점 $(-2, 3)$은 제 몇 사분면 위의 점인가?', options: ['제1사분면', '제2사분면', '제3사분면', '제4사분면', '축 위의 점'], answer: 1, topic: '좌표평면', difficulty: 'easy', order: 4, active: true },
+            { id: 'ltq5', grade: '중1', content: '정비례 관계 $y = 3x$에서 $x = -2$일 때 $y$의 값은?', options: ['6', '-6', '1', '-1', '5'], answer: 1, topic: '정비례와 반비례', difficulty: 'easy', order: 5, active: true },
+            { id: 'ltq6', grade: '중2', content: '다항식 $(2x+3)(x-1)$을 전개하면?', options: ['$2x^2+x-3$', '$2x^2-x-3$', '$2x^2+5x-3$', '$2x^2-2x-3$', '$2x^2+x+3$'], answer: 0, topic: '다항식의 곱셈', difficulty: 'medium', order: 1, active: true },
+            { id: 'ltq7', grade: '중2', content: '연립방정식 $\\begin{cases} x+y=5 \\\\ 2x-y=1 \\end{cases}$의 해는?', options: ['$x=1, y=4$', '$x=2, y=3$', '$x=3, y=2$', '$x=4, y=1$', '$x=2, y=4$'], answer: 1, topic: '연립방정식', difficulty: 'medium', order: 2, active: true },
+            { id: 'ltq8', grade: '중2', content: '일차함수 $y = -2x + 5$의 $x$절편은?', options: ['$5$', '$-5$', '$\\frac{5}{2}$', '$-\\frac{5}{2}$', '$2$'], answer: 2, topic: '일차함수', difficulty: 'medium', order: 3, active: true },
+            { id: 'ltq9', grade: '중2', content: '이등변삼각형의 꼭지각이 $40°$일 때, 밑각의 크기는?', options: ['$60°$', '$70°$', '$80°$', '$50°$', '$40°$'], answer: 1, topic: '삼각형의 성질', difficulty: 'easy', order: 4, active: true },
+            { id: 'ltq10', grade: '중2', content: '확률에서 주사위를 던져 3의 배수가 나올 확률은?', options: ['$\\frac{1}{6}$', '$\\frac{1}{3}$', '$\\frac{1}{2}$', '$\\frac{2}{3}$', '$\\frac{1}{4}$'], answer: 1, topic: '확률', difficulty: 'easy', order: 5, active: true },
+            { id: 'ltq11', grade: '중3', content: '$\\sqrt{48} - 2\\sqrt{3}$의 값은?', options: ['$\\sqrt{3}$', '$2\\sqrt{3}$', '$3\\sqrt{3}$', '$4\\sqrt{3}$', '$6\\sqrt{3}$'], answer: 1, topic: '제곱근', difficulty: 'medium', order: 1, active: true },
+            { id: 'ltq12', grade: '중3', content: '이차방정식 $x^2 - 5x + 6 = 0$의 두 근의 합은?', options: ['$3$', '$4$', '$5$', '$6$', '$-5$'], answer: 2, topic: '이차방정식', difficulty: 'medium', order: 2, active: true },
+            { id: 'ltq13', grade: '중3', content: '이차함수 $y = x^2 - 4x + 3$의 꼭짓점의 좌표는?', options: ['$(2, -1)$', '$(2, 1)$', '$(-2, -1)$', '$(1, 0)$', '$(3, 0)$'], answer: 0, topic: '이차함수', difficulty: 'hard', order: 3, active: true },
+            { id: 'ltq14', grade: '중3', content: '삼각형 ABC에서 $\\sin 30°$의 값은?', options: ['$\\frac{1}{2}$', '$\\frac{\\sqrt{2}}{2}$', '$\\frac{\\sqrt{3}}{2}$', '$1$', '$\\frac{\\sqrt{3}}{3}$'], answer: 0, topic: '삼각비', difficulty: 'medium', order: 4, active: true },
+            { id: 'ltq15', grade: '중3', content: '원에 내접하는 사각형의 대각의 합은?', options: ['$90°$', '$180°$', '$270°$', '$360°$', '알 수 없다'], answer: 1, topic: '원의 성질', difficulty: 'easy', order: 5, active: true },
         ]);
     }
 }

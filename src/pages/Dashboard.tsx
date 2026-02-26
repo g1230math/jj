@@ -21,6 +21,7 @@ import { AttendanceAdmin } from '../components/AttendanceAdmin';
 import { HomeworkAdmin } from '../components/HomeworkAdmin';
 import { ScheduleAdmin } from '../components/ScheduleAdmin';
 import { TuitionAdmin } from '../components/TuitionAdmin';
+import { LevelTestAdmin } from '../components/LevelTestAdmin';
 import {
   studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers,
   Lecture, LectureProgress, ConsultRequest
@@ -33,7 +34,7 @@ import { seedSampleData } from '../data/sampleStudyData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /* ─── 관리자 탭 정의 ─── */
-type AdminTab = 'overview' | 'members' | 'attendance' | 'homework' | 'schedule' | 'tuition' | 'lecture' | 'questions' | 'ai_gen' | 'exams' | 'analytics' | 'teacher' | 'tax' | 'site';
+type AdminTab = 'overview' | 'members' | 'attendance' | 'homework' | 'schedule' | 'tuition' | 'lecture' | 'questions' | 'ai_gen' | 'exams' | 'analytics' | 'level_test' | 'teacher' | 'tax' | 'site';
 
 const ADMIN_TABS: { key: AdminTab; label: string; icon: React.ElementType; desc: string }[] = [
   { key: 'overview', label: '운영 현황', icon: LayoutDashboard, desc: '오늘 일정·미납·반 정원' },
@@ -46,6 +47,7 @@ const ADMIN_TABS: { key: AdminTab; label: string; icon: React.ElementType; desc:
   { key: 'ai_gen', label: 'AI 생성', icon: Sparkles, desc: 'Gemini AI 문제 자동 생성' },
   { key: 'exams', label: '시험 관리', icon: FileCheck, desc: '시험 생성·게시·결과' },
   { key: 'analytics', label: '학습 분석', icon: BarChart3, desc: '전체 학생 성적·순위·취약점' },
+  { key: 'level_test', label: '레벨테스트', icon: Sparkles, desc: '문제 관리 및 응시 결과' },
   { key: 'lecture', label: '강의·셔틀', icon: BookOpen, desc: '강의 및 셔틀 관리' },
   { key: 'teacher', label: '강사·급여', icon: UserCog, desc: '강사 정보 및 급여 명세' },
   { key: 'tax', label: '세금·정산', icon: Receipt, desc: '원천세·부가세·인건비' },
@@ -320,6 +322,7 @@ export function Dashboard() {
           {adminTab === 'homework' && <HomeworkAdmin />}
           {adminTab === 'schedule' && <ScheduleAdmin />}
           {adminTab === 'tuition' && <TuitionAdmin />}
+          {adminTab === 'level_test' && <LevelTestAdmin />}
         </div>
       </div>
     </div>

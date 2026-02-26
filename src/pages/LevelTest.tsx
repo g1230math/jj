@@ -1,33 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
 import { Brain, CheckCircle, ArrowRight, RotateCcw, Trophy, Phone, Loader2 } from 'lucide-react';
-import { genId, saveLevelTestResults, type LevelTestResult } from '../data/academyData';
+import { genId, saveLevelTestResults, getLevelTestQuestionsByGrade, type LevelTestResult, type LevelTestQuestion } from '../data/academyData';
 import { MathRenderer } from '../components/MathRenderer';
-
-/* ─── Pre-built questions per grade ─── */
-const LEVEL_TEST_QUESTIONS: Record<string, { content: string; options: string[]; answer: number; topic: string }[]> = {
-    '중1': [
-        { content: '다음 중 음수가 아닌 정수를 모두 고르면? ①−3 ②0 ③$\\frac{1}{2}$ ④5 ⑤−0.7', options: ['①,②', '②,④', '②,③,④', '①,②,④', '②,④,⑤'], answer: 1, topic: '정수와 유리수' },
-        { content: '$(-3) \\times (-2) + 4 \\div (-2)$의 값은?', options: ['4', '8', '-4', '2', '-8'], answer: 0, topic: '정수의 사칙연산' },
-        { content: '일차방정식 $2x - 5 = 3$의 해는?', options: ['$x=1$', '$x=2$', '$x=3$', '$x=4$', '$x=-1$'], answer: 3, topic: '일차방정식' },
-        { content: '좌표평면에서 점 $(-2, 3)$은 제 몇 사분면 위의 점인가?', options: ['제1사분면', '제2사분면', '제3사분면', '제4사분면', '축 위의 점'], answer: 1, topic: '좌표평면' },
-        { content: '정비례 관계 $y = 3x$에서 $x = -2$일 때 $y$의 값은?', options: ['6', '-6', '1', '-1', '5'], answer: 1, topic: '정비례와 반비례' },
-    ],
-    '중2': [
-        { content: '다항식 $(2x+3)(x-1)$을 전개하면?', options: ['$2x^2+x-3$', '$2x^2-x-3$', '$2x^2+5x-3$', '$2x^2-2x-3$', '$2x^2+x+3$'], answer: 0, topic: '다항식의 곱셈' },
-        { content: '연립방정식 $\\begin{cases} x+y=5 \\\\ 2x-y=1 \\end{cases}$의 해는?', options: ['$x=1, y=4$', '$x=2, y=3$', '$x=3, y=2$', '$x=4, y=1$', '$x=2, y=4$'], answer: 1, topic: '연립방정식' },
-        { content: '일차함수 $y = -2x + 5$의 $x$절편은?', options: ['$5$', '$-5$', '$\\frac{5}{2}$', '$-\\frac{5}{2}$', '$2$'], answer: 2, topic: '일차함수' },
-        { content: '이등변삼각형의 꼭지각이 $40°$일 때, 밑각의 크기는?', options: ['$60°$', '$70°$', '$80°$', '$50°$', '$40°$'], answer: 1, topic: '삼각형의 성질' },
-        { content: '확률에서 주사위를 던져 3의 배수가 나올 확률은?', options: ['$\\frac{1}{6}$', '$\\frac{1}{3}$', '$\\frac{1}{2}$', '$\\frac{2}{3}$', '$\\frac{1}{4}$'], answer: 1, topic: '확률' },
-    ],
-    '중3': [
-        { content: '$\\sqrt{48} - 2\\sqrt{3}$의 값은?', options: ['$\\sqrt{3}$', '$2\\sqrt{3}$', '$3\\sqrt{3}$', '$4\\sqrt{3}$', '$6\\sqrt{3}$'], answer: 1, topic: '제곱근' },
-        { content: '이차방정식 $x^2 - 5x + 6 = 0$의 두 근의 합은?', options: ['$3$', '$4$', '$5$', '$6$', '$-5$'], answer: 2, topic: '이차방정식' },
-        { content: '이차함수 $y = x^2 - 4x + 3$의 꼭짓점의 좌표는?', options: ['$(2, -1)$', '$(2, 1)$', '$(-2, -1)$', '$(1, 0)$', '$(3, 0)$'], answer: 0, topic: '이차함수' },
-        { content: '삼각형 ABC에서 $\\sin 30°$의 값은?', options: ['$\\frac{1}{2}$', '$\\frac{\\sqrt{2}}{2}$', '$\\frac{\\sqrt{3}}{2}$', '$1$', '$\\frac{\\sqrt{3}}{3}$'], answer: 0, topic: '삼각비' },
-        { content: '원에 내접하는 사각형의 대각의 합은?', options: ['$90°$', '$180°$', '$270°$', '$360°$', '알 수 없다'], answer: 1, topic: '원의 성질' },
-    ],
-};
 
 export function LevelTest() {
     const [step, setStep] = useState<'intro' | 'test' | 'result'>('intro');
@@ -37,12 +12,20 @@ export function LevelTest() {
     const [currentQ, setCurrentQ] = useState(0);
     const [answers, setAnswers] = useState<(number | null)[]>([]);
     const [result, setResult] = useState<LevelTestResult | null>(null);
+    const [questions, setQuestions] = useState<LevelTestQuestion[]>([]);
 
-    const questions = LEVEL_TEST_QUESTIONS[grade] || LEVEL_TEST_QUESTIONS['중2'];
+    // Load question count for display
+    const [questionCount, setQuestionCount] = useState(5);
+    useEffect(() => {
+        setQuestionCount(getLevelTestQuestionsByGrade(grade).length || 0);
+    }, [grade]);
 
     const startTest = () => {
         if (!name.trim()) { alert('이름을 입력해주세요.'); return; }
-        setAnswers(new Array(questions.length).fill(null));
+        const qs = getLevelTestQuestionsByGrade(grade);
+        if (qs.length === 0) { alert('해당 학년에 등록된 문제가 없습니다.'); return; }
+        setQuestions(qs);
+        setAnswers(new Array(qs.length).fill(null));
         setCurrentQ(0);
         setStep('test');
     };
@@ -81,7 +64,7 @@ export function LevelTest() {
                         <Brain className="w-8 h-8 text-white" />
                     </div>
                     <h2 className="text-2xl font-bold text-slate-900 mb-2">무료 수학 레벨 테스트</h2>
-                    <p className="text-sm text-slate-500 mb-6">5문제로 현재 수학 실력을 진단하고<br />맞춤 학습 방향을 제안받으세요!</p>
+                    <p className="text-sm text-slate-500 mb-6">{questionCount > 0 ? `${questionCount}문제로` : ''} 현재 수학 실력을 진단하고<br />맞춤 학습 방향을 제안받으세요!</p>
 
                     <div className="space-y-3 text-left">
                         <div>
