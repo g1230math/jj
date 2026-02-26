@@ -13,6 +13,7 @@ import {
 } from '../data/studyData';
 import { seedSampleData } from '../data/sampleStudyData';
 import { MathRenderer } from '../components/MathRenderer';
+import { StudentEngagement } from '../components/StudentEngagement';
 
 export function StudyHub() {
     const { user } = useAuth();
@@ -167,6 +168,11 @@ export function StudyHub() {
                             <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                         </motion.div>
                     ))}
+                </div>
+
+                {/* ═══ Student Engagement Panel ═══ */}
+                <div className="mb-8">
+                    <StudentEngagement />
                 </div>
 
                 {/* ═══ Exam List ═══ */}

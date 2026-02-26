@@ -1,0 +1,23 @@
+{
+    "name": "진접 G1230 수학전문학원",
+    "short_name": "G1230수학",
+    "description": "남양주 진접읍 초·중·고 수학 전문학원 – 소수정예 맞춤 교육",
+    "start_url": "/jj/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4f46e5",
+    "orientation": "portrait-primary",
+    "lang": "ko",
+    "icons": [
+        {
+            "src": "/jj/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "education"
+    ],
+    "scope": "/jj/"
+}

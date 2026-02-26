@@ -6,6 +6,7 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { ConsultModal } from './ConsultModal';
 import { NotificationCenter } from './NotificationCenter';
+import { GlobalSearch } from './GlobalSearch';
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -102,7 +103,8 @@ export function Layout() {
               })}
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <GlobalSearch />
               {/* 수능 D-day */}
               {(() => {
                 const csatDate = new Date(2026, 10, 19); // 2026년 11월 19일 (목)
