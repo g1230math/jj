@@ -130,7 +130,7 @@ export function Layout() {
                         {user.name[0]}
                       </div>
                     )}
-                    <span className="hidden sm:inline font-semibold">{user.name} 님</span>
+                    <span className="hidden sm:inline font-semibold whitespace-nowrap">{user.name} 님</span>
                   </Link>
                   <button onClick={() => logout()} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
                     <LogOut className="w-5 h-5" />
