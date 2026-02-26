@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════
 // 📐 학습 플랫폼 예시 데이터
 // ═══════════════════════════════════════════
-import type { Question, Exam, ExamAttempt, WrongNote } from './studyData';
+import type { Question, Exam, ExamAttempt, WrongNote, RelatedLink } from './studyData';
 import { saveQuestions, saveExams, saveAttempts, saveWrongNotes, getQuestions, getExams } from './studyData';
 
 const now = new Date().toISOString();
@@ -15,6 +15,10 @@ const SAMPLE_QUESTIONS: Question[] = [
         textbook: '동아출판', chapter: '일차함수', sub_topic: '일차함수의 그래프',
         difficulty: 1, source: 'manual', tags: ['일차함수', '기울기'], created_by: 'admin', created_at: now, updated_at: now,
         content: '일차함수 $y = 2x + 3$의 그래프의 기울기와 $y$절편을 바르게 나타낸 것은?',
+        related_links: [
+            { url: '/jj/lectures', title: '일차함수 개념 정리 강의', type: 'lecture' },
+            { url: 'https://www.youtube.com/watch?v=E3MnYGB7Hxo', title: '일차함수의 기울기와 절편 완벽 정리', type: 'youtube' },
+        ],
         options: [
             { label: '①', text: '기울기: 2, $y$절편: 3' },
             { label: '②', text: '기울기: 3, $y$절편: 2' },
@@ -45,6 +49,9 @@ const SAMPLE_QUESTIONS: Question[] = [
         textbook: '동아출판', chapter: '일차함수', sub_topic: '일차함수의 그래프',
         difficulty: 2, source: 'manual', tags: ['일차함수', '교점'], created_by: 'admin', created_at: now, updated_at: now,
         content: '일차함수 $y = 3x - 6$의 그래프가 $x$축과 만나는 점의 $x$좌표를 구하시오.',
+        related_links: [
+            { url: 'https://m.blog.naver.com/mathteacher/222', title: '일차함수 그래프와 축 교점 구하기', type: 'blog' },
+        ],
         correct_answer: '2',
         explanation: '$x$축과 만나는 점에서 $y = 0$이므로\n$0 = 3x - 6$\n$3x = 6$\n$x = 2$\n\n따라서 $x$좌표는 $2$입니다.',
     },
@@ -63,6 +70,11 @@ const SAMPLE_QUESTIONS: Question[] = [
         textbook: '미래엔', chapter: '확률', sub_topic: '경우의 수',
         difficulty: 1, source: 'manual', tags: ['확률', '경우의수'], created_by: 'admin', created_at: now, updated_at: now,
         content: '1에서 10까지의 자연수가 적혀 있는 카드에서 한 장을 뽑을 때, 3의 배수가 뽑히는 경우의 수는?',
+        related_links: [
+            { url: 'https://www.youtube.com/watch?v=abc123', title: '경우의 수 개념 정리 (중학 확률)', type: 'youtube' },
+            { url: '/jj/lectures', title: '확률 단원 강의 프로그램', type: 'lecture' },
+            { url: 'https://mathblog.example.com/probability-basics', title: '확률 기초 정리 블로그', type: 'blog' },
+        ],
         options: [
             { label: '①', text: '3가지' },
             { label: '②', text: '4가지' },
@@ -118,6 +130,9 @@ const SAMPLE_QUESTIONS: Question[] = [
         textbook: '천재교육', chapter: '도형의 닮음과 피타고라스', sub_topic: '피타고라스 정리',
         difficulty: 2, source: 'manual', tags: ['피타고라스', '직각삼각형'], created_by: 'admin', created_at: now, updated_at: now,
         content: '직각삼각형에서 빗변의 길이가 $13\\text{cm}$이고 한 변의 길이가 $5\\text{cm}$일 때, 나머지 한 변의 길이는?',
+        related_links: [
+            { url: 'https://www.youtube.com/watch?v=xyz789', title: '피타고라스 정리 완벽 정리', type: 'youtube' },
+        ],
         options: [
             { label: '①', text: '$8\\text{cm}$' },
             { label: '②', text: '$10\\text{cm}$' },

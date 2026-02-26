@@ -13,6 +13,7 @@ import {
     MC_LABELS, QUESTION_TYPE_LABELS, DIFFICULTY_LABELS
 } from '../data/studyData';
 import { MathRenderer } from '../components/MathRenderer';
+import { RelatedLinksDisplay } from '../components/RelatedLinksDisplay';
 
 export function WrongNotes() {
     const { user } = useAuth();
@@ -243,6 +244,9 @@ export function WrongNotes() {
                                                     <div className="p-3 bg-white rounded-lg border border-slate-200">
                                                         <MathRenderer content={q.explanation} className="text-sm text-slate-700 leading-relaxed" />
                                                     </div>
+                                                    {q.related_links && q.related_links.length > 0 && (
+                                                        <RelatedLinksDisplay links={q.related_links} />
+                                                    )}
                                                 </div>
                                             )}
                                         </>

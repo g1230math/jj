@@ -2,13 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import {
     Plus, Search, Trash2, Edit2, Save, X, Eye, Sparkles, Filter,
-    ChevronDown, BookOpen, FileText
+    ChevronDown, BookOpen, FileText, Link2, Video
 } from 'lucide-react';
 import {
     getQuestions, addQuestion, updateQuestion, deleteQuestion,
-    genId, type Question, type QuestionType, type Difficulty,
+    genId, type Question, type QuestionType, type Difficulty, type LinkType, type RelatedLink,
     QUESTION_TYPE_LABELS, DIFFICULTY_LABELS, MC_LABELS,
-    SCHOOL_LEVEL_GRADES, TEXTBOOK_PRESETS, SCHOOL_LIST
+    SCHOOL_LEVEL_GRADES, TEXTBOOK_PRESETS, SCHOOL_LIST, LINK_TYPE_LABELS
 } from '../data/studyData';
 import { MathRenderer, MathPreview } from './MathRenderer';
 
@@ -202,6 +202,11 @@ export function QuestionBankAdmin() {
                                         난이도: {q.difficulty === 3 ? '상' : q.difficulty === 2 ? '중' : '하'}
                                     </span>
                                     {q.source === 'ai_generated' && <span className="text-[10px] bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">🤖 AI 생성</span>}
+                                    {q.related_links && q.related_links.length > 0 && (
+                                        <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5">
+                                            <Video className="w-2.5 h-2.5" /> {q.related_links.length}개 자료
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -419,6 +424,80 @@ export function QuestionBankAdmin() {
                                     onChange={e => updateField('tags', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
                                     placeholder="일차함수, 그래프, 중간고사"
                                 />
+                            </div>
+
+                            {/* ═══ Related Links ═══ */}
+                            <div>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className={labelCls + ' mb-0 flex items-center gap-1'}>
+                                        <Link2 className="w-3.5 h-3.5" /> 관련 학습 자료 링크
+                                    </label>
+                                    <button
+                                        onClick={() => updateField('related_links', [
+                                            ...(editQ.related_links || []),
+                                            { url: '', title: '', type: 'youtube' as LinkType }
+                                        ])}
+                                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-semibold text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
+                                    >
+                                        <Plus className="w-3 h-3" /> 링크 추가
+                                    </button>
+                                </div>
+                                {(editQ.related_links || []).length === 0 ? (
+                                    <p className="text-[10px] text-slate-400 italic">동영상 강의, YouTube, 블로그 등 관련 자료 링크를 추가하세요</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(editQ.related_links || []).map((link, li) => (
+                                            <div key={li} className="flex items-start gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                                <div className="flex-1 space-y-1.5">
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            className="px-2 py-1 border border-slate-300 rounded text-xs"
+                                                            value={link.type}
+                                                            onChange={e => {
+                                                                const links = [...(editQ.related_links || [])];
+                                                                links[li] = { ...links[li], type: e.target.value as LinkType };
+                                                                updateField('related_links', links);
+                                                            }}
+                                                        >
+                                                            {(Object.entries(LINK_TYPE_LABELS) as [LinkType, any][]).map(([k, v]) => (
+                                                                <option key={k} value={k}>{v.emoji} {v.label}</option>
+                                                            ))}
+                                                        </select>
+                                                        <input
+                                                            className="flex-1 px-2 py-1 border border-slate-300 rounded text-xs"
+                                                            value={link.title}
+                                                            onChange={e => {
+                                                                const links = [...(editQ.related_links || [])];
+                                                                links[li] = { ...links[li], title: e.target.value };
+                                                                updateField('related_links', links);
+                                                            }}
+                                                            placeholder="제목 (예: 일차함수 개념 정리)"
+                                                        />
+                                                    </div>
+                                                    <input
+                                                        className="w-full px-2 py-1 border border-slate-300 rounded text-xs font-mono"
+                                                        value={link.url}
+                                                        onChange={e => {
+                                                            const links = [...(editQ.related_links || [])];
+                                                            links[li] = { ...links[li], url: e.target.value };
+                                                            updateField('related_links', links);
+                                                        }}
+                                                        placeholder="https://..."
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const links = (editQ.related_links || []).filter((_, i) => i !== li);
+                                                        updateField('related_links', links);
+                                                    }}
+                                                    className="p-1 bg-red-50 text-red-400 rounded hover:bg-red-100 hover:text-red-600 transition-colors shrink-0 mt-1"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Actions */}

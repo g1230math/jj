@@ -10,6 +10,7 @@ import {
     type ExamAttempt, type Question, type Exam, MC_LABELS, DIFFICULTY_LABELS
 } from '../data/studyData';
 import { MathRenderer } from '../components/MathRenderer';
+import { RelatedLinksDisplay } from '../components/RelatedLinksDisplay';
 
 export function ExamResult() {
     const { attemptId } = useParams<{ attemptId: string }>();
@@ -163,6 +164,9 @@ export function ExamResult() {
                                                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">💡 해설</p>
                                                     <MathRenderer content={q.explanation} className="text-sm text-slate-700 leading-relaxed" />
                                                 </div>
+                                                {q.related_links && q.related_links.length > 0 && (
+                                                    <RelatedLinksDisplay links={q.related_links} />
+                                                )}
                                             </div>
                                         )}
                                     </>

@@ -42,6 +42,21 @@ export interface MCOption {
     image_url?: string;
 }
 
+export type LinkType = 'lecture' | 'youtube' | 'blog' | 'other';
+
+export interface RelatedLink {
+    url: string;
+    title: string;
+    type: LinkType;
+}
+
+export const LINK_TYPE_LABELS: Record<LinkType, { label: string; emoji: string; color: string }> = {
+    lecture: { label: '동영상 강의', emoji: '🎬', color: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
+    youtube: { label: 'YouTube', emoji: '▶️', color: 'bg-red-50 text-red-600 border-red-200' },
+    blog: { label: '블로그/글', emoji: '📝', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
+    other: { label: '기타 자료', emoji: '🔗', color: 'bg-slate-50 text-slate-600 border-slate-200' },
+};
+
 export interface Question {
     id: string;
     type: QuestionType;
@@ -59,6 +74,7 @@ export interface Question {
     answer_tolerance?: number;
     explanation: string;    // 풀이 해설 (LaTeX 지원)
     explanation_image_url?: string;
+    related_links?: RelatedLink[]; // 관련 학습 자료 링크
     source: 'manual' | 'ai_generated';
     seed_question_id?: string;
     tags: string[];
