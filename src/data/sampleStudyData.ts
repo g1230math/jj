@@ -269,23 +269,118 @@ const SAMPLE_EXAMS: Exam[] = [
     },
 ];
 
+// ─── 데모 학생용 응시 기록 (학생 id: '1', 김지훈) ───
+const pastDate1 = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(); // 3일 전
+const pastDate2 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(); // 1일 전
+
+const SAMPLE_ATTEMPTS: ExamAttempt[] = [
+    // ── 시험 1: 일차함수 단원 테스트 → 3/4 맞음 (75점) ──
+    {
+        id: `${base}_att1`,
+        exam_id: `${base}_exam1`,
+        student_id: '1',
+        student_name: '김지훈',
+        started_at: pastDate1,
+        submitted_at: pastDate1,
+        score: 75,
+        total_points: 100,
+        status: 'graded',
+        answers: [
+            { question_id: `${base}_q1`, answer: '1', is_correct: true, points_earned: 25 },   // ✅ 기울기/절편
+            { question_id: `${base}_q2`, answer: '3', is_correct: false, points_earned: 0 },    // ❌ 정답은 1 (a+b=-1)
+            { question_id: `${base}_q3`, answer: '2', is_correct: true, points_earned: 25 },    // ✅ x축 교점
+            { question_id: `${base}_q4`, answer: 'y = -5x + 200, 40분', is_correct: true, points_earned: 25 }, // ✅ 서술형
+        ],
+    },
+    // ── 시험 2: 확률·도형 종합 → 5/7 맞음 (약71점) ──
+    {
+        id: `${base}_att2`,
+        exam_id: `${base}_exam2`,
+        student_id: '1',
+        student_name: '김지훈',
+        started_at: pastDate2,
+        submitted_at: pastDate2,
+        score: 71,
+        total_points: 100,
+        status: 'graded',
+        answers: [
+            { question_id: `${base}_q5`, answer: '1', is_correct: true, points_earned: 14 },   // ✅ 경우의 수
+            { question_id: `${base}_q6`, answer: '1', is_correct: false, points_earned: 0 },    // ❌ 정답 3 (1/4)
+            { question_id: `${base}_q7`, answer: '1/2', is_correct: true, points_earned: 15 },  // ✅ 소수 확률
+            { question_id: `${base}_q8`, answer: '3', is_correct: true, points_earned: 14 },    // ✅ 닮음비 넓이
+            { question_id: `${base}_q9`, answer: '1', is_correct: false, points_earned: 0 },    // ❌ 정답 3 (12cm)
+            { question_id: `${base}_q10`, answer: 'O', is_correct: true, points_earned: 14 },   // ✅ 3,4,5 직삼
+            { question_id: `${base}_q11`, answer: 'X', is_correct: true, points_earned: 14 },   // ✅ 5,7,9 아님
+        ],
+    },
+];
+
+// ─── 오답 노트 (틀린 문제 자동 수집) ───
+const SAMPLE_WRONG_NOTES: WrongNote[] = [
+    {
+        id: `${base}_wn1`,
+        student_id: '1',
+        question_id: `${base}_q2`,       // 일차함수 a+b 문제
+        attempt_id: `${base}_att1`,
+        student_answer: '3',
+        reviewed: false,
+        reviewed_at: null,
+        created_at: pastDate1,
+    },
+    {
+        id: `${base}_wn2`,
+        student_id: '1',
+        question_id: `${base}_q6`,       // 동전 확률 문제
+        attempt_id: `${base}_att2`,
+        student_answer: '1',
+        reviewed: false,
+        reviewed_at: null,
+        created_at: pastDate2,
+    },
+    {
+        id: `${base}_wn3`,
+        student_id: '1',
+        question_id: `${base}_q9`,       // 피타고라스 문제
+        attempt_id: `${base}_att2`,
+        student_answer: '1',
+        reviewed: false,
+        reviewed_at: null,
+        created_at: pastDate2,
+    },
+];
+
 // ─── 시딩 함수 ───
 export async function seedSampleData(): Promise<boolean> {
     const existingQ = await getQuestions();
     const existingE = await getExams();
 
-    // 이미 데이터가 있으면 스킵
-    if (existingQ.some(q => q.id.startsWith(base)) && existingE.some(e => e.id.startsWith(base))) {
-        return false;
+    const hasQuestions = existingQ.some(q => q.id.startsWith(base));
+    const hasExams = existingE.some(e => e.id.startsWith(base));
+
+    // 문제/시험 시딩
+    if (!hasQuestions || !hasExams) {
+        const seedQIds = new Set(SAMPLE_QUESTIONS.map(q => q.id));
+        const seedEIds = new Set(SAMPLE_EXAMS.map(e => e.id));
+        const mergedQ = [...existingQ.filter(q => !seedQIds.has(q.id)), ...SAMPLE_QUESTIONS];
+        const mergedE = [...existingE.filter(e => !seedEIds.has(e.id)), ...SAMPLE_EXAMS];
+        await saveQuestions(mergedQ);
+        await saveExams(mergedE);
     }
 
-    // 기존 데이터에 합치기 (중복 방지)
-    const seedQIds = new Set(SAMPLE_QUESTIONS.map(q => q.id));
-    const seedEIds = new Set(SAMPLE_EXAMS.map(e => e.id));
-    const mergedQ = [...existingQ.filter(q => !seedQIds.has(q.id)), ...SAMPLE_QUESTIONS];
-    const mergedE = [...existingE.filter(e => !seedEIds.has(e.id)), ...SAMPLE_EXAMS];
+    // 응시 기록 & 오답 노트 시딩 (이전에 시딩 안된 경우에도 추가)
+    const { getAttempts, getWrongNotes } = await import('./studyData');
+    const existingA = await getAttempts();
+    const existingWN = await getWrongNotes();
 
-    await saveQuestions(mergedQ);
-    await saveExams(mergedE);
+    if (!existingA.some(a => a.id.startsWith(base))) {
+        const merged = [...existingA, ...SAMPLE_ATTEMPTS];
+        await saveAttempts(merged);
+    }
+    if (!existingWN.some(w => w.id.startsWith(base))) {
+        const merged = [...existingWN, ...SAMPLE_WRONG_NOTES];
+        await saveWrongNotes(merged);
+    }
+
     return true;
 }
+
