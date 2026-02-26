@@ -21,6 +21,7 @@ import { ExamTaking } from './pages/ExamTaking';
 import { ExamResult } from './pages/ExamResult';
 import { WrongNotes } from './pages/WrongNotes';
 import { StudentAnalytics } from './pages/StudentAnalytics';
+import { Practice } from './pages/Practice';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -87,6 +88,11 @@ function AppRoutes() {
         <Route path="study/analytics" element={
           <ProtectedRoute>
             <StudentAnalytics />
+          </ProtectedRoute>
+        } />
+        <Route path="study/practice" element={
+          <ProtectedRoute>
+            <Practice />
           </ProtectedRoute>
         } />
       </Route>
