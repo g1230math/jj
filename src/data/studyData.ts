@@ -7,24 +7,39 @@ import { SCHOOL_LIST } from './mockData';
 // Re-export school list for study features
 export { SCHOOL_LIST };
 
-// ─── Generic Supabase KV helpers ───
+// ─── Generic Supabase KV helpers (with localStorage fallback) ───
 async function getData<T>(key: string, defaults: T): Promise<T> {
-    if (!supabase) return defaults;
+    // 1) Try Supabase first
+    if (supabase) {
+        try {
+            const { data, error } = await supabase.from('site_data').select('value').eq('key', key).maybeSingle();
+            if (!error && data) {
+                // Sync to localStorage as cache
+                try { localStorage.setItem(`study_${key}`, JSON.stringify(data.value)); } catch { }
+                return data.value as T;
+            }
+        } catch { /* fall through to localStorage */ }
+    }
+    // 2) Fallback to localStorage
     try {
-        const { data, error } = await supabase.from('site_data').select('value').eq('key', key).maybeSingle();
-        if (error || !data) return defaults;
-        return data.value as T;
-    } catch { return defaults; }
+        const raw = localStorage.getItem(`study_${key}`);
+        if (raw) return JSON.parse(raw) as T;
+    } catch { }
+    return defaults;
 }
 
 async function saveData<T>(key: string, value: T): Promise<void> {
-    if (!supabase) return;
-    try {
-        await supabase.from('site_data').upsert(
-            { key, value: value as any, updated_at: new Date().toISOString() },
-            { onConflict: 'key' }
-        );
-    } catch { /* silent */ }
+    // Always save to localStorage (immediate, reliable)
+    try { localStorage.setItem(`study_${key}`, JSON.stringify(value)); } catch { }
+    // Also try Supabase
+    if (supabase) {
+        try {
+            await supabase.from('site_data').upsert(
+                { key, value: value as any, updated_at: new Date().toISOString() },
+                { onConflict: 'key' }
+            );
+        } catch { /* silent */ }
+    }
 }
 
 // ═══════════════════════════════════════════
