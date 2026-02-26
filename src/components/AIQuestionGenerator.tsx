@@ -57,12 +57,12 @@ async function fileToImageDataList(file: File): Promise<ImageData[]> {
 
 // ─── Gemini API 호출 (텍스트 + 이미지 멀티모달) ───
 async function callGemini(prompt: string, images?: ImageData[]): Promise<string> {
-    const apiKey = typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY ?? '' : '';
+    const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
 
     if (!apiKey || apiKey === 'undefined') {
         throw new Error(
             'GEMINI_API_KEY가 설정되지 않았습니다.\n' +
-            '.env 파일에 GEMINI_API_KEY=your_key를 추가한 후 서버를 재시작하세요.'
+            'GitHub Secrets에 VITE_GEMINI_API_KEY를 추가한 후 다시 배포하세요.'
         );
     }
 
