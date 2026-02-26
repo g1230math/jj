@@ -17,6 +17,10 @@ import { QuestionBankAdmin } from '../components/QuestionBankAdmin';
 import { ExamBuilderAdmin } from '../components/ExamBuilderAdmin';
 import { AIQuestionGenerator } from '../components/AIQuestionGenerator';
 import { AdminAnalytics } from '../components/AdminAnalytics';
+import { AttendanceAdmin } from '../components/AttendanceAdmin';
+import { HomeworkAdmin } from '../components/HomeworkAdmin';
+import { ScheduleAdmin } from '../components/ScheduleAdmin';
+import { TuitionAdmin } from '../components/TuitionAdmin';
 import {
   studentGrades, getLectures, getAllProgress, getConsultRequests, getMembers,
   Lecture, LectureProgress, ConsultRequest
@@ -29,11 +33,15 @@ import { seedSampleData } from '../data/sampleStudyData';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 /* ─── 관리자 탭 정의 ─── */
-type AdminTab = 'overview' | 'members' | 'lecture' | 'questions' | 'ai_gen' | 'exams' | 'analytics' | 'teacher' | 'tax' | 'site';
+type AdminTab = 'overview' | 'members' | 'attendance' | 'homework' | 'schedule' | 'tuition' | 'lecture' | 'questions' | 'ai_gen' | 'exams' | 'analytics' | 'teacher' | 'tax' | 'site';
 
 const ADMIN_TABS: { key: AdminTab; label: string; icon: React.ElementType; desc: string }[] = [
   { key: 'overview', label: '운영 현황', icon: LayoutDashboard, desc: '오늘 일정·미납·반 정원' },
   { key: 'members', label: '회원·상담', icon: Users, desc: '회원 목록 및 상담 신청' },
+  { key: 'attendance', label: '출결', icon: CheckCircle, desc: '출결 관리 및 통계' },
+  { key: 'homework', label: '숙제', icon: BookOpen, desc: '숙제 배정 및 완료 현황' },
+  { key: 'schedule', label: '시간표', icon: Clock, desc: '반별 수업 시간표' },
+  { key: 'tuition', label: '학원비', icon: CreditCard, desc: '수강료 납부 현황' },
   { key: 'questions', label: '문제 은행', icon: PenTool, desc: '문제 등록·수정·AI 생성' },
   { key: 'ai_gen', label: 'AI 생성', icon: Sparkles, desc: 'Gemini AI 문제 자동 생성' },
   { key: 'exams', label: '시험 관리', icon: FileCheck, desc: '시험 생성·게시·결과' },
@@ -307,6 +315,11 @@ export function Dashboard() {
           {adminTab === 'tax' && <TaxDashboard />}
 
           {adminTab === 'site' && <PopupAdmin />}
+
+          {adminTab === 'attendance' && <AttendanceAdmin />}
+          {adminTab === 'homework' && <HomeworkAdmin />}
+          {adminTab === 'schedule' && <ScheduleAdmin />}
+          {adminTab === 'tuition' && <TuitionAdmin />}
         </div>
       </div>
     </div>

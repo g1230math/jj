@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -22,6 +22,9 @@ import { ExamResult } from './pages/ExamResult';
 import { WrongNotes } from './pages/WrongNotes';
 import { StudentAnalytics } from './pages/StudentAnalytics';
 import { Practice } from './pages/Practice';
+import { LevelTest } from './pages/LevelTest';
+import { TrialBooking } from './pages/TrialBooking';
+import { seedAcademyData } from './data/academyData';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -48,6 +51,8 @@ function AppRoutes() {
         <Route path="calendar" element={<Calendar />} />
         <Route path="shuttle" element={<Shuttle />} />
         <Route path="success" element={<SuccessStories />} />
+        <Route path="level-test" element={<LevelTest />} />
+        <Route path="trial" element={<TrialBooking />} />
 
         {/* Protected Routes */}
         <Route path="dashboard" element={
@@ -102,6 +107,7 @@ function AppRoutes() {
 
 export default function App() {
   const basename = import.meta.env.BASE_URL || '/';
+  useEffect(() => { seedAcademyData(); }, []);
   return (
     <AuthProvider>
       <Router basename={basename}>

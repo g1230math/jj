@@ -11,6 +11,8 @@ import { cn } from '../lib/utils';
 import { ScrollReveal, CountUp, Section, SectionHeader } from '../components/ScrollReveal';
 import { PopupBanner } from '../components/PopupBanner';
 import { useAuth } from '../context/AuthContext';
+import { ReviewSection } from '../components/ReviewSection';
+import { EventBannerSection } from '../components/EventBannerSection';
 
 /* ─── helpers ─── */
 const genId = (p: string) => `${p}_${Date.now()}`;
@@ -437,6 +439,12 @@ export function Home() {
             )}
           </div>
         </section>
+
+        {/* ═══════ EVENT BANNERS ═══════ */}
+        <EventBannerSection />
+
+        {/* ═══════ REVIEWS (별점) ═══════ */}
+        <ReviewSection />
 
         {/* ═══════ NOTICES + CALENDAR ═══════ */}
         <Section className="bg-white">

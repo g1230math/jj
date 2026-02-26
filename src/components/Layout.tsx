@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame, PenTool } from 'lucide-react';
+import { BookOpen, Bus, Calendar, Home, Info, LogIn, LogOut, MessageSquare, Video, MapPin, Menu, X, Users, Phone, MessageCircle, Trophy, Flame, PenTool, Brain, CalendarCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { ConsultModal } from './ConsultModal';
+import { NotificationCenter } from './NotificationCenter';
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -42,6 +43,8 @@ export function Layout() {
     { name: '커뮤니티', path: '/community', icon: MessageSquare },
     { name: '성공스토리', path: '/success', icon: Trophy },
     { name: '학부모서비스', path: '/parent-service', icon: Users, requiresAuth: true },
+    { name: '레벨테스트', path: '/level-test', icon: Brain },
+    { name: '체험예약', path: '/trial', icon: CalendarCheck },
     { name: '오시는길', path: '/contact', icon: MapPin },
   ];
 
@@ -114,6 +117,7 @@ export function Layout() {
                   </div>
                 );
               })()}
+              {user && <NotificationCenter />}
               {user ? (
                 <div className="flex items-center gap-3">
                   <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors">
