@@ -1,0 +1,30 @@
+name: Keep Supabase Alive
+
+# 매일 UTC 00:00 (한국시간 09:00)에 실행
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 수동 실행도 가능
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase to prevent pausing
+        run: |
+          echo "Pinging Supabase project to keep it alive..."
+          
+          # REST API로 간단한 health check 쿼리 실행
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Supabase is alive! (Status: $HTTP_STATUS)"
+          else
+            echo "❌ Supabase ping failed! (Status: $HTTP_STATUS)"
+            exit 1
+          fi
